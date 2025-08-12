@@ -13,9 +13,11 @@ import lombok.NoArgsConstructor;
 public class FormRegister
 {
     @NotBlank(message = "Không được để trống")
-    private String fullName;
+    private String lastName;
     @NotBlank(message = "Không được để trống")
-    private String username;
+    private String firstName;
+    @NotBlank(message = "Không được để trống")
+    private String email;
     @NotBlank(message = "Không được để trống")
     private String password;
 }
