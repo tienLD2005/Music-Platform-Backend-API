@@ -3,6 +3,7 @@ package com.ra.base_spring_boot.controller;
 import com.ra.base_spring_boot.dto.ResponseWrapper;
 import com.ra.base_spring_boot.dto.req.BannerCreateReq;
 import com.ra.base_spring_boot.dto.resp.BannerRes;
+import com.ra.base_spring_boot.dto.resp.PageResponse;
 import com.ra.base_spring_boot.model.constants.BannerStatus;
 import com.ra.base_spring_boot.services.IBannerService;
 import lombok.RequiredArgsConstructor;
@@ -24,17 +25,27 @@ public class BannerController {
     private final IBannerService bannerService;
 
     @GetMapping
-    public ResponseEntity<ResponseWrapper<Page<BannerRes>>> getAll(
+    public ResponseEntity<ResponseWrapper<PageResponse<BannerRes>>> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String keyword
     ) {
         Page<BannerRes> result = bannerService.getAll(page, size, keyword);
-        ResponseWrapper<Page<BannerRes>> body = ResponseWrapper.<Page<BannerRes>>builder()
+
+        PageResponse<BannerRes> pageResponse = PageResponse.<BannerRes>builder()
+                .content(result.getContent())
+                .currentPage(result.getNumber())
+                .totalPages(result.getTotalPages())
+                .totalElements(result.getTotalElements())
+                .size(result.getSize())
+                .build();
+
+        ResponseWrapper<PageResponse<BannerRes>> body = ResponseWrapper.<PageResponse<BannerRes>>builder()
                 .status(HttpStatus.OK)
                 .code(HttpStatus.OK.value())
-                .data(result)
+                .data(pageResponse)
                 .build();
+
         return ResponseEntity.ok(body);
     }
 
