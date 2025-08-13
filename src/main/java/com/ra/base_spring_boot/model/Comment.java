@@ -20,12 +20,12 @@ import java.util.Set;
 public class Comment extends BaseObject
 {
 
-    // Người viết bình luận
+    // The one who comments
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // Bài nhạc được bình luận
+    // Commented song
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "song_id", nullable = false)
     private Song song;
@@ -33,12 +33,12 @@ public class Comment extends BaseObject
     @Column(length = 255, nullable = false)
     private String content;
 
-    // Bình luận cha
+    // Main comment
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     private Comment parent;
 
-    // Danh sách bình luận con
+    // Reply comment
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Comment> replies = new HashSet<>();
 

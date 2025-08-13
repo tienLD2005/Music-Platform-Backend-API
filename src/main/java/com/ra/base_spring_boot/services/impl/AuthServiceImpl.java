@@ -67,7 +67,7 @@ public class AuthServiceImpl implements IAuthService
         }
 
         MyUserDetails userDetails = (MyUserDetails) authentication.getPrincipal();
-        if (!userDetails.getUser().getStatus().equals(UStatus.BLOCKED))
+        if (userDetails.getUser().getStatus().equals(UStatus.BLOCKED))
         {
             throw new HttpBadRequest("your account is blocked");
         }

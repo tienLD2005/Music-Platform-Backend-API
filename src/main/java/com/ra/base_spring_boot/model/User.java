@@ -49,7 +49,7 @@ public class User extends BaseObject {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // ==== QUAN HỆ ====
+    // ==== Relationship ====
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -86,4 +86,8 @@ public class User extends BaseObject {
     public void preUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+// I add this one for trending artists
+    @OneToMany(mappedBy = "artist")
+    private List<Song> songs;
 }
