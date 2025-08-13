@@ -19,12 +19,10 @@ import java.time.LocalDateTime;
 @Builder
 public class Payment extends BaseObject
 {
-    // Liên kết tới bảng users
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // Liên kết tới bảng subscription_plan
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "plan_id", nullable = false)
     private SubscriptionPlan subscriptionPlan;
