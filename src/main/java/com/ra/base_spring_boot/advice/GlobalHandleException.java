@@ -164,4 +164,16 @@ public class GlobalHandleException
     }
 
 
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<?> handleMessage(RuntimeException ex)
+    {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                ResponseWrapper.builder()
+                .data(ex.getMessage())
+                .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .build()
+        );
+    }
+
 }

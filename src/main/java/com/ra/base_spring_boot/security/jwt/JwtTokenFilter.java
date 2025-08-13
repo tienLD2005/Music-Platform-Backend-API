@@ -1,5 +1,7 @@
 package com.ra.base_spring_boot.security.jwt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ra.base_spring_boot.repository.IBlacklistedTokenRepository;
 import com.ra.base_spring_boot.security.principle.MyUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -15,46 +17,77 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class JwtTokenFilter extends OncePerRequestFilter
-{
+public class JwtTokenFilter extends OncePerRequestFilter {
+
     private final MyUserDetailsService userDetailsService;
     private final JwtProvider jwtProvider;
+    private final IBlacklistedTokenRepository blacklistedTokenRepository;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException
-    {
-        try
-        {
-            String token = getTokenFromRequest(request);
-            if (token != null)
-            {
-                String username = jwtProvider.extractUsername(token);
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                if (jwtProvider.validateToken(token, userDetails) )
-                {
-                    Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
+        try {
+            String token = getTokenFromUser(request);
+            if (token != null) {
+
+                // 1. Check token bị blacklist
+                if (blacklistedTokenRepository.existsByToken(token)) {
+                    throw new RuntimeException("Token đã bị thu hồi");
+                }
+
+                // 2. Check token hợp lệ về chữ ký & cấu trúc
+                if (jwtProvider.validateToken(token)) {
+                    String email = jwtProvider.extractEmail(token);
+
+                    // 3. Load user từ DB bằng email
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+
+                    // 4. Validate khớp người dùng & hạn token
+                    if (!jwtProvider.validateToken(token, userDetails)) {
+                        throw new RuntimeException("Token không khớp với người dùng");
+                    }
+
+                    // 5. Set Authentication vào context
+                    Authentication authentication = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities());
                     SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                } else {
+                    throw new RuntimeException("Token không hợp lệ hoặc đã hết hạn");
                 }
             }
+        } catch (Exception e) {
+            log.error("Không thể xác thực JWT: {}", e.getMessage());
+            writeErrorResponse(response, e.getMessage());
+            return; // Dừng filter chain nếu lỗi
         }
-        catch (Exception e)
-        {
-            log.error("Un Authentication {}", e.getMessage());
-        }
+
         filterChain.doFilter(request, response);
     }
 
-    public String getTokenFromRequest(HttpServletRequest request)
-    {
-        String header = request.getHeader("Authorization");
-        if (header != null && header.startsWith("Bearer "))
-        {
-            return header.substring(7);
+    private String getTokenFromUser(HttpServletRequest request) {
+        String authorization = request.getHeader("Authorization");
+        if (authorization != null && authorization.startsWith("Bearer ")) {
+            return authorization.substring(7);
         }
         return null;
+    }
+
+    private void writeErrorResponse(HttpServletResponse response, String message) throws IOException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        Map<String, Object> error = new HashMap<>();
+        error.put("error", "Unauthorized");
+        error.put("message", message);
+
+        new ObjectMapper().writeValue(response.getOutputStream(), error);
     }
 }
