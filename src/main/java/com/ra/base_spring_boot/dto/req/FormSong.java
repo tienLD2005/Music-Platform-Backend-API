@@ -24,6 +24,5 @@ public class FormSong {
     private MultipartFile fileUrl;
     @Min(value = 0, message = "Số lượt nghe không được nhỏ hơn 0")
     private Integer views;
-    private Long albumId;
     private Set<Long> genreIds;
 }

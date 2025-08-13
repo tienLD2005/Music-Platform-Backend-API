@@ -24,7 +24,6 @@ public class Album extends BaseObject {
     @Column(name = "release_date")
     private LocalDateTime releaseDate;
 
-    // Khóa ngoại tới bảng User
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "artist_id", nullable = false)
     private User artist;
