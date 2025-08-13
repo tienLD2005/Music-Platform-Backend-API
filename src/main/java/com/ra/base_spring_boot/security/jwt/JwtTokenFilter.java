@@ -37,7 +37,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             if (token != null) {
 
                 if (blacklistedTokenRepository.existsByToken(token)) {
-                    throw new RuntimeException("Token đã bị thu hồi");
+                    throw new RuntimeException("Token has been revoked");
                 }
 
                 if (jwtProvider.validateToken(token)) {
@@ -46,7 +46,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                     UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
                     if (!jwtProvider.validateToken(token, userDetails)) {
-                        throw new RuntimeException("Token không khớp với người dùng");
+                        throw new RuntimeException("Token does not match the user");
                     }
 
                     Authentication authentication = new UsernamePasswordAuthenticationToken(
@@ -54,11 +54,11 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authentication);
 
                 } else {
-                    throw new RuntimeException("Token không hợp lệ hoặc đã hết hạn");
+                    throw new RuntimeException("Invalid or expired token");
                 }
             }
         } catch (Exception e) {
-            log.error("Không thể xác thực JWT: {}", e.getMessage());
+            log.error("Cannot authenticate JWT: {}", e.getMessage());
             writeErrorResponse(response, e.getMessage());
             return;
         }
@@ -86,3 +86,4 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         new ObjectMapper().writeValue(response.getOutputStream(), error);
     }
 }
+
