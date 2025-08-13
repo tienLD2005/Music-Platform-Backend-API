@@ -25,8 +25,8 @@ public class CloudinaryService {
     }
 
     public String uploadImage(MultipartFile file) throws IOException {
-        if (file == null || file.isEmpty()) throw new IllegalArgumentException("File không được để trống");
-        if (file.getSize() > MAX_IMAGE_SIZE) throw new IllegalArgumentException("Kích thước ảnh tối đa 10MB");
+        if (file == null || file.isEmpty()) throw new IllegalArgumentException("The file cannot be empty.");
+        if (file.getSize() > MAX_IMAGE_SIZE) throw new IllegalArgumentException("Maximum image size is 10MB.");
 
         Map<?,?> result = cloudinary.uploader().upload(
                 file.getBytes(),

@@ -49,14 +49,14 @@ public class BannerServiceImpl implements IBannerService {
                     .build();
             return toRes(bannerRepository.save(banner));
         } catch (Exception e) {
-            throw new RuntimeException("Lỗi upload ảnh: " + e.getMessage());
+            throw new RuntimeException("Error uploading image: " + e.getMessage());
         }
     }
 
     @Override
     public void delete(Integer id) {
         Banner banner = bannerRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Banner không tồn tại"));
+                .orElseThrow(() -> new IllegalArgumentException("The banner does not exist"));
         banner.setStatus(BannerStatus.INACTIVE);
         bannerRepository.save(banner);
     }
