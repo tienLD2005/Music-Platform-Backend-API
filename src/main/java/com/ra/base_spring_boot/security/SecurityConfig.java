@@ -5,9 +5,15 @@ import com.ra.base_spring_boot.security.exception.AccessDenied;
 import com.ra.base_spring_boot.security.exception.JwtEntryPoint;
 import com.ra.base_spring_boot.security.jwt.JwtTokenFilter;
 import com.ra.base_spring_boot.security.principle.MyUserDetailsService;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -29,6 +35,19 @@ import java.util.List;
 @EnableWebSecurity
 @EnableMethodSecurity
 @RequiredArgsConstructor
+
+// --- Thêm phần sau đây để enable bearerAuth cho Swagger ---
+@OpenAPIDefinition(
+        info = @Info(title = "Music API", version = "v1"),
+        security = @SecurityRequirement(name = "bearerAuth")   // Áp dụng cho tất cả API
+)
+@SecurityScheme(
+        name = "bearerAuth",              // tên scheme
+        type = SecuritySchemeType.HTTP,   // HTTP auth
+        scheme = "bearer",                // loại Bearer token
+        bearerFormat = "JWT",             // định dạng JWT
+        description = "Nhập token JWT bắt đầu với 'Bearer '"
+)
 public class SecurityConfig
 {
     private final MyUserDetailsService userDetailsService;
@@ -55,6 +74,8 @@ public class SecurityConfig
                         url -> url
                                 .requestMatchers("/api/v1/admin/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
                                 .requestMatchers("/api/v1/user/**").hasAuthority(RoleName.ROLE_USER.toString())
+                                // song
+                                .requestMatchers("/api/v1/songs/**").permitAll()
                                 .anyRequest().permitAll()
                 )
                 .authenticationProvider(authenticationProvider())
