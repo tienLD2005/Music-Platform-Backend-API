@@ -76,6 +76,9 @@ public class User extends BaseObject {
     @OneToMany(mappedBy = "user")
     private List<Payment> payments;
 
+    @OneToMany(mappedBy = "user")
+    private List<Subscription> subscriptions;
+
     @PrePersist
     public void prePersist() {
         createdAt = LocalDateTime.now();
