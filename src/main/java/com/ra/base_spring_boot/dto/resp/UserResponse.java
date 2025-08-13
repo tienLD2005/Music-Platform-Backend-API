@@ -1,5 +1,6 @@
 package com.ra.base_spring_boot.dto.resp;
 
+import com.ra.base_spring_boot.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,4 +20,5 @@ public class UserResponse {
     private String status;
     private String createdAt;
     private String updatedAt;
+
 }
