@@ -36,24 +36,19 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             String token = getTokenFromUser(request);
             if (token != null) {
 
-                // 1. Check token bị blacklist
                 if (blacklistedTokenRepository.existsByToken(token)) {
                     throw new RuntimeException("Token đã bị thu hồi");
                 }
 
-                // 2. Check token hợp lệ về chữ ký & cấu trúc
                 if (jwtProvider.validateToken(token)) {
                     String email = jwtProvider.extractEmail(token);
 
-                    // 3. Load user từ DB bằng email
                     UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-                    // 4. Validate khớp người dùng & hạn token
                     if (!jwtProvider.validateToken(token, userDetails)) {
                         throw new RuntimeException("Token không khớp với người dùng");
                     }
 
-                    // 5. Set Authentication vào context
                     Authentication authentication = new UsernamePasswordAuthenticationToken(
                             userDetails, null, userDetails.getAuthorities());
                     SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -65,7 +60,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         } catch (Exception e) {
             log.error("Không thể xác thực JWT: {}", e.getMessage());
             writeErrorResponse(response, e.getMessage());
-            return; // Dừng filter chain nếu lỗi
+            return;
         }
 
         filterChain.doFilter(request, response);

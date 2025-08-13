@@ -77,7 +77,6 @@ public class AuthServiceImpl implements IAuthService {
 
     @Override
     public JwtResponse login(FormLogin formLogin) {
-        // 1. Kiểm tra email có tồn tại
         Optional<User> optionalUser = userRepository.findByEmail(formLogin.getEmail());
         if (optionalUser.isEmpty()) {
             throw new HttpBadRequest("Email không tồn tại");
@@ -85,7 +84,6 @@ public class AuthServiceImpl implements IAuthService {
 
         User user = optionalUser.get();
 
-        // 2. Kiểm tra trạng thái tài khoản
         switch (user.getStatus()) {
             case VERIFY -> throw new HttpBadRequest("Tài khoản chưa được kích hoạt");
             case BLOCKED -> throw new HttpBadRequest("Tài khoản đã bị khóa");
@@ -93,7 +91,6 @@ public class AuthServiceImpl implements IAuthService {
             default -> throw new HttpBadRequest("Trạng thái tài khoản không hợp lệ");
         }
 
-        // 3. Xác thực mật khẩu
         Authentication authentication;
         try {
             authentication = authenticationManager.authenticate(
@@ -105,7 +102,6 @@ public class AuthServiceImpl implements IAuthService {
 
         MyUserDetails userDetails = (MyUserDetails) authentication.getPrincipal();
 
-        // 4. Map User -> UserResponseDto
         UserResponse userDto = UserResponse.builder()
                 .id(user.getId())
                 .firstName(user.getFirstName())
@@ -118,7 +114,6 @@ public class AuthServiceImpl implements IAuthService {
                 .updatedAt(user.getUpdatedAt().toString())
                 .build();
 
-        // 5. Tạo token JWT và trả về
         return JwtResponse.builder()
                 .accessToken(jwtProvider.generateToken(userDetails.getUsername()))
                 .user(userDto)
@@ -165,10 +160,8 @@ public class AuthServiceImpl implements IAuthService {
 
         String token = rawToken.substring(7);
 
-        // Lấy thời gian hết hạn từ JWT
         Date expiryDate = jwtProvider.extractExpiration(token);
 
-        // Lưu token vào blacklist
         BlacklistedToken blacklisted = BlacklistedToken.builder()
                 .token(token)
                 .expiryDate(expiryDate.toInstant()

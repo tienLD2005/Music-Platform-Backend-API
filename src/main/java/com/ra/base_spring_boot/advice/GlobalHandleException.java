@@ -17,10 +17,6 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalHandleException
 {
-    /**
-     * @param ex MethodArgumentNotValidException
-     * @apiNote handle valid exception for validation (400)
-     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleValidException(MethodArgumentNotValidException ex)
     {
@@ -35,10 +31,6 @@ public class GlobalHandleException
         );
     }
 
-    /**
-     * @param ex MaxUploadSizeExceededException
-     * @apiNote handle exception max upload file (400)
-     */
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<?> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException ex)
     {
@@ -51,10 +43,6 @@ public class GlobalHandleException
         );
     }
 
-    /**
-     * @param ex NoResourceFoundException
-     * @apiNote handle exception not found resource (404)
-     * */
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<?> handleNoResourceFoundException(NoResourceFoundException ex)
     {
@@ -67,10 +55,6 @@ public class GlobalHandleException
         );
     }
 
-    /**
-     * @param ex UsernameNotFoundException
-     * @apiNote handle username not found exception
-     * */
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<?> handleUsernameNotFoundException(UsernameNotFoundException ex)
     {
@@ -83,10 +67,6 @@ public class GlobalHandleException
         );
     }
 
-    /**
-     * @param ex HttpBadRequest
-     * @apiNote handle exception bad request (400)
-     * */
     @ExceptionHandler(HttpBadRequest.class)
     public ResponseEntity<?> handleHttpBadReqeust(HttpBadRequest ex)
     {
@@ -99,10 +79,6 @@ public class GlobalHandleException
         );
     }
 
-    /**
-     * @param ex HttpUnAuthorized
-     * @apiNote handle exception unauthorized (401)
-     * */
     @ExceptionHandler(HttpUnAuthorized.class)
     public ResponseEntity<?> handleHttpUnAuthorized(HttpUnAuthorized ex)
     {
@@ -115,10 +91,6 @@ public class GlobalHandleException
         );
     }
 
-    /**
-     * @param ex HttpForbiden
-     * @apiNote handle exception forbiden (403)
-     * */
     @ExceptionHandler(HttpForbiden.class)
     public ResponseEntity<?> handleHttpForbiden(HttpForbiden ex)
     {
@@ -131,10 +103,6 @@ public class GlobalHandleException
         );
     }
 
-    /**
-     * @param ex HttpNotFound
-     * @apiNote handle exception not found (404)
-     * */
     @ExceptionHandler(HttpNotFound.class)
     public ResponseEntity<?> handleHttpNotFound(HttpNotFound ex)
     {
@@ -147,10 +115,6 @@ public class GlobalHandleException
         );
     }
 
-    /**
-     * @param ex HttpConflict
-     * @apiNote handle exception conflict (409)
-     * */
     @ExceptionHandler(HttpConflict.class)
     public ResponseEntity<?> handleHttpConflict(HttpConflict ex)
     {

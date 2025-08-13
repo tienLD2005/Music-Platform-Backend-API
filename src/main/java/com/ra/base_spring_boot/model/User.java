@@ -55,8 +55,6 @@ public class User extends BaseObject {
     @Column(name = "reset_password_code")
     private String resetPasswordCode;
 
-    // ==== QUAN HỆ ====
-
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_role",

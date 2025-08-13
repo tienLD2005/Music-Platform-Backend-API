@@ -22,7 +22,7 @@ public class JwtProvider {
     private String SECRET_KEY;
 
     @Value("${jwt.expired.access}")
-    private Long EXPIRED_ACCESS; // seconds
+    private Long EXPIRED_ACCESS;
 
     public String extractEmail(String token) {
         return extractClaim(token, Claims::getSubject);

@@ -18,10 +18,6 @@ public class AuthController {
 
     private final IAuthService authService;
 
-    /**
-     * param with {email,password}
-     * @apiNote Đăng nhập
-     */
     @PostMapping("/login")
     public ResponseEntity<?> handleLogin(@Valid @RequestBody FormLogin formLogin) {
         return ResponseEntity.ok(
@@ -33,10 +29,6 @@ public class AuthController {
         );
     }
 
-    /**
-     * param with {lastName, firstName,email,password}
-     * @apiNote Đăng ký + gửi email xác thực
-     */
     @PostMapping("/register")
     public ResponseEntity<?> handleRegister(@Valid @RequestBody FormRegister formRegister) {
         authService.register(formRegister);
@@ -49,9 +41,6 @@ public class AuthController {
                 );
     }
 
-    /**
-     * @apiNote Xác thực email khi đăng ký
-     */
     @GetMapping("/verify")
     public ResponseEntity<?> handleVerifyEmail(@RequestParam String code) {
         authService.verifyEmail(code);
@@ -64,9 +53,6 @@ public class AuthController {
         );
     }
 
-    /**
-     * @apiNote Quên mật khẩu - gửi OTP qua email
-     */
     @PostMapping("/forgot-password")
     public ResponseEntity<?> handleForgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
         authService.forgotPassword(request);
@@ -79,9 +65,6 @@ public class AuthController {
         );
     }
 
-    /**
-     * @apiNote Đặt lại mật khẩu bằng OTP
-     */
     @PatchMapping("/reset-password")
     public ResponseEntity<?> handleResetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         authService.resetPassword(request);
@@ -94,9 +77,6 @@ public class AuthController {
         );
     }
 
-    /**
-     * @apiNote Đăng xuất (thu hồi token)
-     */
     @PostMapping("/logout")
     public ResponseEntity<?> handleLogout(@RequestHeader("Authorization") String token) {
         authService.logout(token);
