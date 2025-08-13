@@ -1,6 +1,7 @@
 package com.ra.base_spring_boot.model;
 
 import com.ra.base_spring_boot.model.base.BaseObject;
+import com.ra.base_spring_boot.model.constants.AlbumStatus;
 import com.ra.base_spring_boot.model.constants.AlbumType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -42,4 +43,8 @@ public class Album extends BaseObject {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    // thêm 1 thuộc tính status cho bảng Album
+    @Enumerated(EnumType.STRING)
+    private AlbumStatus status;
 }
