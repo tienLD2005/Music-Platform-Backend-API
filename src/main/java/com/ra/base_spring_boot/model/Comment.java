@@ -20,12 +20,10 @@ import java.util.Set;
 public class Comment extends BaseObject
 {
 
-    // The one who comments
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // Commented song
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "song_id", nullable = false)
     private Song song;
@@ -33,12 +31,10 @@ public class Comment extends BaseObject
     @Column(length = 255, nullable = false)
     private String content;
 
-    // Main comment
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     private Comment parent;
 
-    // Reply comment
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Comment> replies = new HashSet<>();
 

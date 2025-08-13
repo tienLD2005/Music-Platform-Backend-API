@@ -1,6 +1,7 @@
 package com.ra.base_spring_boot.security.principle;
 
 import com.ra.base_spring_boot.model.User;
+import com.ra.base_spring_boot.model.constants.UStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,50 +16,43 @@ import java.util.List;
 @AllArgsConstructor
 @Data
 @Builder
-public class MyUserDetails implements UserDetails
-{
+public class MyUserDetails implements UserDetails {
     private User user;
     private Collection<? extends GrantedAuthority> authorities;
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities()
-    {
-        return this.authorities;
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return authorities;
     }
 
     @Override
-    public String getPassword()
-    {
-        return this.user.getPassword();
+    public String getPassword() {
+        return user.getPassword();
     }
 
     @Override
-    public String getUsername()
-    {
-        return this.user.getEmail();
+    public String getUsername() {
+        return user.getEmail();
     }
 
     @Override
-    public boolean isAccountNonExpired()
-    {
+    public boolean isAccountNonExpired() {
         return true;
     }
 
     @Override
-    public boolean isAccountNonLocked()
-    {
+    public boolean isAccountNonLocked() {
         return true;
     }
 
     @Override
-    public boolean isCredentialsNonExpired()
-    {
+    public boolean isCredentialsNonExpired() {
         return true;
     }
 
     @Override
-    public boolean isEnabled()
-    {
+    public boolean isEnabled() {
         return true;
     }
 }
+

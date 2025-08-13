@@ -49,7 +49,11 @@ public class User extends BaseObject {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // ==== Relationship ====
+    @Column(name = "verification_code")
+    private String verificationCode;
+
+    @Column(name = "reset_password_code")
+    private String resetPasswordCode;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -76,6 +80,9 @@ public class User extends BaseObject {
     @OneToMany(mappedBy = "user")
     private List<Payment> payments;
 
+    @OneToMany(mappedBy = "user")
+    private List<Subscription> subscriptions;
+
     @PrePersist
     public void prePersist() {
         createdAt = LocalDateTime.now();
@@ -87,7 +94,8 @@ public class User extends BaseObject {
         updatedAt = LocalDateTime.now();
     }
 
-// I add this one for trending artists
+
+    // I add this one for trending artists
     @OneToMany(mappedBy = "artist")
     private List<Song> songs;
 }

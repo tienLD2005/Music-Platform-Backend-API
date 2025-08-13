@@ -26,12 +26,10 @@ public class Song extends BaseObject {
     @Column
     private LocalTime duration;
 
-    // Nghệ sĩ (tham chiếu tới bảng users)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "artist_id", nullable = false)
     private User artist;
 
-    // Album (tham chiếu tới bảng albums)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "album_id")
     private Album album;
