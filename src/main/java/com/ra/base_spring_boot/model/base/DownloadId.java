@@ -7,7 +7,6 @@ public class DownloadId implements Serializable {
     private Long user;
     private Long song;
 
-    // equals & hashCode
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -49,7 +49,11 @@ public class User extends BaseObject {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // ==== QUAN HỆ ====
+    @Column(name = "verification_code")
+    private String verificationCode;
+
+    @Column(name = "reset_password_code")
+    private String resetPasswordCode;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
