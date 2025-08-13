@@ -11,11 +11,11 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 public class FormLogin {
-    @NotBlank(message = "Không được để trống")
+    @NotBlank(message = "Cannot be blank")
     @Email
     private String email;
 
-    @NotBlank(message = "Không được để trống")
+    @NotBlank(message = "Cannot be blank")
     private String password;
 
     public FormLogin(String email, String password) {

@@ -68,7 +68,7 @@ public class GlobalHandleException
     }
 
     @ExceptionHandler(HttpBadRequest.class)
-    public ResponseEntity<?> handleHttpBadReqeust(HttpBadRequest ex)
+    public ResponseEntity<?> handleHttpBadRequest(HttpBadRequest ex)
     {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                 ResponseWrapper.builder()
@@ -92,7 +92,7 @@ public class GlobalHandleException
     }
 
     @ExceptionHandler(HttpForbiden.class)
-    public ResponseEntity<?> handleHttpForbiden(HttpForbiden ex)
+    public ResponseEntity<?> handleHttpForbidden(HttpForbiden ex)
     {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                 ResponseWrapper.builder()

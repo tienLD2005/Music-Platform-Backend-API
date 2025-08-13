@@ -14,25 +14,25 @@ import java.util.Set;
 @NoArgsConstructor
 @Data
 public class FormRegister {
-    @NotBlank(message = "Không được để trống")
+    @NotBlank(message = "Cannot be blank")
     private String lastName;
 
-    @NotBlank(message = "Không được để trống")
+    @NotBlank(message = "Cannot be blank")
     private String firstName;
 
-    @NotBlank(message = "Không được để trống")
-    @Email
+    @NotBlank(message = "Cannot be blank")
+    @Email(message = "Invalid email format")
     private String email;
 
-    @NotBlank(message = "Không được để trống")
-    @Size(min = 8, message = "Mật khẩu phải có ít nhất 8 ký tự")
+    @NotBlank(message = "Cannot be blank")
+    @Size(min = 8, message = "Password must be at least 8 characters long")
     @Pattern(
             regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$",
-            message = "Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt"
+            message = "Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character"
     )
     private String password;
 
-    @NotBlank(message = "Không được để trống xác nhận mật khẩu")
+    @NotBlank(message = "Confirm password cannot be blank")
     private String confirmPassword;
 
     private Set<String> role;

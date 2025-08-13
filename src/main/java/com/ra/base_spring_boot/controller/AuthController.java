@@ -36,7 +36,7 @@ public class AuthController {
                 .body(ResponseWrapper.builder()
                         .status(HttpStatus.CREATED)
                         .code(201)
-                        .data("Đăng ký thành công! Vui lòng kiểm tra email để xác thực.")
+                        .data("Registration successful! Please check your email to verify your account.")
                         .build()
                 );
     }
@@ -48,7 +48,7 @@ public class AuthController {
                 ResponseWrapper.builder()
                         .status(HttpStatus.OK)
                         .code(200)
-                        .data("Xác thực email thành công! Bạn có thể đăng nhập.")
+                        .data("Email verified successfully! You can now log in.")
                         .build()
         );
     }
@@ -60,7 +60,7 @@ public class AuthController {
                 ResponseWrapper.builder()
                         .status(HttpStatus.OK)
                         .code(200)
-                        .data("Mã OTP đã được gửi tới email.")
+                        .data("OTP code has been sent to your email.")
                         .build()
         );
     }
@@ -72,7 +72,7 @@ public class AuthController {
                 ResponseWrapper.builder()
                         .status(HttpStatus.OK)
                         .code(200)
-                        .data("Đặt lại mật khẩu thành công.")
+                        .data("Password has been reset successfully.")
                         .build()
         );
     }
@@ -84,7 +84,7 @@ public class AuthController {
                 ResponseWrapper.builder()
                         .status(HttpStatus.OK)
                         .code(200)
-                        .data("Đăng xuất thành công.")
+                        .data("Logged out successfully.")
                         .build()
         );
     }

@@ -47,11 +47,11 @@ public class AuthServiceImpl implements IAuthService {
     @Override
     public void register(FormRegister request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new RuntimeException("Email đã tồn tại");
+            throw new RuntimeException("Email already exists");
         }
 
         if (!request.getPassword().equals(request.getConfirmPassword())) {
-            throw new RuntimeException("Mật khẩu và xác nhận mật khẩu không khớp");
+            throw new RuntimeException("Password and confirm password do not match");
         }
 
         Set<Role> roles = new HashSet<>();
@@ -70,8 +70,8 @@ public class AuthServiceImpl implements IAuthService {
 
         userRepository.save(user);
 
-        emailService.sendEmail(request.getEmail(), "Xác thực tài khoản",
-                "Nhấn vào link để xác thực: http://localhost:8080/api/v1/auth/verify?code=" + code);
+        emailService.sendEmail(request.getEmail(), "Account Verification",
+                "Click the link to verify your account: http://localhost:8080/api/v1/auth/verify?code=" + code);
     }
 
 
@@ -79,16 +79,16 @@ public class AuthServiceImpl implements IAuthService {
     public JwtResponse login(FormLogin formLogin) {
         Optional<User> optionalUser = userRepository.findByEmail(formLogin.getEmail());
         if (optionalUser.isEmpty()) {
-            throw new HttpBadRequest("Email không tồn tại");
+            throw new HttpBadRequest("Email does not exist");
         }
 
         User user = optionalUser.get();
 
         switch (user.getStatus()) {
-            case VERIFY -> throw new HttpBadRequest("Tài khoản chưa được kích hoạt");
-            case BLOCKED -> throw new HttpBadRequest("Tài khoản đã bị khóa");
+            case VERIFY -> throw new HttpBadRequest("Account is not activated");
+            case BLOCKED -> throw new HttpBadRequest("Account is blocked");
             case ACTIVE -> {}
-            default -> throw new HttpBadRequest("Trạng thái tài khoản không hợp lệ");
+            default -> throw new HttpBadRequest("Invalid account status");
         }
 
         Authentication authentication;
@@ -97,7 +97,7 @@ public class AuthServiceImpl implements IAuthService {
                     new UsernamePasswordAuthenticationToken(formLogin.getEmail(), formLogin.getPassword())
             );
         } catch (AuthenticationException e) {
-            throw new HttpBadRequest("Mật khẩu không chính xác");
+            throw new HttpBadRequest("Incorrect password");
         }
 
         MyUserDetails userDetails = (MyUserDetails) authentication.getPrincipal();
@@ -126,7 +126,7 @@ public class AuthServiceImpl implements IAuthService {
     @Override
     public void verifyEmail(String code) {
         User user = userRepository.findByVerificationCode(code)
-                .orElseThrow(() -> new RuntimeException("Mã xác thực không hợp lệ"));
+                .orElseThrow(() -> new RuntimeException("Invalid verification code"));
         user.setStatus(UStatus.ACTIVE);
         user.setVerificationCode(null);
         userRepository.save(user);
@@ -135,18 +135,18 @@ public class AuthServiceImpl implements IAuthService {
     @Override
     public void forgotPassword(ForgotPasswordRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Email không tồn tại"));
+                .orElseThrow(() -> new RuntimeException("Email does not exist"));
         String code = UUID.randomUUID().toString().substring(0, 6);
         user.setResetPasswordCode(code);
         userRepository.save(user);
 
-        emailService.sendEmail(user.getEmail(), "Mã đặt lại mật khẩu", "Mã OTP của bạn: " + code);
+        emailService.sendEmail(user.getEmail(), "Password Reset Code", "Your OTP code is: " + code);
     }
 
     @Override
     public void resetPassword(ResetPasswordRequest request) {
         User user = userRepository.findByResetPasswordCode(request.getCode())
-                .orElseThrow(() -> new RuntimeException("Mã OTP không hợp lệ"));
+                .orElseThrow(() -> new RuntimeException("Invalid OTP code"));
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         user.setResetPasswordCode(null);
         userRepository.save(user);
@@ -155,7 +155,7 @@ public class AuthServiceImpl implements IAuthService {
     @Override
     public void logout(String rawToken) {
         if (rawToken == null || !rawToken.startsWith("Bearer ")) {
-            throw new HttpBadRequest("Token không hợp lệ");
+            throw new HttpBadRequest("Invalid token");
         }
 
         String token = rawToken.substring(7);

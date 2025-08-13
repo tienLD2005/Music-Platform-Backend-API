@@ -18,7 +18,7 @@ public class EmailService {
     public void sendEmail(String to, String subject, String text) {
         Optional<User> optionalUser = userRepository.findByEmail(to);
         if (optionalUser.isEmpty()) {
-            throw new IllegalArgumentException("Email này không tồn tại trong hệ thống");
+            throw new IllegalArgumentException("This email does not exist in the system");
         }
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
@@ -28,7 +28,7 @@ public class EmailService {
         try {
             mailSender.send(message);
         } catch (Exception e) {
-            throw new RuntimeException("Gửi email thất bại: " + e.getMessage());
+            throw new RuntimeException("Failed to send email: " + e.getMessage());
         }
     }
 }
