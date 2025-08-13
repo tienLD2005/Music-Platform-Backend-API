@@ -22,4 +22,8 @@ public interface AlbumRepository extends JpaRepository<Album, Long> {
         WHERE s.album.id = :albumId
         """)
     Long countSongsInAlbum(Long albumId);
+
+    boolean existsByTitleIgnoreCaseAndArtistId(String title, Long artistId);
+
+
 }

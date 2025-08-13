@@ -1,12 +1,13 @@
 package com.ra.base_spring_boot.dto.req;
 
-import com.ra.base_spring_boot.model.User;
 import com.ra.base_spring_boot.model.constants.AlbumType;
-import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 
@@ -15,20 +16,15 @@ import java.time.LocalDateTime;
 @Data
 public class AlbumRequest {
 
-    @NotBlank(message = "Tên Album không được để trống")
+    @NotBlank(message = "Album name must not be empty")
     private String title;
 
-    @NotBlank(message = "Ngày phát được để trống")
+    @NotNull(message = "Release date must not be empty")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime releaseDate;
 
-    // Khóa ngoại tới bảng User
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "artist_id", nullable = false)
-    private User artist;
-
-    @Column(name = "cover_image", length = 255)
-    private String coverImage;
-
-    @Enumerated(EnumType.STRING)
+    @NotNull(message = "Type must not be empty")
     private AlbumType type;
+
+    private MultipartFile coverImageFile;
 }

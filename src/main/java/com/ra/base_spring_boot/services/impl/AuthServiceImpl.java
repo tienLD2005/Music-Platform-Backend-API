@@ -13,6 +13,7 @@ import com.ra.base_spring_boot.model.User;
 import com.ra.base_spring_boot.model.constants.RoleName;
 import com.ra.base_spring_boot.model.constants.UStatus;
 import com.ra.base_spring_boot.repository.IBlacklistedTokenRepository;
+import com.ra.base_spring_boot.repository.IRoleRepository;
 import com.ra.base_spring_boot.repository.IUserRepository;
 import com.ra.base_spring_boot.security.jwt.JwtProvider;
 import com.ra.base_spring_boot.security.principle.MyUserDetails;
@@ -43,6 +44,7 @@ public class AuthServiceImpl implements IAuthService {
     private final JwtProvider jwtProvider;
     private final EmailService emailService;
     private final IBlacklistedTokenRepository  blacklistedTokenRepository;
+    private final IRoleRepository roleRepository;
 
     @Override
     public void register(FormRegister request) {
@@ -53,9 +55,10 @@ public class AuthServiceImpl implements IAuthService {
         if (!request.getPassword().equals(request.getConfirmPassword())) {
             throw new RuntimeException("Password and confirm password do not match");
         }
-
-        Set<Role> roles = new HashSet<>();
-        roles.add(roleService.findByRoleName(RoleName.ROLE_USER));
+        Set<Role> roles = request.getRole().stream()
+                .map(roleName -> roleRepository.findByRoleName(RoleName.valueOf(roleName))
+                        .orElseThrow(() -> new RuntimeException("Role not found: " + roleName)))
+                .collect(Collectors.toSet());
 
         String code = UUID.randomUUID().toString();
         User user = User.builder()
