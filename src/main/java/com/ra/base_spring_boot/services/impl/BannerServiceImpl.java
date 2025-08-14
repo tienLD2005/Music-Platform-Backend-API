@@ -2,7 +2,9 @@ package com.ra.base_spring_boot.services.impl;
 
 import com.ra.base_spring_boot.dto.req.BannerCreateRequest;
 import com.ra.base_spring_boot.dto.req.BannerUpdateReq;
+import com.ra.base_spring_boot.dto.resp.BannerResponse;
 import com.ra.base_spring_boot.dto.resp.BannerResponseDTO;
+import com.ra.base_spring_boot.mapper.BannerMapper;
 import com.ra.base_spring_boot.model.Banner;
 import com.ra.base_spring_boot.model.constants.BannerStatus;
 import com.ra.base_spring_boot.repository.IBannerRepository;
@@ -13,6 +15,7 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -97,6 +100,15 @@ public class BannerServiceImpl implements IBannerService {
                 .orElseThrow(() -> new IllegalArgumentException("The banner does not exist"));
         banner.setStatus(BannerStatus.INACTIVE);
         bannerRepository.save(banner);
+    }
+
+    @Override
+    public List<BannerResponse> getActiveBanners(String position) {
+        LocalDateTime now = LocalDateTime.now();
+        return bannerRepository.findActiveBanners(BannerStatus.ACTIVE, now, position)
+                .stream()
+                .map(BannerMapper::toBannerResponse)
+                .toList();
     }
 
     private BannerResponseDTO toRes(Banner banner) {
