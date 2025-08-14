@@ -1,5 +1,6 @@
 package com.ra.base_spring_boot.dto.resp;
 
+import com.ra.base_spring_boot.model.Song;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,12 +9,16 @@ import lombok.NoArgsConstructor;
 import java.time.LocalTime;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public class ResponseSong {
+public class SongResponseDTO {
+    private Long id;
     private String title;
     private LocalTime duration;
-    private Integer views;
+    private String artistName;
+    private String albumName;
     private String fileUrl;
+    private Integer views;
+
 }
