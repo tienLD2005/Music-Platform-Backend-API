@@ -8,4 +8,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface IBannerRepository extends JpaRepository<Banner, Integer> {
     Page<Banner> findByStatus(BannerStatus status, Pageable pageable);
+    Page<Banner> findByStatusAndTitleContainingIgnoreCase(
+            BannerStatus status,
+            String keyword,
+            Pageable pageable
+    );
 }

@@ -2,6 +2,7 @@ package com.ra.base_spring_boot.controller;
 
 import com.ra.base_spring_boot.dto.ResponseWrapper;
 import com.ra.base_spring_boot.dto.req.BannerCreateReq;
+import com.ra.base_spring_boot.dto.req.SearchBannerRequest;
 import com.ra.base_spring_boot.dto.resp.BannerRes;
 import com.ra.base_spring_boot.dto.resp.PageResponse;
 import com.ra.base_spring_boot.model.constants.BannerStatus;
@@ -27,26 +28,30 @@ public class BannerController {
     @GetMapping
     public ResponseEntity<ResponseWrapper<PageResponse<BannerRes>>> getAll(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String keyword
+            @RequestParam(defaultValue = "10") int size
     ) {
-        Page<BannerRes> result = bannerService.getAll(page, size, keyword);
+        Page<BannerRes> result = bannerService.getAll(page, size);
+        return ResponseEntity.ok(
+                ResponseWrapper.<PageResponse<BannerRes>>builder()
+                        .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
+                        .data(toPageResponse(result))
+                        .build()
+        );
+    }
 
-        PageResponse<BannerRes> pageResponse = PageResponse.<BannerRes>builder()
-                .content(result.getContent())
-                .currentPage(result.getNumber())
-                .totalPages(result.getTotalPages())
-                .totalElements(result.getTotalElements())
-                .size(result.getSize())
-                .build();
-
-        ResponseWrapper<PageResponse<BannerRes>> body = ResponseWrapper.<PageResponse<BannerRes>>builder()
-                .status(HttpStatus.OK)
-                .code(HttpStatus.OK.value())
-                .data(pageResponse)
-                .build();
-
-        return ResponseEntity.ok(body);
+    @PostMapping("/search")
+    public ResponseEntity<?> search(@RequestBody SearchBannerRequest req) {
+        int page = (req.getPage() == null || req.getPage() < 0) ? 0 : req.getPage();
+        int size = (req.getSize() == null || req.getSize() <= 0) ? 10 : req.getSize();
+        Page<BannerRes> result = bannerService.searchByKeyword(page, size, req.getKeyword());
+        return ResponseEntity.ok(
+                ResponseWrapper.<PageResponse<BannerRes>>builder()
+                        .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
+                        .data(toPageResponse(result))
+                        .build()
+        );
     }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
@@ -91,5 +96,13 @@ public class BannerController {
                 .build();
         return ResponseEntity.ok(body);
     }
-
+    private PageResponse<BannerRes> toPageResponse(Page<BannerRes> page) {
+        return PageResponse.<BannerRes>builder()
+                .content(page.getContent())
+                .currentPage(page.getNumber())
+                .totalPages(page.getTotalPages())
+                .totalElements(page.getTotalElements())
+                .size(page.getSize())
+                .build();
+    }
 }

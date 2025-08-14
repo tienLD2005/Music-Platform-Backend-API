@@ -5,7 +5,9 @@ import com.ra.base_spring_boot.dto.resp.BannerRes;
 import org.springframework.data.domain.Page;
 
 public interface IBannerService {
-    Page<BannerRes> getAll(int page, int size, String keyword);
+    Page<BannerRes> getAll(int page, int size);
+    Page<BannerRes> searchByKeyword(int page, int size, String keyword);
     BannerRes create(BannerCreateReq req);
     void delete(Integer id);
 }
+

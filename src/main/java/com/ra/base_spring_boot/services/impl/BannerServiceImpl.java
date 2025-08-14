@@ -19,19 +19,20 @@ public class BannerServiceImpl implements IBannerService {
     private final CloudinaryService cloudinaryService;
 
     @Override
-    public Page<BannerRes> getAll(int page, int size, String keyword) {
+    public Page<BannerRes> getAll(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
         Page<Banner> banners = bannerRepository.findByStatus(BannerStatus.ACTIVE, pageable);
+        return banners.map(this::toRes);
+    }
 
-        if (keyword != null && !keyword.isBlank()) {
-            banners = new PageImpl<>(
-                    banners.stream()
-                            .filter(b -> b.getTitle().toLowerCase().contains(keyword.toLowerCase()))
-                            .toList(),
-                    pageable,
-                    banners.getTotalElements()
-            );
-        }
+    @Override
+    public Page<BannerRes> searchByKeyword(int page, int size, String keyword) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        Page<Banner> banners = bannerRepository.findByStatusAndTitleContainingIgnoreCase(
+                BannerStatus.ACTIVE,
+                keyword == null ? "" : keyword,
+                pageable
+        );
         return banners.map(this::toRes);
     }
 
