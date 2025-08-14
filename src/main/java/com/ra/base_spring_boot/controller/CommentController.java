@@ -1,0 +1,84 @@
+package com.ra.base_spring_boot.controller;
+
+import com.ra.base_spring_boot.dto.ResponseWrapper;
+import com.ra.base_spring_boot.dto.req.CommentRequest;
+import com.ra.base_spring_boot.dto.req.UpdateCommentRequest;
+import com.ra.base_spring_boot.dto.resp.CommentResponseDTO;
+import com.ra.base_spring_boot.dto.resp.PageResponse;
+import com.ra.base_spring_boot.exception.HttpBadRequest;
+import com.ra.base_spring_boot.services.IClientCommentService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/v1/comments")
+@RequiredArgsConstructor
+public class CommentController {
+
+    private final IClientCommentService commentService;
+
+    @PreAuthorize("hasAuthority('ROLE_USER')")
+    @GetMapping("/song/{songId}")
+    public ResponseEntity<ResponseWrapper<PageResponse<CommentResponseDTO>>> getCommentsBySong(
+            @PathVariable Long songId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir
+    ) {
+        return ResponseEntity.ok(
+                ResponseWrapper.<PageResponse<CommentResponseDTO>>builder()
+                        .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
+                        .data(commentService.getCommentsBySong(songId, page, size, sortBy, sortDir))
+                        .build()
+        );
+    }
+    @PreAuthorize("hasAuthority('ROLE_USER')")
+    @PostMapping
+    public ResponseEntity<ResponseWrapper<CommentResponseDTO>> addComment(@RequestBody CommentRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ResponseWrapper.<CommentResponseDTO>builder()
+                        .status(HttpStatus.CREATED)
+                        .code(HttpStatus.CREATED.value())
+                        .data(commentService.addComment(request))
+                        .build());
+    }
+    @PreAuthorize("hasAuthority('ROLE_USER')")
+    @PutMapping("/{commentId}")
+    public ResponseEntity<ResponseWrapper<CommentResponseDTO>> updateComment(
+            @PathVariable Long commentId,
+            @RequestBody UpdateCommentRequest request
+    ) {
+        return ResponseEntity.ok(
+                ResponseWrapper.<CommentResponseDTO>builder()
+                        .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
+                        .data(commentService.updateComment(commentId, request.getContent()))
+                        .build()
+        );
+    }
+
+    @PreAuthorize("hasAuthority('ROLE_USER')")
+    @DeleteMapping("/{commentId}")
+    public ResponseEntity<ResponseWrapper<String>> deleteComment(
+            @PathVariable Long commentId,
+            @RequestParam(defaultValue = "false") boolean confirm
+    ) {
+        if (!confirm) {
+            throw new HttpBadRequest("You need to confirm deletion by adding ?confirm=true");
+        }
+        commentService.deleteComment(commentId);
+        return ResponseEntity.ok(
+                ResponseWrapper.<String>builder()
+                        .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
+                        .data("Comment deleted successfully")
+                        .build()
+        );
+    }
+
+}

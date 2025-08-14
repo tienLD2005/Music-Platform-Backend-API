@@ -27,7 +27,7 @@ public class AlbumController {
 
     private final IAlbumService albumService;
 
-    @GetMapping()
+    @GetMapping("/my-albums")
     @PreAuthorize("hasAuthority('ROLE_ARTIST')")
     public ResponseEntity<ResponseWrapper<PageResponse<AlbumResponseDTO>>> getMyAlbums(
             @RequestParam(required = false) String title,
