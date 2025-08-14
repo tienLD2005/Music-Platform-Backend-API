@@ -6,8 +6,10 @@ import com.ra.base_spring_boot.dto.req.BannerUpdateReq;
 import com.ra.base_spring_boot.dto.req.SearchBannerRequest;
 import com.ra.base_spring_boot.dto.resp.BannerRes;
 import com.ra.base_spring_boot.dto.resp.PageResponse;
+import com.ra.base_spring_boot.mapper.PageMapper;
 import com.ra.base_spring_boot.model.constants.BannerStatus;
 import com.ra.base_spring_boot.services.IBannerService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -36,7 +38,7 @@ public class BannerController {
                 ResponseWrapper.<PageResponse<BannerRes>>builder()
                         .status(HttpStatus.OK)
                         .code(HttpStatus.OK.value())
-                        .data(toPageResponse(result))
+                        .data(PageMapper.toPageResponse(result))
                         .build()
         );
     }
@@ -50,76 +52,40 @@ public class BannerController {
                 ResponseWrapper.<PageResponse<BannerRes>>builder()
                         .status(HttpStatus.OK)
                         .code(HttpStatus.OK.value())
-                        .data(toPageResponse(result))
+                        .data(PageMapper.toPageResponse(result))
                         .build()
         );
     }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ResponseWrapper<BannerRes>> create(
-            @RequestPart String title,
-            @RequestPart(required = false) String position,
-            @RequestPart(required = false) String startTime,
-            @RequestPart(required = false) String endTime,
-            @RequestPart MultipartFile image
+    public ResponseEntity<ResponseWrapper<?>> create(
+            @Valid @ModelAttribute BannerCreateReq req
     ) {
-        BannerCreateReq req = new BannerCreateReq();
-        req.setTitle(title);
-        req.setPosition(position);
-        if (startTime != null && !startTime.isBlank()) {
-            req.setStartTime(LocalDateTime.parse(startTime));
-        }
-        if (endTime != null && !endTime.isBlank()) {
-            req.setEndTime(LocalDateTime.parse(endTime));
-        }
-        req.setStatus(BannerStatus.ACTIVE);
-        req.setImage(image);
-
         BannerRes created = bannerService.create(req);
-
-        ResponseWrapper<BannerRes> body = ResponseWrapper.<BannerRes>builder()
-                .status(HttpStatus.CREATED)
-                .code(HttpStatus.CREATED.value())
-                .data(created)
-                .build();
-        return ResponseEntity.status(HttpStatus.CREATED).body(body);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ResponseWrapper.<BannerRes>builder()
+                        .status(HttpStatus.CREATED)
+                        .code(HttpStatus.CREATED.value())
+                        .data(created)
+                        .build());
     }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ResponseWrapper<BannerRes>> update(
+    public ResponseEntity<ResponseWrapper<?>> update(
             @PathVariable Integer id,
-            @RequestPart(required = false) String title,
-            @RequestPart(required = false) String position,
-            @RequestPart(required = false) String startTime,
-            @RequestPart(required = false) String endTime,
-            @RequestPart(required = false) BannerStatus status,
-            @RequestPart(required = false) MultipartFile image
+            @ModelAttribute BannerUpdateReq req
     ) {
-        BannerUpdateReq req = new BannerUpdateReq();
-        req.setTitle(title);
-        req.setPosition(position);
-        if (startTime != null && !startTime.isBlank()) {
-            req.setStartTime(LocalDateTime.parse(startTime));
-        }
-        if (endTime != null && !endTime.isBlank()) {
-            req.setEndTime(LocalDateTime.parse(endTime));
-        }
-        req.setStatus(status);
-        req.setImage(image);
-
         BannerRes updated = bannerService.update(id, req);
-
-        ResponseWrapper<BannerRes> body = ResponseWrapper.<BannerRes>builder()
-                .status(HttpStatus.OK)
-                .code(HttpStatus.OK.value())
-                .data(updated)
-                .build();
-
-        return ResponseEntity.ok(body);
+        return ResponseEntity.ok(
+                ResponseWrapper.<BannerRes>builder()
+                        .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
+                        .data(updated)
+                        .build()
+        );
     }
-
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
@@ -131,15 +97,5 @@ public class BannerController {
                 .data("Banner deleted successfully")
                 .build();
         return ResponseEntity.ok(body);
-    }
-
-    private PageResponse<BannerRes> toPageResponse(Page<BannerRes> page) {
-        return PageResponse.<BannerRes>builder()
-                .content(page.getContent())
-                .currentPage(page.getNumber())
-                .totalPages(page.getTotalPages())
-                .totalElements(page.getTotalElements())
-                .size(page.getSize())
-                .build();
     }
 }

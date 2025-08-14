@@ -20,7 +20,7 @@ public class SongHistoryController {
     @GetMapping("/recent")
     public ResponseEntity<ResponseWrapper<PageResponse<SongHistoryResponse>>> getRecent(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "10") int size,
             @AuthenticationPrincipal MyUserDetails principal
     ) {
         PageResponse<SongHistoryResponse> data =

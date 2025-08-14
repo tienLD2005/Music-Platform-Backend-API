@@ -12,12 +12,20 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class BannerServiceImpl implements IBannerService {
 
     private final IBannerRepository bannerRepository;
     private final CloudinaryService cloudinaryService;
+
+    private void validateTime(LocalDateTime start, LocalDateTime end) {
+        if (start != null && end != null && !start.isBefore(end)) {
+            throw new IllegalArgumentException("startTime phải nhỏ hơn endTime");
+        }
+    }
 
     @Override
     public Page<BannerRes> getAll(int page, int size) {
@@ -39,6 +47,8 @@ public class BannerServiceImpl implements IBannerService {
 
     @Override
     public BannerRes create(BannerCreateReq req) {
+        validateTime(req.getStartTime(), req.getEndTime());
+
         try {
             String imageUrl = cloudinaryService.uploadImage(req.getImage());
             Banner banner = Banner.builder()
@@ -60,6 +70,8 @@ public class BannerServiceImpl implements IBannerService {
         Banner banner = bannerRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Banner không tồn tại"));
 
+        validateTime(req.getStartTime(), req.getEndTime());
+
         if (req.getImage() != null && !req.getImage().isEmpty()) {
             try {
                 String imageUrl = cloudinaryService.uploadImage(req.getImage());
@@ -75,8 +87,7 @@ public class BannerServiceImpl implements IBannerService {
         if (req.getEndTime() != null) banner.setEndTime(req.getEndTime());
         if (req.getStatus() != null) banner.setStatus(req.getStatus());
 
-        Banner saved = bannerRepository.save(banner);
-        return toRes(saved);
+        return toRes(bannerRepository.save(banner));
     }
 
 

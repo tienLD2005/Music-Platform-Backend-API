@@ -2,6 +2,7 @@ package com.ra.base_spring_boot.dto.req;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ra.base_spring_boot.model.constants.BannerStatus;
+import jakarta.validation.constraints.Future;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,9 +17,9 @@ public class BannerUpdateReq {
     private LocalDateTime startTime;
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @Future(message = "Thời gian kết thúc phải ở tương lai")
     private LocalDateTime endTime;
 
     private BannerStatus status;
-
     private MultipartFile image;
 }
