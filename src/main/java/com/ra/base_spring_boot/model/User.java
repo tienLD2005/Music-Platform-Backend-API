@@ -93,4 +93,8 @@ public class User extends BaseObject {
     public void preUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+    @OneToMany(mappedBy = "artist", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Album> albums;
+
 }
