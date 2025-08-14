@@ -1,8 +1,9 @@
 package com.ra.base_spring_boot.controller;
 
 import com.ra.base_spring_boot.dto.ResponseWrapper;
-import com.ra.base_spring_boot.dto.req.BannerCreateReq;
-import com.ra.base_spring_boot.dto.resp.BannerRes;
+import com.ra.base_spring_boot.dto.req.BannerCreateRequest;
+import com.ra.base_spring_boot.dto.resp.BannerResponseDTO;
+import com.ra.base_spring_boot.dto.resp.BannerResponse;
 import com.ra.base_spring_boot.dto.resp.PageResponse;
 import com.ra.base_spring_boot.model.constants.BannerStatus;
 import com.ra.base_spring_boot.services.IBannerService;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/banner")
@@ -25,14 +27,14 @@ public class BannerController {
     private final IBannerService bannerService;
 
     @GetMapping
-    public ResponseEntity<ResponseWrapper<PageResponse<BannerRes>>> getAll(
+    public ResponseEntity<ResponseWrapper<PageResponse<BannerResponseDTO>>> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String keyword
     ) {
-        Page<BannerRes> result = bannerService.getAll(page, size, keyword);
+        Page<BannerResponseDTO> result = bannerService.getAll(page, size, keyword);
 
-        PageResponse<BannerRes> pageResponse = PageResponse.<BannerRes>builder()
+        PageResponse<BannerResponseDTO> pageResponse = PageResponse.<BannerResponseDTO>builder()
                 .content(result.getContent())
                 .currentPage(result.getNumber())
                 .totalPages(result.getTotalPages())
@@ -40,7 +42,7 @@ public class BannerController {
                 .size(result.getSize())
                 .build();
 
-        ResponseWrapper<PageResponse<BannerRes>> body = ResponseWrapper.<PageResponse<BannerRes>>builder()
+        ResponseWrapper<PageResponse<BannerResponseDTO>> body = ResponseWrapper.<PageResponse<BannerResponseDTO>>builder()
                 .status(HttpStatus.OK)
                 .code(HttpStatus.OK.value())
                 .data(pageResponse)
@@ -51,14 +53,14 @@ public class BannerController {
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ResponseWrapper<BannerRes>> create(
+    public ResponseEntity<ResponseWrapper<BannerResponseDTO>> create(
             @RequestPart String title,
             @RequestPart(required = false) String position,
             @RequestPart(required = false) String startTime,
             @RequestPart(required = false) String endTime,
             @RequestPart MultipartFile image
     ) {
-        BannerCreateReq req = new BannerCreateReq();
+        BannerCreateRequest req = new BannerCreateRequest();
         req.setTitle(title);
         req.setPosition(position);
         if (startTime != null && !startTime.isBlank()) {
@@ -70,9 +72,9 @@ public class BannerController {
         req.setStatus(BannerStatus.ACTIVE);
         req.setImage(image);
 
-        BannerRes created = bannerService.create(req);
+        BannerResponseDTO created = bannerService.create(req);
 
-        ResponseWrapper<BannerRes> body = ResponseWrapper.<BannerRes>builder()
+        ResponseWrapper<BannerResponseDTO> body = ResponseWrapper.<BannerResponseDTO>builder()
                 .status(HttpStatus.CREATED)
                 .code(HttpStatus.CREATED.value())
                 .data(created)
@@ -90,5 +92,18 @@ public class BannerController {
                 .data(null)
                 .build();
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(body);
+    }
+
+    @GetMapping("/active")
+    public ResponseEntity<?> getActiveBanners(@RequestParam(required = false) String position) {
+        List<BannerResponse> banners = bannerService.getActiveBanners(position);
+
+        return ResponseEntity.ok(
+                ResponseWrapper.<List<BannerResponse>>builder()
+                        .status(HttpStatus.OK)
+                        .code(200)
+                        .data(banners)
+                        .build()
+        );
     }
 }

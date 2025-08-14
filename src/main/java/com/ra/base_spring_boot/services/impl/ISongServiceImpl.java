@@ -1,0 +1,29 @@
+package com.ra.base_spring_boot.services.impl;
+
+import com.ra.base_spring_boot.dto.resp.SongResponse;
+import com.ra.base_spring_boot.dto.resp.TopSongDTO;
+import com.ra.base_spring_boot.mapper.SongMapper;
+import com.ra.base_spring_boot.repository.ISongRepository;
+import com.ra.base_spring_boot.services.ISongService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+@Service
+@RequiredArgsConstructor
+public class ISongServiceImpl implements ISongService {
+    private final ISongRepository songRepository;
+
+    @Override
+    public List<TopSongDTO> getTop15SongsOfWeek() {
+        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
+        Pageable top15 = PageRequest.of(0, 15);
+        return songRepository.findTopSongsOfWeek(sevenDaysAgo, top15);
+    }
+
+
+
+}

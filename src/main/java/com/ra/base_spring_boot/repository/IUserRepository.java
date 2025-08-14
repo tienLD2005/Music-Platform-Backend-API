@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface IUserRepository extends JpaRepository<User, Long>
@@ -34,4 +35,27 @@ public interface IUserRepository extends JpaRepository<User, Long>
     ORDER BY SUM(COALESCE(s.views, 0)) DESC
     """)
     Page<User> findTrendingArtists(Pageable pageable);
+
+    @Query("""
+        SELECT u
+        FROM User u
+        JOIN u.roles r
+        WHERE r.roleName = 'ARTIST'
+        """)
+    List<User> findAllArtists();
+
+    @Query("""
+        SELECT u.id AS id, u.firstName AS firstName, u.lastName AS lastName, u.profileImage AS profileImage, u.bio AS bio,
+               COUNT(DISTINCT sh.id) AS listens,
+               COUNT(DISTINCT d.user.id) AS downloads
+        FROM User u
+        JOIN u.roles r
+        LEFT JOIN u.songs s
+        LEFT JOIN s.songHistories sh
+        LEFT JOIN s.downloads d
+        WHERE r.roleName = 'ROLE_ARTIST'
+        GROUP BY u.id, u.firstName, u.lastName, u.profileImage, u.bio
+        ORDER BY (COUNT(DISTINCT sh.id) + COUNT(DISTINCT d.user.id)) DESC
+        """)
+    List<Object[]> findTrendingArtists();
 }
