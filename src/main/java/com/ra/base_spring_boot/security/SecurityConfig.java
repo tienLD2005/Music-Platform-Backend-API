@@ -53,6 +53,12 @@ public class SecurityConfig
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
                         url -> url
+
+                                // API Banner
+                                .requestMatchers("GET", "/api/v1/banner/**").permitAll()
+                                .requestMatchers("POST", "/api/v1/banner/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
+                                .requestMatchers("DELETE", "/api/v1/banner/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
+
                                 .requestMatchers("/api/v1/admin/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
                                 .requestMatchers("/api/v1/user/**").hasAuthority(RoleName.ROLE_USER.toString())
                                 .requestMatchers("/api/v1/artist/**").hasAuthority(RoleName.ROLE_ARTIST.toString())
