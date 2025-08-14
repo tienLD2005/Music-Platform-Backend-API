@@ -12,6 +12,7 @@ import java.util.Map;
 public class CloudinaryService {
     private final Cloudinary cloudinary;
     private static final long MAX_AUDIO_SIZE = 20L * 1024 * 1024;
+    private static final long MAX_IMAGE_SIZE = 10L * 1024 * 1024;
 
     public CloudinaryService() {
         this.cloudinary = new Cloudinary(ObjectUtils.asMap(
@@ -52,6 +53,14 @@ public class CloudinaryService {
             throw new RuntimeException("Lỗi khi upload file lên Cloudinary", e);
         }
     }
+    public String uploadImage(MultipartFile file) throws IOException {
+        if (file == null || file.isEmpty()) throw new IllegalArgumentException("File không được để trống");
+        if (file.getSize() > MAX_IMAGE_SIZE) throw new IllegalArgumentException("Kích thước ảnh tối đa 10MB");
 
-
+        Map<?,?> result = cloudinary.uploader().upload(
+                file.getBytes(),
+                ObjectUtils.asMap("folder", "banners")
+        );
+        return result.get("secure_url").toString();
+    }
 }
