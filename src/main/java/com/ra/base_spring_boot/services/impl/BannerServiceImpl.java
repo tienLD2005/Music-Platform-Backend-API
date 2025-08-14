@@ -5,7 +5,7 @@ import com.ra.base_spring_boot.dto.resp.BannerRes;
 import com.ra.base_spring_boot.model.Banner;
 import com.ra.base_spring_boot.model.constants.BannerStatus;
 import com.ra.base_spring_boot.repository.IBannerRepository;
-import com.ra.base_spring_boot.services.CloudinaryService;
+import com.ra.base_spring_boot.services.cloudinary.CloudinaryService;
 import com.ra.base_spring_boot.services.IBannerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;

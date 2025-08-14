@@ -17,7 +17,7 @@ import com.ra.base_spring_boot.repository.IGenreRepository;
 import com.ra.base_spring_boot.repository.ISongRepository;
 import com.ra.base_spring_boot.repository.IUserRepository;
 import com.ra.base_spring_boot.security.principle.MyUserDetails;
-import com.ra.base_spring_boot.services.CloudinaryService;
+import com.ra.base_spring_boot.services.cloudinary.CloudinaryService;
 import com.ra.base_spring_boot.services.IAlbumService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
