@@ -36,16 +36,16 @@ import java.util.List;
 @EnableMethodSecurity
 @RequiredArgsConstructor
 
-// --- Thêm phần sau đây để enable bearerAuth cho Swagger ---
+
 @OpenAPIDefinition(
         info = @Info(title = "Music API", version = "v1"),
-        security = @SecurityRequirement(name = "bearerAuth")   // Áp dụng cho tất cả API
+        security = @SecurityRequirement(name = "bearerAuth")
 )
 @SecurityScheme(
-        name = "bearerAuth",              // tên scheme
-        type = SecuritySchemeType.HTTP,   // HTTP auth
-        scheme = "bearer",                // loại Bearer token
-        bearerFormat = "JWT",             // định dạng JWT
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT",
         description = "Nhập token JWT bắt đầu với 'Bearer '"
 )
 public class SecurityConfig
@@ -84,6 +84,10 @@ public class SecurityConfig
                                 .requestMatchers(HttpMethod.GET,"/api/v1/albums/*/songs").hasAnyAuthority(RoleName.ROLE_ADMIN.toString(), RoleName.ROLE_USER.toString(), RoleName.ROLE_ARTIST.toString())
                                 .requestMatchers(HttpMethod.POST,"/api/v1/albums/*/songs").hasAuthority(RoleName.ROLE_ARTIST.toString())
                                 .requestMatchers(HttpMethod.DELETE,"/api/v1/albums/*/songs/**").hasAuthority(RoleName.ROLE_ARTIST.toString())
+
+                                .requestMatchers("/api/v1/artist/**").hasAuthority(RoleName.ROLE_ARTIST.toString())
+                                .requestMatchers("api/v1/artists/**").hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ADMIN.toString(), RoleName.ROLE_ARTIST.toString())
+                                .requestMatchers("api/v1/genres/**").hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ADMIN.toString(), RoleName.ROLE_ARTIST.toString())
 
                                 .anyRequest().permitAll()
                 )
