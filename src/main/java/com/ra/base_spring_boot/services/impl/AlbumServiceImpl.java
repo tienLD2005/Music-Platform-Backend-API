@@ -112,7 +112,7 @@ public class AlbumServiceImpl implements IAlbumService {
         }
 
         songRepository.delete(song);
-        return "Song removed from album successfully";
+        return "Song delete from album successfully";
     }
 
     private Long getCurrentArtistId() {
