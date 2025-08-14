@@ -82,13 +82,14 @@ public class BannerController {
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<ResponseWrapper<Void>> delete(@PathVariable Integer id) {
+    public ResponseEntity<ResponseWrapper<String>> delete(@PathVariable Integer id) {
         bannerService.delete(id);
-        ResponseWrapper<Void> body = ResponseWrapper.<Void>builder()
-                .status(HttpStatus.NO_CONTENT)
-                .code(HttpStatus.NO_CONTENT.value())
-                .data(null)
+        ResponseWrapper<String> body = ResponseWrapper.<String>builder()
+                .status(HttpStatus.OK)
+                .code(HttpStatus.OK.value())
+                .data("Banner deleted successfully")
                 .build();
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(body);
+        return ResponseEntity.ok(body);
     }
+
 }
