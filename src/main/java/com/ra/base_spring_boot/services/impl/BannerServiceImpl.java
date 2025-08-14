@@ -1,6 +1,7 @@
 package com.ra.base_spring_boot.services.impl;
 
 import com.ra.base_spring_boot.dto.req.BannerCreateReq;
+import com.ra.base_spring_boot.dto.req.BannerUpdateReq;
 import com.ra.base_spring_boot.dto.resp.BannerRes;
 import com.ra.base_spring_boot.model.Banner;
 import com.ra.base_spring_boot.model.constants.BannerStatus;
@@ -53,6 +54,31 @@ public class BannerServiceImpl implements IBannerService {
             throw new RuntimeException("Error uploading image: " + e.getMessage());
         }
     }
+
+    @Override
+    public BannerRes update(Integer id, BannerUpdateReq req) {
+        Banner banner = bannerRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Banner không tồn tại"));
+
+        if (req.getImage() != null && !req.getImage().isEmpty()) {
+            try {
+                String imageUrl = cloudinaryService.uploadImage(req.getImage());
+                banner.setImageUrl(imageUrl);
+            } catch (Exception e) {
+                throw new RuntimeException("Lỗi upload ảnh: " + e.getMessage());
+            }
+        }
+
+        if (req.getTitle() != null) banner.setTitle(req.getTitle());
+        if (req.getPosition() != null) banner.setPosition(req.getPosition());
+        if (req.getStartTime() != null) banner.setStartTime(req.getStartTime());
+        if (req.getEndTime() != null) banner.setEndTime(req.getEndTime());
+        if (req.getStatus() != null) banner.setStatus(req.getStatus());
+
+        Banner saved = bannerRepository.save(banner);
+        return toRes(saved);
+    }
+
 
     @Override
     public void delete(Integer id) {

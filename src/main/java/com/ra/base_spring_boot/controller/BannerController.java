@@ -2,6 +2,7 @@ package com.ra.base_spring_boot.controller;
 
 import com.ra.base_spring_boot.dto.ResponseWrapper;
 import com.ra.base_spring_boot.dto.req.BannerCreateReq;
+import com.ra.base_spring_boot.dto.req.BannerUpdateReq;
 import com.ra.base_spring_boot.dto.req.SearchBannerRequest;
 import com.ra.base_spring_boot.dto.resp.BannerRes;
 import com.ra.base_spring_boot.dto.resp.PageResponse;
@@ -86,6 +87,41 @@ public class BannerController {
     }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ResponseWrapper<BannerRes>> update(
+            @PathVariable Integer id,
+            @RequestPart(required = false) String title,
+            @RequestPart(required = false) String position,
+            @RequestPart(required = false) String startTime,
+            @RequestPart(required = false) String endTime,
+            @RequestPart(required = false) BannerStatus status,
+            @RequestPart(required = false) MultipartFile image
+    ) {
+        BannerUpdateReq req = new BannerUpdateReq();
+        req.setTitle(title);
+        req.setPosition(position);
+        if (startTime != null && !startTime.isBlank()) {
+            req.setStartTime(LocalDateTime.parse(startTime));
+        }
+        if (endTime != null && !endTime.isBlank()) {
+            req.setEndTime(LocalDateTime.parse(endTime));
+        }
+        req.setStatus(status);
+        req.setImage(image);
+
+        BannerRes updated = bannerService.update(id, req);
+
+        ResponseWrapper<BannerRes> body = ResponseWrapper.<BannerRes>builder()
+                .status(HttpStatus.OK)
+                .code(HttpStatus.OK.value())
+                .data(updated)
+                .build();
+
+        return ResponseEntity.ok(body);
+    }
+
+
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<ResponseWrapper<String>> delete(@PathVariable Integer id) {
         bannerService.delete(id);
@@ -96,6 +132,7 @@ public class BannerController {
                 .build();
         return ResponseEntity.ok(body);
     }
+
     private PageResponse<BannerRes> toPageResponse(Page<BannerRes> page) {
         return PageResponse.<BannerRes>builder()
                 .content(page.getContent())
