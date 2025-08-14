@@ -65,12 +65,9 @@ public class CommentController {
     @PreAuthorize("hasAuthority('ROLE_USER')")
     @DeleteMapping("/{commentId}")
     public ResponseEntity<ResponseWrapper<String>> deleteComment(
-            @PathVariable Long commentId,
-            @RequestParam(defaultValue = "false") boolean confirm
+            @PathVariable Long commentId
     ) {
-        if (!confirm) {
-            throw new HttpBadRequest("You need to confirm deletion by adding ?confirm=true");
-        }
+
         commentService.deleteComment(commentId);
         return ResponseEntity.ok(
                 ResponseWrapper.<String>builder()
