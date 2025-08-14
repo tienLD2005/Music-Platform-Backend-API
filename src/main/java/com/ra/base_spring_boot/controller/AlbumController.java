@@ -15,12 +15,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-
 @RestController
 @RequestMapping("/api/v1/albums")
 @RequiredArgsConstructor
 public class AlbumController {
-
     private final IAlbumService albumService;
 
     @GetMapping("/{albumId}/songs")
@@ -76,4 +74,5 @@ public class AlbumController {
                         .build()
         );
     }
+
 }
