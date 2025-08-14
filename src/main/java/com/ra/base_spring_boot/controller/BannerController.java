@@ -1,13 +1,12 @@
 package com.ra.base_spring_boot.controller;
 
 import com.ra.base_spring_boot.dto.ResponseWrapper;
-import com.ra.base_spring_boot.dto.req.BannerCreateReq;
+import com.ra.base_spring_boot.dto.req.BannerCreateRequest;
 import com.ra.base_spring_boot.dto.req.BannerUpdateReq;
 import com.ra.base_spring_boot.dto.req.SearchBannerRequest;
-import com.ra.base_spring_boot.dto.resp.BannerRes;
+import com.ra.base_spring_boot.dto.resp.BannerResponseDTO;
 import com.ra.base_spring_boot.dto.resp.PageResponse;
 import com.ra.base_spring_boot.mapper.PageMapper;
-import com.ra.base_spring_boot.model.constants.BannerStatus;
 import com.ra.base_spring_boot.services.IBannerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,9 +16,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/v1/banner")
@@ -29,13 +25,13 @@ public class BannerController {
     private final IBannerService bannerService;
 
     @GetMapping
-    public ResponseEntity<ResponseWrapper<PageResponse<BannerRes>>> getAll(
+    public ResponseEntity<ResponseWrapper<PageResponse<BannerResponseDTO>>> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        Page<BannerRes> result = bannerService.getAll(page, size);
+        Page<BannerResponseDTO> result = bannerService.getAll(page, size);
         return ResponseEntity.ok(
-                ResponseWrapper.<PageResponse<BannerRes>>builder()
+                ResponseWrapper.<PageResponse<BannerResponseDTO>>builder()
                         .status(HttpStatus.OK)
                         .code(HttpStatus.OK.value())
                         .data(PageMapper.toPageResponse(result))
@@ -47,9 +43,9 @@ public class BannerController {
     public ResponseEntity<?> search(@RequestBody SearchBannerRequest req) {
         int page = (req.getPage() == null || req.getPage() < 0) ? 0 : req.getPage();
         int size = (req.getSize() == null || req.getSize() <= 0) ? 10 : req.getSize();
-        Page<BannerRes> result = bannerService.searchByKeyword(page, size, req.getKeyword());
+        Page<BannerResponseDTO> result = bannerService.searchByKeyword(page, size, req.getKeyword());
         return ResponseEntity.ok(
-                ResponseWrapper.<PageResponse<BannerRes>>builder()
+                ResponseWrapper.<PageResponse<BannerResponseDTO>>builder()
                         .status(HttpStatus.OK)
                         .code(HttpStatus.OK.value())
                         .data(PageMapper.toPageResponse(result))
@@ -60,11 +56,11 @@ public class BannerController {
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResponseWrapper<?>> create(
-            @Valid @ModelAttribute BannerCreateReq req
+            @Valid @ModelAttribute BannerCreateRequest req
     ) {
-        BannerRes created = bannerService.create(req);
+        BannerResponseDTO created = bannerService.create(req);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ResponseWrapper.<BannerRes>builder()
+                .body(ResponseWrapper.<BannerResponseDTO>builder()
                         .status(HttpStatus.CREATED)
                         .code(HttpStatus.CREATED.value())
                         .data(created)
@@ -77,9 +73,9 @@ public class BannerController {
             @PathVariable Integer id,
             @ModelAttribute BannerUpdateReq req
     ) {
-        BannerRes updated = bannerService.update(id, req);
+        BannerResponseDTO updated = bannerService.update(id, req);
         return ResponseEntity.ok(
-                ResponseWrapper.<BannerRes>builder()
+                ResponseWrapper.<BannerResponseDTO>builder()
                         .status(HttpStatus.OK)
                         .code(HttpStatus.OK.value())
                         .data(updated)
@@ -99,3 +95,4 @@ public class BannerController {
         return ResponseEntity.ok(body);
     }
 }
+

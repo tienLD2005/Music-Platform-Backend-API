@@ -4,8 +4,6 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,7 +11,7 @@ import java.util.Set;
 
 @NoArgsConstructor
 @Data
-public class FormRegister {
+public class FormRegisterRequest {
     @NotBlank(message = "Cannot be blank")
     private String lastName;
 
@@ -35,9 +33,7 @@ public class FormRegister {
     @NotBlank(message = "Confirm password cannot be blank")
     private String confirmPassword;
 
-    private Set<String> role;
-
-    public FormRegister(String fullName, String email, String password, String confirmPassword) {
+    public FormRegisterRequest(String fullName, String email, String password, String confirmPassword) {
         this.lastName = fullName != null ? fullName.trim() : null;
         this.firstName = email != null ? email.trim() : null;
         this.email = email != null ? email.trim() : null;

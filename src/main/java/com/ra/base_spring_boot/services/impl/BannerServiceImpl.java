@@ -1,8 +1,8 @@
 package com.ra.base_spring_boot.services.impl;
 
-import com.ra.base_spring_boot.dto.req.BannerCreateReq;
+import com.ra.base_spring_boot.dto.req.BannerCreateRequest;
 import com.ra.base_spring_boot.dto.req.BannerUpdateReq;
-import com.ra.base_spring_boot.dto.resp.BannerRes;
+import com.ra.base_spring_boot.dto.resp.BannerResponseDTO;
 import com.ra.base_spring_boot.model.Banner;
 import com.ra.base_spring_boot.model.constants.BannerStatus;
 import com.ra.base_spring_boot.repository.IBannerRepository;
@@ -28,14 +28,14 @@ public class BannerServiceImpl implements IBannerService {
     }
 
     @Override
-    public Page<BannerRes> getAll(int page, int size) {
+    public Page<BannerResponseDTO> getAll(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
         Page<Banner> banners = bannerRepository.findByStatus(BannerStatus.ACTIVE, pageable);
         return banners.map(this::toRes);
     }
 
     @Override
-    public Page<BannerRes> searchByKeyword(int page, int size, String keyword) {
+    public Page<BannerResponseDTO> searchByKeyword(int page, int size, String keyword) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
         Page<Banner> banners = bannerRepository.findByStatusAndTitleContainingIgnoreCase(
                 BannerStatus.ACTIVE,
@@ -46,7 +46,7 @@ public class BannerServiceImpl implements IBannerService {
     }
 
     @Override
-    public BannerRes create(BannerCreateReq req) {
+    public BannerResponseDTO create(BannerCreateRequest req) {
         validateTime(req.getStartTime(), req.getEndTime());
 
         try {
@@ -66,7 +66,7 @@ public class BannerServiceImpl implements IBannerService {
     }
 
     @Override
-    public BannerRes update(Integer id, BannerUpdateReq req) {
+    public BannerResponseDTO update(Integer id, BannerUpdateReq req) {
         Banner banner = bannerRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Banner không tồn tại"));
 
@@ -99,8 +99,8 @@ public class BannerServiceImpl implements IBannerService {
         bannerRepository.save(banner);
     }
 
-    private BannerRes toRes(Banner banner) {
-        return BannerRes.builder()
+    private BannerResponseDTO toRes(Banner banner) {
+        return BannerResponseDTO.builder()
                 .id(banner.getId())
                 .title(banner.getTitle())
                 .position(banner.getPosition())

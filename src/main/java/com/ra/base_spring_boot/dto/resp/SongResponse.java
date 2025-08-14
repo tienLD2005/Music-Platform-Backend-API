@@ -1,23 +1,25 @@
 package com.ra.base_spring_boot.dto.resp;
 
-import com.ra.base_spring_boot.model.Song;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import lombok.*;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SongResponseDTO {
+public class SongResponse {
     private Long id;
     private String title;
     private LocalTime duration;
     private String artistName;
+    private Long artistId;
     private String albumName;
+    private Long albumId;
     private String fileUrl;
     private Integer views;
+    private LocalDateTime createdAt;
+    private List<String> genres;
 }

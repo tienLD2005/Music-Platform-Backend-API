@@ -1,15 +1,14 @@
 package com.ra.base_spring_boot.services;
 
-import com.ra.base_spring_boot.dto.req.BannerCreateReq;
+import com.ra.base_spring_boot.dto.req.BannerCreateRequest;
 import com.ra.base_spring_boot.dto.req.BannerUpdateReq;
-import com.ra.base_spring_boot.dto.resp.BannerRes;
+import com.ra.base_spring_boot.dto.resp.BannerResponseDTO;
 import org.springframework.data.domain.Page;
 
 public interface IBannerService {
-    Page<BannerRes> getAll(int page, int size);
-    Page<BannerRes> searchByKeyword(int page, int size, String keyword);
-    BannerRes create(BannerCreateReq req);
-    BannerRes update(Integer id, BannerUpdateReq req);
+    Page<BannerResponseDTO> getAll(int page, int size);
+    Page<BannerResponseDTO> searchByKeyword(int page, int size, String keyword);
+    BannerResponseDTO create(BannerCreateRequest req);
+    BannerResponseDTO update(Integer id, BannerUpdateReq req);
     void delete(Integer id);
 }
-

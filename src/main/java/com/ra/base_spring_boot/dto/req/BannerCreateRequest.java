@@ -11,8 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 
 @Data
-public class BannerCreateReq {
-
+public class BannerCreateRequest {
     @NotBlank(message = "Tiêu đề không được để trống")
     private String title;
 
