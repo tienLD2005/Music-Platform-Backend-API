@@ -25,7 +25,7 @@ import java.util.Map;
 public class AlbumController {
     private final IAlbumService albumService;
 
-    @GetMapping("/my")
+    @GetMapping("/my-album")
     @PreAuthorize("hasAuthority('ROLE_ARTIST')")
     public ResponseEntity<ResponseWrapper<PageResponse<AlbumResponseDTO>>> getMyAlbums(
             @RequestParam(required = false) String title,
@@ -118,7 +118,7 @@ public class AlbumController {
         );
     }
 
-    // List Ablum
+    // List Ablums
     @GetMapping
     public ResponseEntity<?> getAlbums(@RequestParam(defaultValue = "1") int page,
                                        @RequestParam(defaultValue = "10") int size,
@@ -192,7 +192,7 @@ public class AlbumController {
         );
     }
 
-    @GetMapping("/{artistId}/albums")
+    @GetMapping("/{artistId}")
     public ResponseEntity<?> getAlbumsByArtist(@PathVariable Long artistId,
                                                @RequestParam(defaultValue = "1") int page,
                                                @RequestParam(defaultValue = "10") int size,
