@@ -19,7 +19,7 @@ public class AuthController {
     private final IAuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> handleLogin(@Valid @RequestBody FormLogin formLogin) {
+    public ResponseEntity<?> handleLogin(@Valid @RequestBody FormLoginRequest formLogin) {
         return ResponseEntity.ok(
                 ResponseWrapper.builder()
                         .status(HttpStatus.OK)
@@ -30,7 +30,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> handleRegister(@Valid @RequestBody FormRegister formRegister) {
+    public ResponseEntity<?> handleRegister(@Valid @RequestBody FormRegisterRequest formRegister) {
         authService.register(formRegister);
         return ResponseEntity.created(URI.create("/api/v1/auth/register"))
                 .body(ResponseWrapper.builder()

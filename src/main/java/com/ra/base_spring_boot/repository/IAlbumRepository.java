@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 import java.time.LocalDateTime;
 
 @Repository
@@ -29,6 +31,17 @@ public interface IAlbumRepository extends JpaRepository<Album, Long> {
     Long countSongsInAlbum(Long albumId);
 
     boolean existsByTitleIgnoreCaseAndArtistId(String title, Long artistId);
+
+    @Query("""
+    SELECT a,\s
+           SUM(COALESCE(s.views, 0)) + COUNT(sh)
+    FROM Album a
+    LEFT JOIN a.songs s
+    LEFT JOIN s.songHistories sh
+    GROUP BY a.id
+    ORDER BY SUM(COALESCE(s.views, 0)) + COUNT(sh) DESC
+""")
+    List<Object[]> findTopTrendingAlbumsWithViews(Pageable pageable);
 
 
     //List Album

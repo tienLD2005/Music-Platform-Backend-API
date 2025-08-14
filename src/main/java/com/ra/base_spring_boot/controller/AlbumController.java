@@ -3,7 +3,8 @@ package com.ra.base_spring_boot.controller;
 import com.ra.base_spring_boot.dto.ResponseWrapper;
 import com.ra.base_spring_boot.dto.req.AlbumFilter;
 import com.ra.base_spring_boot.dto.req.AlbumRequest;
-import com.ra.base_spring_boot.dto.req.FormSong;
+import com.ra.base_spring_boot.dto.resp.*;
+import com.ra.base_spring_boot.dto.req.FormSongRequest;
 import com.ra.base_spring_boot.dto.resp.*;
 import com.ra.base_spring_boot.model.base.Pagination;
 import com.ra.base_spring_boot.services.IAlbumService;
@@ -18,11 +19,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/v1/albums")
 @RequiredArgsConstructor
 public class AlbumController {
+
     private final IAlbumService albumService;
 
     @GetMapping("/my-album")
@@ -64,7 +68,7 @@ public class AlbumController {
         return ResponseEntity.ok(albumService.deleteAlbum(albumId));
     }
 
-    @GetMapping("/{albumId}/songs")
+        @GetMapping("/{albumId}/songs")
     public ResponseEntity<?> getSongsByAlbum(@PathVariable Long albumId,
                                              @RequestParam(defaultValue = "1") int page,
                                              @RequestParam(defaultValue = "10") int size,
@@ -91,7 +95,7 @@ public class AlbumController {
 
     @PostMapping("/{albumId}/songs")
     public ResponseEntity<?> addSongToAlbum(@PathVariable Long albumId,
-                                            @ModelAttribute @Valid FormSong request,
+                                            @ModelAttribute @Valid FormSongRequest request,
                                             Authentication authentication) {
         UserDetails user = (UserDetails) authentication.getPrincipal();
         return ResponseEntity.status(HttpStatus.CREATED).body(
@@ -223,6 +227,18 @@ public class AlbumController {
                         .status(HttpStatus.OK)
                         .code(HttpStatus.OK.value())
                         .data(paginated)
+                        .build()
+        );
+    }
+
+    @GetMapping("/top-trending")
+    public ResponseEntity<?> getTopTrendingAlbums(@RequestParam(defaultValue = "5") int limit) {
+        List<AlbumResponse> albums = albumService.getTopTrendingAlbums(limit);
+        return ResponseEntity.ok(
+                ResponseWrapper.builder()
+                        .status(HttpStatus.OK)
+                        .code(200)
+                        .data(albums)
                         .build()
         );
     }

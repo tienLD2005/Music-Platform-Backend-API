@@ -18,9 +18,9 @@ public class AlbumResponse {
     private String title;
     private LocalDateTime releaseDate;
     private String coverImage;
-    private AlbumStatus status;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String artistName;
+    private Long songCount;
+    private  Long totalPlays;
     private AlbumType type;
     private String access;
 }
