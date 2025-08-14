@@ -1,18 +1,17 @@
 package com.ra.base_spring_boot.services;
 
 import com.ra.base_spring_boot.dto.req.ForgotPasswordRequest;
-import com.ra.base_spring_boot.dto.req.FormLogin;
-import com.ra.base_spring_boot.dto.req.FormRegister;
+import com.ra.base_spring_boot.dto.req.FormLoginRequest;
+import com.ra.base_spring_boot.dto.req.FormRegisterRequest;
 import com.ra.base_spring_boot.dto.req.ResetPasswordRequest;
 import com.ra.base_spring_boot.dto.resp.JwtResponse;
-import com.ra.base_spring_boot.model.User;
 
 public interface IAuthService
 {
 
-    void register(FormRegister formRegister);
+    void register(FormRegisterRequest formRegister);
 
-    JwtResponse login(FormLogin formLogin);
+    JwtResponse login(FormLoginRequest formLogin);
 
     void verifyEmail(String code);
 

@@ -1,11 +1,12 @@
 package com.ra.base_spring_boot.services.impl;
 
 import com.ra.base_spring_boot.dto.req.ForgotPasswordRequest;
-import com.ra.base_spring_boot.dto.req.FormLogin;
-import com.ra.base_spring_boot.dto.req.FormRegister;
+import com.ra.base_spring_boot.dto.req.FormLoginRequest;
+import com.ra.base_spring_boot.dto.req.FormRegisterRequest;
 import com.ra.base_spring_boot.dto.req.ResetPasswordRequest;
 import com.ra.base_spring_boot.dto.resp.JwtResponse;
 import com.ra.base_spring_boot.dto.resp.UserResponse;
+import com.ra.base_spring_boot.exception.BadRequestException;
 import com.ra.base_spring_boot.exception.HttpBadRequest;
 import com.ra.base_spring_boot.model.BlacklistedToken;
 import com.ra.base_spring_boot.model.Role;
@@ -37,7 +38,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements IAuthService {
 
-    private final IRoleService roleService;
     private final IUserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
@@ -47,18 +47,19 @@ public class AuthServiceImpl implements IAuthService {
     private final IRoleRepository roleRepository;
 
     @Override
-    public void register(FormRegister request) {
+    public void register(FormRegisterRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new RuntimeException("Email already exists");
+            throw new BadRequestException("Email already exists");
         }
 
         if (!request.getPassword().equals(request.getConfirmPassword())) {
-            throw new RuntimeException("Password and confirm password do not match");
+            throw new BadRequestException("Password and confirm password do not match");
         }
-        Set<Role> roles = request.getRole().stream()
-                .map(roleName -> roleRepository.findByRoleName(RoleName.valueOf(roleName))
-                        .orElseThrow(() -> new RuntimeException("Role not found: " + roleName)))
-                .collect(Collectors.toSet());
+
+        Set<Role> roles;
+        Role userRole = roleRepository.findByRoleName(RoleName.ROLE_USER)
+                .orElseThrow(() -> new BadRequestException("Default role not found"));
+        roles = Set.of(userRole);
 
         String code = UUID.randomUUID().toString();
         User user = User.builder()
@@ -77,9 +78,8 @@ public class AuthServiceImpl implements IAuthService {
                 "Click the link to verify your account: http://localhost:8080/api/v1/auth/verify?code=" + code);
     }
 
-
     @Override
-    public JwtResponse login(FormLogin formLogin) {
+    public JwtResponse login(FormLoginRequest formLogin) {
         Optional<User> optionalUser = userRepository.findByEmail(formLogin.getEmail());
         if (optionalUser.isEmpty()) {
             throw new HttpBadRequest("Email does not exist");

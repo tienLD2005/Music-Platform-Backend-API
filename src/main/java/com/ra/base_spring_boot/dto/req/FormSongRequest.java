@@ -16,7 +16,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class FormSong {
+public class FormSongRequest {
     @NotBlank(message = "Tiêu đề không được để trống")
     private String title;
     @NotNull(message = "Thể loại không được để trống")
