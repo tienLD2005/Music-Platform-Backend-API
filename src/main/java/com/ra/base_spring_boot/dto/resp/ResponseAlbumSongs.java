@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ResponseAlbum {
+public class ResponseAlbumSongs {
     private Long id;
     private String title;
     private String coverImage;

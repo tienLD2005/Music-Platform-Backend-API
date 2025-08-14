@@ -15,4 +15,5 @@ public class ResponseSong {
     private String title;
     private LocalTime duration;
     private Integer views;
+    private String fileUrl;
 }

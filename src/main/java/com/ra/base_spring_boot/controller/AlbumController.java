@@ -1,7 +1,9 @@
 package com.ra.base_spring_boot.controller;
 
 import com.ra.base_spring_boot.dto.ResponseWrapper;
+import com.ra.base_spring_boot.dto.req.AlbumFilter;
 import com.ra.base_spring_boot.dto.req.AlbumRequest;
+import com.ra.base_spring_boot.dto.resp.*;
 import com.ra.base_spring_boot.dto.req.FormSongRequest;
 import com.ra.base_spring_boot.dto.resp.*;
 import com.ra.base_spring_boot.model.base.Pagination;
@@ -16,6 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.List;
 
 
@@ -26,7 +29,7 @@ public class AlbumController {
 
     private final IAlbumService albumService;
 
-    @GetMapping("/my-albums")
+    @GetMapping("/my-album")
     @PreAuthorize("hasAuthority('ROLE_ARTIST')")
     public ResponseEntity<ResponseWrapper<PageResponse<AlbumResponseDTO>>> getMyAlbums(
             @RequestParam(required = false) String title,
@@ -109,12 +112,121 @@ public class AlbumController {
                                                  @PathVariable Long songId,
                                                  Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        albumService.deleteSongFromAlbum(albumId, songId, userDetails.getUsername());
+        String message = albumService.deleteSongFromAlbum(albumId, songId, userDetails.getUsername());
         return ResponseEntity.status(HttpStatus.OK).body(
                 ResponseWrapper.builder()
                         .status(HttpStatus.OK)
                         .code(HttpStatus.OK.value())
-                        .data(null)
+                        .data(message)
+                        .build()
+        );
+    }
+
+    // List Ablums
+    @GetMapping
+    public ResponseEntity<?> getAlbums(@RequestParam(defaultValue = "1") int page,
+                                       @RequestParam(defaultValue = "10") int size,
+                                       @RequestParam(defaultValue = "title") String sortBy,
+                                       @RequestParam(defaultValue = "asc") String sortDir,
+                                       @RequestParam(required = false) String keyword) {
+        Page<AlbumResponse> albumsPage = albumService.getAllAlbums(page, size, sortBy, sortDir, keyword);
+        PaginatedResponse<AlbumResponse> paginated = new PaginatedResponse<>();
+        paginated.setItems(albumsPage.getContent());
+        paginated.setPagination(new Pagination(
+                albumsPage.getNumber() + 1,
+                albumsPage.getSize(),
+                albumsPage.getTotalPages(),
+                albumsPage.getTotalElements()
+        ));
+
+        return ResponseEntity.ok().body(
+                ResponseWrapper.builder()
+                        .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
+                        .data(paginated)
+                        .build()
+        );
+    }
+
+    @GetMapping("/top")
+    public ResponseEntity<?> getTopAlbums(@RequestParam(defaultValue = "1") int page,
+                                          @RequestParam(defaultValue = "15") int size,
+                                          @RequestParam(defaultValue = "week") String period) {
+        Page<AlbumResponse> topAlbums = albumService.getTopAlbums(page, size, period);
+
+        PaginatedResponse<AlbumResponse> paginated = new PaginatedResponse<>();
+        paginated.setItems(topAlbums.getContent());
+        paginated.setPagination(new Pagination(
+                topAlbums.getNumber() + 1,
+                topAlbums.getSize(),
+                topAlbums.getTotalPages(),
+                topAlbums.getTotalElements()
+        ));
+
+        return  ResponseEntity.ok().body(
+                ResponseWrapper.builder()
+                        .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
+                        .data(paginated)
+                        .build()
+        );
+    }
+
+
+    @GetMapping("/featured")
+    public ResponseEntity<?> getFeaturedAlbums (@RequestParam(defaultValue = "1") int page,
+                                                @RequestParam(defaultValue = "5") int size) {
+        Page<AlbumResponse> albumsPage = albumService.findFeaturedAlbums(page, size);
+
+        PaginatedResponse<AlbumResponse> paginated = new PaginatedResponse<>();
+        paginated.setItems(albumsPage.getContent());
+        paginated.setPagination(new Pagination(
+                albumsPage.getNumber() + 1,
+                albumsPage.getSize(),
+                albumsPage.getTotalPages(),
+                albumsPage.getTotalElements()
+        ));
+
+        return ResponseEntity.ok().body(
+                ResponseWrapper.builder()
+                        .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
+                        .data(paginated)
+                        .build()
+        );
+    }
+
+    @GetMapping("/{artistId}")
+    public ResponseEntity<?> getAlbumsByArtist(@PathVariable Long artistId,
+                                               @RequestParam(defaultValue = "1") int page,
+                                               @RequestParam(defaultValue = "10") int size,
+                                               @RequestParam(required = false, defaultValue = "") String keyword,
+                                               @RequestParam(defaultValue = "desc") String sortDir,
+                                               @RequestParam(defaultValue = "false") boolean isPremium) {
+        AlbumFilter filter = new AlbumFilter();
+        filter.setArtistId(artistId);
+        filter.setPage(page);
+        filter.setSize(size);
+        filter.setKeyword(keyword);
+        filter.setSortDir(sortDir);
+        filter.setPremium(isPremium);
+
+        Page<AlbumResponse> albumPage = albumService.getAlbumsByArtist(filter);
+
+        PaginatedResponse<AlbumResponse> paginated = new PaginatedResponse<>();
+        paginated.setItems(albumPage.getContent());
+        paginated.setPagination(new Pagination(
+                albumPage.getNumber() + 1,
+                albumPage.getSize(),
+                albumPage.getTotalPages(),
+                albumPage.getTotalElements()
+        ));
+
+        return ResponseEntity.ok().body(
+                ResponseWrapper.builder()
+                        .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
+                        .data(paginated)
                         .build()
         );
     }
