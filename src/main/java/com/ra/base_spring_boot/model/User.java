@@ -94,6 +94,9 @@ public class User extends BaseObject {
         updatedAt = LocalDateTime.now();
     }
 
+    @OneToMany(mappedBy = "artist", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Album> albums;
+
     // I add this one for trending artists
     @OneToMany(mappedBy = "artist")
     private List<Song> songs;

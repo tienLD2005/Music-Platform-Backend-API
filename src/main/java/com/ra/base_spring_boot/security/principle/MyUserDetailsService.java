@@ -1,6 +1,7 @@
 package com.ra.base_spring_boot.security.principle;
 
 import com.ra.base_spring_boot.model.User;
+import com.ra.base_spring_boot.model.constants.UStatus;
 import com.ra.base_spring_boot.repository.IUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -23,6 +24,10 @@ public class MyUserDetailsService implements UserDetailsService
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException
     {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not found with : " + email));
+
+        if (user.getStatus() == UStatus.BLOCKED ){
+            throw new RuntimeException("User account is blocked");
+        }
 
         return MyUserDetails.builder()
                 .user(user)
