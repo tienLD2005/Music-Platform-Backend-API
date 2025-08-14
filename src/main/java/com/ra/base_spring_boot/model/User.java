@@ -94,7 +94,6 @@ public class User extends BaseObject {
         updatedAt = LocalDateTime.now();
     }
 
-
     // I add this one for trending artists
     @OneToMany(mappedBy = "artist")
     private List<Song> songs;
