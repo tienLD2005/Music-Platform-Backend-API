@@ -9,6 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "albums")
@@ -43,7 +44,10 @@ public class Album extends BaseObject {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // thêm 1 thuộc tính status cho bảng Album
     @Enumerated(EnumType.STRING)
     private AlbumStatus status;
+
+    @OneToMany(mappedBy = "album")
+    private List<Song> songs;
+
 }
