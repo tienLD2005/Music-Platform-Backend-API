@@ -315,6 +315,7 @@ public class AlbumServiceImpl implements IAlbumService {
         Sort sort = sortDir.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page - 1, size, sort);
 
+
         Page<Album> albumPage;
 
         if (keyword != null && !keyword.isEmpty()) {
@@ -329,7 +330,10 @@ public class AlbumServiceImpl implements IAlbumService {
                 .coverImage(album.getCoverImage())
                 .releaseDate(album.getReleaseDate())
                 .type(album.getType())
-                .artistName(album.getArtist().getLastName())
+                .artistName(album.getArtist() != null
+                        ? album.getArtist().getFirstName() + " " + album.getArtist().getLastName()
+                        : null)
+                .songCount(albumRepository.countSongsInAlbum(album.getId()))
                 .build());
     }
 
@@ -352,7 +356,10 @@ public class AlbumServiceImpl implements IAlbumService {
                 .coverImage(album.getCoverImage())
                 .releaseDate(album.getReleaseDate())
                 .type(album.getType())
-                .artistName(album.getArtist().getLastName())
+                .artistName(album.getArtist() != null
+                        ? album.getArtist().getFirstName() + " " + album.getArtist().getLastName()
+                        : null)
+                .songCount(albumRepository.countSongsInAlbum(album.getId()))
                 .build());
     }
 
@@ -367,7 +374,10 @@ public class AlbumServiceImpl implements IAlbumService {
                 .coverImage(album.getCoverImage())
                 .releaseDate(album.getReleaseDate())
                 .type(album.getType())
-                .artistName(album.getArtist().getLastName())
+                .artistName(album.getArtist() != null
+                        ? album.getArtist().getFirstName() + " " + album.getArtist().getLastName()
+                        : null)
+                .songCount(albumRepository.countSongsInAlbum(album.getId()))
                 .build());
     }
 
@@ -398,7 +408,10 @@ public class AlbumServiceImpl implements IAlbumService {
                     .coverImage(album.getCoverImage())
                     .releaseDate(album.getReleaseDate())
                     .type(album.getType())
-                    .artistName(album.getArtist().getLastName())
+                    .artistName(album.getArtist() != null
+                            ? album.getArtist().getFirstName() + " " + album.getArtist().getLastName()
+                            : null)
+                    .songCount(albumRepository.countSongsInAlbum(album.getId()))
                     .access(access)
                     .build();
         });
