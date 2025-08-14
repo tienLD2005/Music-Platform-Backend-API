@@ -329,6 +329,7 @@ public class AlbumServiceImpl implements IAlbumService {
                 .coverImage(album.getCoverImage())
                 .releaseDate(album.getReleaseDate())
                 .type(album.getType())
+                .artistName(album.getArtist().getLastName())
                 .build());
     }
 
@@ -351,6 +352,7 @@ public class AlbumServiceImpl implements IAlbumService {
                 .coverImage(album.getCoverImage())
                 .releaseDate(album.getReleaseDate())
                 .type(album.getType())
+                .artistName(album.getArtist().getLastName())
                 .build());
     }
 
@@ -365,6 +367,7 @@ public class AlbumServiceImpl implements IAlbumService {
                 .coverImage(album.getCoverImage())
                 .releaseDate(album.getReleaseDate())
                 .type(album.getType())
+                .artistName(album.getArtist().getLastName())
                 .build());
     }
 
@@ -395,6 +398,7 @@ public class AlbumServiceImpl implements IAlbumService {
                     .coverImage(album.getCoverImage())
                     .releaseDate(album.getReleaseDate())
                     .type(album.getType())
+                    .artistName(album.getArtist().getLastName())
                     .access(access)
                     .build();
         });
