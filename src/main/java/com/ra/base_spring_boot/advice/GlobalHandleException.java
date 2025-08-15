@@ -2,6 +2,7 @@ package com.ra.base_spring_boot.advice;
 
 import com.ra.base_spring_boot.exception.*;
 import com.ra.base_spring_boot.dto.ResponseWrapper;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -162,5 +163,15 @@ public class GlobalHandleException
                         .data("Missing required header: " + ex.getHeaderName())
                         .build()
         );
+    }
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<?> handleEntityNotFound(EntityNotFoundException ex)
+    {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                ResponseWrapper.builder()
+                        .data(ex.getMessage())
+                        .code(HttpStatus.NOT_FOUND.value())
+                        .status(HttpStatus.NOT_FOUND)
+        .build());
     }
 }
