@@ -22,4 +22,6 @@ public class ClientPaymentController {
                 .data(paymentService.getPaymentDetail(paymentId))
                 .build();
     }
+
+
 }
