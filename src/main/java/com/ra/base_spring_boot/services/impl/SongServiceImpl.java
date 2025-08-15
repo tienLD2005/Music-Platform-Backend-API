@@ -1,8 +1,6 @@
 package com.ra.base_spring_boot.services.impl;
 
-import com.ra.base_spring_boot.dto.resp.SongResponse;
 import com.ra.base_spring_boot.dto.resp.TopSongDTO;
-import com.ra.base_spring_boot.mapper.SongMapper;
 import com.ra.base_spring_boot.repository.ISongRepository;
 import com.ra.base_spring_boot.services.ISongService;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +12,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 @Service
 @RequiredArgsConstructor
-public class ISongServiceImpl implements ISongService {
+public class SongServiceImpl implements ISongService {
     private final ISongRepository songRepository;
 
     @Override
