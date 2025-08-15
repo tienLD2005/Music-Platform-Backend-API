@@ -22,6 +22,4 @@ public class SongServiceImpl implements ISongService {
         return songRepository.findTopSongsOfWeek(sevenDaysAgo, top15);
     }
 
-
-
 }

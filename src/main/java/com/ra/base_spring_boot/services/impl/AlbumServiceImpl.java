@@ -1,6 +1,7 @@
 package com.ra.base_spring_boot.services.impl;
 
 import com.ra.base_spring_boot.dto.ResponseWrapper;
+import com.ra.base_spring_boot.dto.req.AlbumFilter;
 import com.ra.base_spring_boot.dto.req.AlbumRequest;
 import com.ra.base_spring_boot.dto.req.FormSongRequest;
 import com.ra.base_spring_boot.dto.resp.*;
@@ -12,6 +13,7 @@ import com.ra.base_spring_boot.model.Genre;
 import com.ra.base_spring_boot.model.Song;
 import com.ra.base_spring_boot.model.User;
 import com.ra.base_spring_boot.model.constants.AlbumStatus;
+import com.ra.base_spring_boot.model.constants.AlbumType;
 import com.ra.base_spring_boot.repository.IAlbumRepository;
 import com.ra.base_spring_boot.repository.IGenreRepository;
 import com.ra.base_spring_boot.repository.ISongRepository;
@@ -28,6 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -49,11 +52,12 @@ public class AlbumServiceImpl implements IAlbumService {
 
         Page<Song> songsPage = songRepository.findByAlbumId(albumId, pageable);
 
-        List<ResponseSong> dtoList = songsPage.stream()
-                .map(song -> new ResponseSong(song.getTitle(), song.getDuration(), song.getViews()))
-                .collect(Collectors.toList());
-
-        return  new PageImpl<>(dtoList, pageable, songsPage.getTotalElements());
+        return songsPage.map(song -> ResponseSong.builder()
+                .title(song.getTitle())
+                .duration(song.getDuration())
+                .views(song.getViews())
+                .fileUrl(song.getFileUrl())
+                .build());
     }
 
     @Override
@@ -63,6 +67,11 @@ public class AlbumServiceImpl implements IAlbumService {
 
         User artist = userRepository.findById(album.getArtist().getId())
                 .orElseThrow(() -> new HttpNotFound("Artist not found"));
+
+        // Check duplicate title song
+        if (songRepository.existsByTitleAndAlbumId(request.getTitle(), albumId)) {
+            throw new HttpBadRequest("Song with this title already exists in the album");
+        }
 
         Set<Genre> genres = new HashSet<>();
         if (request.getGenreIds() != null) {
@@ -85,23 +94,24 @@ public class AlbumServiceImpl implements IAlbumService {
                 .views(request.getViews())
                 .build();
         songRepository.save(song);
-        return new ResponseSong(song.getTitle(), song.getDuration(), song.getViews());
+        return new ResponseSong(song.getTitle(), song.getDuration(), song.getViews(), song.getFileUrl());
     }
 
     @Override
-    public void deleteSongFromAlbum(Long albumId, Long songId, String name) {
+    public String deleteSongFromAlbum(Long albumId, Long songId, String name) {
         Song song = songRepository.findById(songId)
                 .orElseThrow(()-> new HttpNotFound("Song not found"));
 
         if (!song.getArtist().getEmail().equals(name)) {
-            throw new HttpForbiden("Bạn ko có quyền xóa bài hát này");
+            throw new HttpForbiden("You do not have permission to delete this song");
         }
 
         if (!song.getAlbum().getId().equals(albumId)) {
-            throw new HttpBadRequest("Bài hát ko thuộc album này");
+            throw new HttpBadRequest("This song does not belong to the album");
         }
 
         songRepository.delete(song);
+        return "Song delete from album successfully";
     }
 
     private Long getCurrentArtistId() {
@@ -298,6 +308,116 @@ public class AlbumServiceImpl implements IAlbumService {
                 .data("Album deleted successfully")
                 .build();
     }
+
+    // List Album
+    @Override
+    public Page<AlbumResponse> getAllAlbums(int page, int size, String sortBy, String sortDir, String keyword) {
+        Sort sort = sortDir.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
+
+
+        Page<Album> albumPage;
+
+        if (keyword != null && !keyword.isEmpty()) {
+            albumPage = albumRepository.findByTitleContainingIgnoreCaseOrArtist_LastNameContainingIgnoreCase(keyword, keyword, pageable);
+        }else {
+            albumPage = albumRepository.findAll(pageable);
+        }
+
+        return albumPage.map(album -> AlbumResponse.builder()
+                .id(album.getId())
+                .title(album.getTitle())
+                .coverImage(album.getCoverImage())
+                .releaseDate(album.getReleaseDate())
+                .type(album.getType())
+                .artistName(album.getArtist() != null
+                        ? album.getArtist().getFirstName() + " " + album.getArtist().getLastName()
+                        : null)
+                .songCount(albumRepository.countSongsInAlbum(album.getId()))
+                .build());
+    }
+
+    @Override
+    public Page<AlbumResponse> getTopAlbums(int page, int size, String period) {
+
+        LocalDateTime fromDate = switch (period.toLowerCase()) {
+            case "week" -> LocalDateTime.now().minusWeeks(1);
+            case "month" -> LocalDateTime.now().minusMonths(1);
+            default -> LocalDateTime.MIN;
+        };
+
+        Pageable pageable = PageRequest.of(page - 1, size);
+
+        Page<Album> albumPage = albumRepository.findTopAlbumsByViewsSince(AlbumStatus.ACTIVE, fromDate, pageable);
+
+        return albumPage.map(album -> AlbumResponse.builder()
+                .id(album.getId())
+                .title(album.getTitle())
+                .coverImage(album.getCoverImage())
+                .releaseDate(album.getReleaseDate())
+                .type(album.getType())
+                .artistName(album.getArtist() != null
+                        ? album.getArtist().getFirstName() + " " + album.getArtist().getLastName()
+                        : null)
+                .songCount(albumRepository.countSongsInAlbum(album.getId()))
+                .build());
+    }
+
+    @Override
+    public Page<AlbumResponse> findFeaturedAlbums(int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        Page<Album> albumPage = albumRepository.findFeaturedAlbums(pageable);
+
+        return albumPage.map(album -> AlbumResponse.builder()
+                .id(album.getId())
+                .title(album.getTitle())
+                .coverImage(album.getCoverImage())
+                .releaseDate(album.getReleaseDate())
+                .type(album.getType())
+                .artistName(album.getArtist() != null
+                        ? album.getArtist().getFirstName() + " " + album.getArtist().getLastName()
+                        : null)
+                .songCount(albumRepository.countSongsInAlbum(album.getId()))
+                .build());
+    }
+
+    @Override
+    public Page<AlbumResponse> getAlbumsByArtist(AlbumFilter filter) {
+        Sort sort = filter.getSortDir().equalsIgnoreCase("asc") ? Sort.by("releaseDate").ascending() : Sort.by("releaseDate").descending();
+        Pageable pageable = PageRequest.of(filter.getPage() - 1, filter.getSize(), sort);
+
+        Page<Album> albumPage = albumRepository.findAlbumsByArtist(
+                filter.getArtistId(),
+                filter.getKeyword(),
+                filter.isPremium(),
+                pageable
+        );
+
+
+        return albumPage.map(album -> {
+            String access;
+            if (AlbumType.FREE.equals(album.getType())) {
+                access = "Stream + Download";
+            } else {
+                access = filter.isPremium() ? "Stream + Download" : "Stream Only";
+            }
+
+            return AlbumResponse.builder()
+                    .id(album.getId())
+                    .title(album.getTitle())
+                    .coverImage(album.getCoverImage())
+                    .releaseDate(album.getReleaseDate())
+                    .type(album.getType())
+                    .artistName(album.getArtist() != null
+                            ? album.getArtist().getFirstName() + " " + album.getArtist().getLastName()
+                            : null)
+                    .songCount(albumRepository.countSongsInAlbum(album.getId()))
+                    .access(access)
+                    .build();
+        });
+    }
+
+
 
     @Override
     public List<AlbumResponse> getTopTrendingAlbums(int limit) {
