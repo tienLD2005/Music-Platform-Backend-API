@@ -1,6 +1,7 @@
     package com.ra.base_spring_boot.services.impl;
 
     import com.ra.base_spring_boot.dto.req.PlaylistReq;
+    import com.ra.base_spring_boot.dto.resp.PageResponse;
     import com.ra.base_spring_boot.dto.resp.PlaylistResp;
     import com.ra.base_spring_boot.model.Playlist;
     import com.ra.base_spring_boot.model.PlaylistSong;
@@ -45,7 +46,7 @@
         }
 
         @Override
-        public Page<PlaylistResp> searchOfUser(Long userId, String q, int page, int size, String sortBy, String direction) {
+        public PageResponse<PlaylistResp> searchOfUser(Long userId, String q, int page, int size, String sortBy, String direction) {
             String keyword = (q == null || q.trim().isEmpty()) ? null : q.trim();
             String sortField = ALLOWED_SORTS.contains(sortBy) ? sortBy : "createdAt";
 
@@ -55,14 +56,21 @@
             Pageable pageable = PageRequest.of(Math.max(page, 0), Math.max(size, 1), sort);
             Page<Playlist> playlists = playlistRepository.findByUserIdAndKeyword(userId, keyword, pageable);
 
-            return playlists.map(pl -> new PlaylistResp(
-                    pl.getId(),
-                    pl.getName(),
-                    pl.getIsPublic(),
-                    pl.getCreatedAt(),
-                    pl.getUpdatedAt()
-            ));
+            return PageResponse.<PlaylistResp>builder()
+                    .content(playlists.getContent().stream().map(pl -> new PlaylistResp(
+                            pl.getId(),
+                            pl.getName(),
+                            pl.getIsPublic(),
+                            pl.getCreatedAt(),
+                            pl.getUpdatedAt()
+                    )).toList())
+                    .currentPage(playlists.getNumber())
+                    .totalPages(playlists.getTotalPages())
+                    .totalElements(playlists.getTotalElements())
+                    .size(playlists.getSize())
+                    .build();
         }
+
 
         @Override
         public void addSongToPlaylist(Long playlistId, Long songId) {

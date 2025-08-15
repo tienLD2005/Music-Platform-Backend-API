@@ -1,7 +1,9 @@
 package com.ra.base_spring_boot.controller;
 
+import com.ra.base_spring_boot.dto.ResponseWrapper;
 import com.ra.base_spring_boot.dto.req.AddSongToPlaylistReq;
 import com.ra.base_spring_boot.dto.req.PlaylistReq;
+import com.ra.base_spring_boot.dto.resp.PageResponse;
 import com.ra.base_spring_boot.dto.resp.PlaylistResp;
 import com.ra.base_spring_boot.services.IPlaylistService;
 import jakarta.validation.Valid;
@@ -24,10 +26,10 @@ public class AdminPlaylistController {
         this.playlistService = playlistService;
     }
 
-    // 1. search
+    // 1. Search playlists of user
     @GetMapping
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public ResponseEntity<Map<String, Object>> listPlaylistsOfUser(
+    public ResponseEntity<ResponseWrapper<PageResponse<PlaylistResp>>> listPlaylistsOfUser(
             @PathVariable Long userId,
             @RequestParam(name = "q", required = false) String keyword,
             @RequestParam(defaultValue = "0") int page,
@@ -35,65 +37,65 @@ public class AdminPlaylistController {
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "desc") String direction
     ) {
-        Page<PlaylistResp> data = playlistService.searchOfUser(userId, keyword, page, size, sortBy, direction);
+        PageResponse<PlaylistResp> pageResponse = playlistService.searchOfUser(userId, keyword, page, size, sortBy, direction);
 
-        Map<String, Object> body = new HashMap<>();
-        body.put("items", data.getContent());
+        ResponseWrapper<PageResponse<PlaylistResp>> resp = ResponseWrapper.<PageResponse<PlaylistResp>>builder()
+                .status(HttpStatus.OK)
+                .code(HttpStatus.OK.value())
+                .data(pageResponse)
+                .build();
 
-        Map<String, Object> meta = new HashMap<>();
-        meta.put("page", data.getNumber());
-        meta.put("size", data.getSize());
-        meta.put("totalElements", data.getTotalElements());
-        meta.put("totalPages", data.getTotalPages());
-        meta.put("sortBy", sortBy);
-        meta.put("direction", direction);
-
-        body.put("meta", meta);
-
-        return ResponseEntity.ok(body);
+        return ResponseEntity.ok(resp);
     }
 
-    // 2. new playlist
+    // 2. Create playlist
     @PostMapping
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<PlaylistResp> createPlaylist(
+    public ResponseEntity<ResponseWrapper<PlaylistResp>> createPlaylist(
             @PathVariable Long userId,
             @RequestBody @Valid PlaylistReq request) {
-        PlaylistResp resp = playlistService.createPlaylist(userId, request);
+        PlaylistResp playlist = playlistService.createPlaylist(userId, request);
+
+        ResponseWrapper<PlaylistResp> resp = ResponseWrapper.<PlaylistResp>builder()
+                .status(HttpStatus.CREATED)
+                .code(HttpStatus.CREATED.value())
+                .data(playlist)
+                .build();
+
         return ResponseEntity.status(HttpStatus.CREATED).body(resp);
     }
 
-    // 3. add
+    // 3. Add song
     @PostMapping("/{playlistId}/songs")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<Map<String, String>> addSongToPlaylist(
+    public ResponseEntity<ResponseWrapper<String>> addSongToPlaylist(
             @PathVariable Long playlistId,
             @RequestBody @Valid AddSongToPlaylistReq request) {
         playlistService.addSongToPlaylist(playlistId, request.getSongId());
 
-        Map<String, String> resp = new HashMap<>();
-        resp.put("message", "Song added successfully");
+        ResponseWrapper<String> resp = ResponseWrapper.<String>builder()
+                .status(HttpStatus.OK)
+                .code(HttpStatus.OK.value())
+                .data("Song added successfully")
+                .build();
+
         return ResponseEntity.ok(resp);
     }
 
-    // 4. dele
     @DeleteMapping("/{playlistId}/songs/{songId}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<Map<String, String>> removeSongFromPlaylist(
+    public ResponseEntity<ResponseWrapper<String>> removeSongFromPlaylist(
             @PathVariable Long playlistId,
             @PathVariable Long songId) {
         playlistService.removeSongFromPlaylist(playlistId, songId);
 
-        Map<String, String> resp = new HashMap<>();
-        resp.put("message", "Song removed successfully");
+        ResponseWrapper<String> resp = ResponseWrapper.<String>builder()
+                .status(HttpStatus.OK)
+                .code(HttpStatus.OK.value())
+                .data("Song removed successfully")
+                .build();
+
         return ResponseEntity.ok(resp);
     }
 
-
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
-        Map<String, String> error = new HashMap<>();
-        error.put("error", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
-    }
 }
