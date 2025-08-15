@@ -13,7 +13,6 @@ import java.util.List;
 
 public interface IBannerRepository extends JpaRepository<Banner, Integer> {
     Page<Banner> findByStatus(BannerStatus status, Pageable pageable);
-
     @Query("""
         SELECT b FROM Banner b
         WHERE b.status = :status
@@ -25,4 +24,9 @@ public interface IBannerRepository extends JpaRepository<Banner, Integer> {
     List<Banner> findActiveBanners(@Param("status") BannerStatus status,
                                    @Param("currentTime") LocalDateTime currentTime,
                                    @Param("position") String position);
+    Page<Banner> findByStatusAndTitleContainingIgnoreCase(
+            BannerStatus status,
+            String keyword,
+            Pageable pageable
+    );
 }

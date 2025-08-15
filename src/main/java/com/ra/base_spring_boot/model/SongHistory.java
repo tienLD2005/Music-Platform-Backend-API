@@ -1,5 +1,6 @@
 package com.ra.base_spring_boot.model;
 
+import com.ra.base_spring_boot.model.base.BaseObject;
 import com.ra.base_spring_boot.model.base.SongHistoryId;
 import jakarta.persistence.*;
 import lombok.*;
@@ -18,19 +19,20 @@ public class SongHistory {
     @EmbeddedId
     private SongHistoryId id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("userId")
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("songId")
     @JoinColumn(name = "song_id")
     private Song song;
 
-    @CreationTimestamp
-    @Column(name = "played_at")
+    @Column(name = "played_at", nullable = false)
     private LocalDateTime playedAt;
+
 }
+
 
 

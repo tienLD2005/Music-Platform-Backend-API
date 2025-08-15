@@ -32,6 +32,7 @@ public class CloudinaryService {
                 throw new IllegalArgumentException("Kích thước file tối đa 20MB");
             }
 
+            // Chỉ hỗ trợ MP3 hoặc WAV
             String contentType = file.getContentType();
             if (contentType == null ||
                     (!contentType.equalsIgnoreCase("audio/mpeg") && // MP3
@@ -52,7 +53,6 @@ public class CloudinaryService {
             throw new RuntimeException("Lỗi khi upload file lên Cloudinary", e);
         }
     }
-
     public String uploadImage(MultipartFile file) throws IOException {
         if (file == null || file.isEmpty()) throw new IllegalArgumentException("File không được để trống");
         if (file.getSize() > MAX_IMAGE_SIZE) throw new IllegalArgumentException("Kích thước ảnh tối đa 10MB");
