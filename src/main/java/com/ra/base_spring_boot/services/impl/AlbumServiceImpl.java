@@ -2,7 +2,7 @@ package com.ra.base_spring_boot.services.impl;
 
 import com.ra.base_spring_boot.dto.ResponseWrapper;
 import com.ra.base_spring_boot.dto.req.AlbumRequest;
-import com.ra.base_spring_boot.dto.req.FormSong;
+import com.ra.base_spring_boot.dto.req.FormSongRequest;
 import com.ra.base_spring_boot.dto.resp.*;
 import com.ra.base_spring_boot.exception.HttpBadRequest;
 import com.ra.base_spring_boot.exception.HttpForbiden;
@@ -57,7 +57,7 @@ public class AlbumServiceImpl implements IAlbumService {
     }
 
     @Override
-    public ResponseSong addSongToAlbum(Long albumId, FormSong request, String username) {
+    public ResponseSong addSongToAlbum(Long albumId, FormSongRequest request, String username) {
         Album album = albumRepository.findById(albumId)
                 .orElseThrow(() -> new HttpNotFound("Album not found"));
 
@@ -298,4 +298,26 @@ public class AlbumServiceImpl implements IAlbumService {
                 .data("Album deleted successfully")
                 .build();
     }
+
+    @Override
+    public List<AlbumResponse> getTopTrendingAlbums(int limit) {
+        return albumRepository.findTopTrendingAlbumsWithViews(PageRequest.of(0, limit))
+                .stream()
+                .map(obj -> {
+                    Album a = (Album) obj[0];
+                    Long totalPlays = (Long) obj[1];
+                    return AlbumResponse.builder()
+                            .id(a.getId())
+                            .title(a.getTitle())
+                            .coverImage(a.getCoverImage())
+                            .artistName(a.getArtist() != null
+                                    ? a.getArtist().getFirstName() + " " + a.getArtist().getLastName()
+                                    : null)
+                            .songCount((long) (a.getSongs() != null ? a.getSongs().size() : 0))
+                            .totalPlays(totalPlays)
+                            .build();
+                })
+                .toList();
+    }
+
 }

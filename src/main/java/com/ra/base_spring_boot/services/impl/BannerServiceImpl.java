@@ -1,7 +1,9 @@
 package com.ra.base_spring_boot.services.impl;
 
-import com.ra.base_spring_boot.dto.req.BannerCreateReq;
-import com.ra.base_spring_boot.dto.resp.BannerRes;
+import com.ra.base_spring_boot.dto.req.BannerCreateRequest;
+import com.ra.base_spring_boot.dto.resp.BannerResponseDTO;
+import com.ra.base_spring_boot.dto.resp.BannerResponse;
+import com.ra.base_spring_boot.mapper.BannerMapper;
 import com.ra.base_spring_boot.model.Banner;
 import com.ra.base_spring_boot.model.constants.BannerStatus;
 import com.ra.base_spring_boot.repository.IBannerRepository;
@@ -11,6 +13,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class BannerServiceImpl implements IBannerService {
@@ -19,7 +25,7 @@ public class BannerServiceImpl implements IBannerService {
     private final CloudinaryService cloudinaryService;
 
     @Override
-    public Page<BannerRes> getAll(int page, int size, String keyword) {
+    public Page<BannerResponseDTO> getAll(int page, int size, String keyword) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
         Page<Banner> banners = bannerRepository.findByStatus(BannerStatus.ACTIVE, pageable);
 
@@ -36,7 +42,7 @@ public class BannerServiceImpl implements IBannerService {
     }
 
     @Override
-    public BannerRes create(BannerCreateReq req) {
+    public BannerResponseDTO create(BannerCreateRequest req) {
         try {
             String imageUrl = cloudinaryService.uploadImage(req.getImage());
             Banner banner = Banner.builder()
@@ -61,8 +67,17 @@ public class BannerServiceImpl implements IBannerService {
         bannerRepository.save(banner);
     }
 
-    private BannerRes toRes(Banner banner) {
-        return BannerRes.builder()
+    @Override
+    public List<BannerResponse> getActiveBanners(String position) {
+        LocalDateTime now = LocalDateTime.now();
+        return bannerRepository.findActiveBanners(BannerStatus.ACTIVE, now, position)
+                .stream()
+                .map(BannerMapper::toBannerResponse)
+                .toList(); // Java 16+
+    }
+
+    private BannerResponseDTO toRes(Banner banner) {
+        return BannerResponseDTO.builder()
                 .id(banner.getId())
                 .title(banner.getTitle())
                 .position(banner.getPosition())
