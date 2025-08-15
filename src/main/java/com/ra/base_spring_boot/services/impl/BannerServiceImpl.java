@@ -2,6 +2,7 @@ package com.ra.base_spring_boot.services.impl;
 
 import com.ra.base_spring_boot.dto.req.BannerCreateRequest;
 import com.ra.base_spring_boot.dto.req.BannerUpdateReq;
+import com.ra.base_spring_boot.dto.req.SearchBannerRequest;
 import com.ra.base_spring_boot.dto.resp.BannerResponse;
 import com.ra.base_spring_boot.dto.resp.BannerResponseDTO;
 import com.ra.base_spring_boot.mapper.BannerMapper;
@@ -38,11 +39,14 @@ public class BannerServiceImpl implements IBannerService {
     }
 
     @Override
-    public Page<BannerResponseDTO> searchByKeyword(int page, int size, String keyword) {
+    public Page<BannerResponseDTO> searchByKeyword(SearchBannerRequest req) {
+        int page = (req.getPage() == null || req.getPage() < 0) ? 0 : req.getPage();
+        int size = (req.getSize() == null || req.getSize() <= 0) ? 10 : req.getSize();
+
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
         Page<Banner> banners = bannerRepository.findByStatusAndTitleContainingIgnoreCase(
                 BannerStatus.ACTIVE,
-                keyword == null ? "" : keyword,
+                req.getKeyword() == null ? "" : req.getKeyword(),
                 pageable
         );
         return banners.map(this::toRes);

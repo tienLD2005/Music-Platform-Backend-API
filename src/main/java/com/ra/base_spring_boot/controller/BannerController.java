@@ -44,9 +44,7 @@ public class BannerController {
 
     @PostMapping("/search")
     public ResponseEntity<?> search(@RequestBody SearchBannerRequest req) {
-        int page = (req.getPage() == null || req.getPage() < 0) ? 0 : req.getPage();
-        int size = (req.getSize() == null || req.getSize() <= 0) ? 10 : req.getSize();
-        Page<BannerResponseDTO> result = bannerService.searchByKeyword(page, size, req.getKeyword());
+        Page<BannerResponseDTO> result = bannerService.searchByKeyword(req);
         return ResponseEntity.ok(
                 ResponseWrapper.<PageResponse<BannerResponseDTO>>builder()
                         .status(HttpStatus.OK)
