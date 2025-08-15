@@ -18,6 +18,9 @@ public interface ISongRepository extends JpaRepository<Song, Long> {
     @Query("SELECT s FROM Song s JOIN s.genres g WHERE g.id = :genreId")
     Page<Song> findByGenreId(@Param("genreId") Long genreId, Pageable pageable);
 
+    // CHECK DUPLICATE SONG TITLE
+    boolean existsByTitleAndAlbumId(String title, Long albumId);
+
     @Query("""
     SELECT new com.ra.base_spring_boot.dto.resp.TopSongDTO(
         s.id,
