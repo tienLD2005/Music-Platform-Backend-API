@@ -4,6 +4,7 @@ import com.ra.base_spring_boot.dto.ResponseWrapper;
 import com.ra.base_spring_boot.dto.req.BannerCreateRequest;
 import com.ra.base_spring_boot.dto.req.BannerUpdateReq;
 import com.ra.base_spring_boot.dto.req.SearchBannerRequest;
+import com.ra.base_spring_boot.dto.resp.BannerResponse;
 import com.ra.base_spring_boot.dto.resp.BannerResponseDTO;
 import com.ra.base_spring_boot.dto.resp.PageResponse;
 import com.ra.base_spring_boot.mapper.PageMapper;
@@ -16,6 +17,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/banner")
@@ -79,6 +82,19 @@ public class BannerController {
                         .status(HttpStatus.OK)
                         .code(HttpStatus.OK.value())
                         .data(updated)
+                        .build()
+        );
+    }
+
+    @GetMapping("/active")
+    public ResponseEntity<?> getActiveBanners(@RequestParam(required = false) String position) {
+        List<BannerResponse> banners = bannerService.getActiveBanners(position);
+
+        return ResponseEntity.ok(
+                ResponseWrapper.<List<BannerResponse>>builder()
+                        .status(HttpStatus.OK)
+                        .code(200)
+                        .data(banners)
                         .build()
         );
     }
