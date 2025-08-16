@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.Authentication;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -39,5 +40,6 @@ public interface ISongRepository extends JpaRepository<Song, Long> {
     ORDER BY (s.views + COUNT(d)) DESC
 """)
     List<TopSongDTO> findTopSongsOfWeek(@Param("startDate") LocalDateTime startDate, Pageable pageable);
+
 
 }

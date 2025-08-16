@@ -58,4 +58,6 @@ public interface IUserRepository extends JpaRepository<User, Long>
         ORDER BY (COUNT(DISTINCT sh.id) + COUNT(DISTINCT d.user.id)) DESC
         """)
     List<Object[]> findTrendingArtists();
+
+
 }
