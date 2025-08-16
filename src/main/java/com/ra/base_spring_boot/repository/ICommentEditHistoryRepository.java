@@ -15,6 +15,6 @@ public interface ICommentEditHistoryRepository extends JpaRepository<CommentEdit
     @Query("DELETE FROM CommentEditHistory h WHERE h.comment.id = :commentId")
     void deleteAllByCommentId(@Param("commentId") Long commentId);
 
-    void deleteAllByCommentIdIn(Collection<Long> commentIds); // <-- thêm để xoá subtree
+    void deleteAllByCommentIdIn(Collection<Long> commentIds); 
 
 }
