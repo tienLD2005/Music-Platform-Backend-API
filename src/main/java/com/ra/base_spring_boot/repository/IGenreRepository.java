@@ -1,5 +1,6 @@
 package com.ra.base_spring_boot.repository;
 
+import com.ra.base_spring_boot.dto.resp.GenreResponseDTO;
 import com.ra.base_spring_boot.dto.resp.GenreTrendingDTO;
 import com.ra.base_spring_boot.model.Genre;
 import org.springframework.data.domain.Page;
@@ -27,4 +28,38 @@ public interface IGenreRepository extends JpaRepository<Genre, Long>{
     ORDER BY COUNT(sh.id) DESC
 """)
     List<GenreTrendingDTO> findTopGenres(LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+
+
+    // search,sort number songs
+
+    @Query("""
+        SELECT g
+        FROM Genre g
+        WHERE (:keyword IS NULL OR LOWER(g.genreName) LIKE LOWER(CONCAT('%', :keyword, '%')))
+    """)
+    List<Genre> findGenresByName(String keyword);
+
+
+    @Query("""
+        SELECT g
+        FROM Genre g
+        LEFT JOIN g.songs s
+        WHERE (:keyword IS NULL OR LOWER(g.genreName) LIKE LOWER(CONCAT('%', :keyword, '%')))
+        GROUP BY g
+        ORDER BY COUNT(s) DESC
+    """)
+    List<Genre> findGenresOrderBySongCountDesc(String keyword);
+
+
+    @Query("""
+        SELECT g
+        FROM Genre g
+        LEFT JOIN g.songs s
+        WHERE (:keyword IS NULL OR LOWER(g.genreName) LIKE LOWER(CONCAT('%', :keyword, '%')))
+        GROUP BY g
+        ORDER BY COUNT(s) ASC
+    """)
+    List<Genre> findGenresOrderBySongCountAsc(String keyword);
+
+
 }
