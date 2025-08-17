@@ -18,5 +18,4 @@ public interface PlaylistRepository extends JpaRepository<Playlist, Long> {
     Page<Playlist> findByUserIdAndKeyword(@Param("userId") Long userId,
                                           @Param("keyword") String keyword,
                                           Pageable pageable);
-
 }

@@ -1,7 +1,6 @@
 package com.ra.base_spring_boot.controller;
 
 import com.ra.base_spring_boot.dto.ResponseWrapper;
-import com.ra.base_spring_boot.dto.req.SubscriptionRequestDTO;
 import com.ra.base_spring_boot.dto.resp.SubscriptionResponseDTO;
 import com.ra.base_spring_boot.services.IClientSubscriptionService;
 import lombok.RequiredArgsConstructor;
@@ -32,16 +31,6 @@ public class ClientSubscriptionController {
                 .status(HttpStatus.OK)
                 .code(HttpStatus.OK.value())
                 .data(subscriptionService.getSubscriptionHistory())
-                .build();
-    }
-
-    @PostMapping
-    public ResponseWrapper<SubscriptionResponseDTO> createSubscription(
-            @RequestBody SubscriptionRequestDTO requestDTO) {
-        return ResponseWrapper.<SubscriptionResponseDTO>builder()
-                .status(HttpStatus.CREATED)
-                .code(HttpStatus.CREATED.value())
-                .data(subscriptionService.createSubscription(requestDTO))
                 .build();
     }
 

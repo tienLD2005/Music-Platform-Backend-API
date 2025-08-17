@@ -40,4 +40,34 @@ public interface ISongRepository extends JpaRepository<Song, Long> {
 """)
     List<TopSongDTO> findTopSongsOfWeek(@Param("startDate") LocalDateTime startDate, Pageable pageable);
 
+    @Query("""
+    SELECT new com.ra.base_spring_boot.dto.resp.TopSongDTO(
+        s.id, s.title, s.duration, s.fileUrl, s.views, COUNT(d)
+    )
+    FROM Song s
+    LEFT JOIN Download d
+        ON s.id = d.song.id
+    GROUP BY s.id, s.title, s.duration, s.fileUrl, s.views
+    ORDER BY s.views DESC
+""")
+    List<TopSongDTO> findTopSongsAllTime(Pageable pageable);
+
+    @Query("""
+    SELECT new com.ra.base_spring_boot.dto.resp.TopSongDTO(
+        s.id,
+        s.title,
+        s.duration,
+        s.fileUrl,
+        s.views,
+        COUNT(DISTINCT d)
+    )
+    FROM SongHistory sh
+    JOIN sh.song s
+    LEFT JOIN Download d ON s.id = d.song.id
+    WHERE sh.playedAt >= :startDate
+    GROUP BY s.id, s.title, s.duration, s.fileUrl, s.views
+    ORDER BY COUNT(sh) DESC
+""")
+    List<TopSongDTO> findTrendingSongs(@Param("startDate") LocalDateTime startDate, Pageable pageable);
+
 }

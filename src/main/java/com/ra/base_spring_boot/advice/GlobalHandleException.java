@@ -2,6 +2,7 @@ package com.ra.base_spring_boot.advice;
 
 import com.ra.base_spring_boot.exception.*;
 import com.ra.base_spring_boot.dto.ResponseWrapper;
+import com.ra.base_spring_boot.utils.exception.AlreadyPurchasedException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -174,4 +175,16 @@ public class GlobalHandleException
                         .status(HttpStatus.NOT_FOUND)
         .build());
     }
+
+    @ExceptionHandler(AlreadyPurchasedException.class)
+    public ResponseEntity<?> handleAlreadyPurchased(AlreadyPurchasedException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                ResponseWrapper.builder()
+                        .data(ex.getMessage())
+                        .code(HttpStatus.CONFLICT.value())
+                        .status(HttpStatus.CONFLICT)
+                        .build()
+        );
+    }
+
 }
