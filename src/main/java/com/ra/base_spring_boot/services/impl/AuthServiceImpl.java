@@ -5,7 +5,7 @@ import com.ra.base_spring_boot.dto.req.FormLoginRequest;
 import com.ra.base_spring_boot.dto.req.FormRegisterRequest;
 import com.ra.base_spring_boot.dto.req.ResetPasswordRequest;
 import com.ra.base_spring_boot.dto.resp.JwtResponse;
-import com.ra.base_spring_boot.dto.resp.UserResponse;
+import com.ra.base_spring_boot.dto.resp.UserResponseDTO;
 import com.ra.base_spring_boot.exception.BadRequestException;
 import com.ra.base_spring_boot.exception.HttpBadRequest;
 import com.ra.base_spring_boot.model.BlacklistedToken;
@@ -19,7 +19,6 @@ import com.ra.base_spring_boot.repository.IUserRepository;
 import com.ra.base_spring_boot.security.jwt.JwtProvider;
 import com.ra.base_spring_boot.security.principle.MyUserDetails;
 import com.ra.base_spring_boot.services.IAuthService;
-import com.ra.base_spring_boot.services.IRoleService;
 import com.ra.base_spring_boot.services.email.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,6 +29,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -105,7 +105,7 @@ public class AuthServiceImpl implements IAuthService {
 
         MyUserDetails userDetails = (MyUserDetails) authentication.getPrincipal();
 
-        UserResponse userDto = UserResponse.builder()
+        UserResponseDTO userDto = UserResponseDTO.builder()
                 .id(user.getId())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
@@ -141,6 +141,7 @@ public class AuthServiceImpl implements IAuthService {
                 .orElseThrow(() -> new RuntimeException("Email does not exist"));
         String code = UUID.randomUUID().toString().substring(0, 6);
         user.setResetPasswordCode(code);
+        user.setResetPasswordExpiration(LocalDateTime.now().plusMinutes(15));
         userRepository.save(user);
 
         emailService.sendEmail(user.getEmail(), "Password Reset Code", "Your OTP code is: " + code);
@@ -150,8 +151,14 @@ public class AuthServiceImpl implements IAuthService {
     public void resetPassword(ResetPasswordRequest request) {
         User user = userRepository.findByResetPasswordCode(request.getCode())
                 .orElseThrow(() -> new RuntimeException("Invalid OTP code"));
+
+        if (user.getResetPasswordExpiration() == null || LocalDateTime.now().isAfter(user.getResetPasswordExpiration())) {
+            throw new RuntimeException("OTP has expired");
+        }
+
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         user.setResetPasswordCode(null);
+        user.setResetPasswordExpiration(null);
         userRepository.save(user);
     }
 

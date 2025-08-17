@@ -29,4 +29,5 @@ public interface IBannerRepository extends JpaRepository<Banner, Integer> {
             String keyword,
             Pageable pageable
     );
+    boolean existsByPosition(String position);
 }

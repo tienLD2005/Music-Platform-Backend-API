@@ -192,4 +192,16 @@ public class GlobalHandleException
         );
     }
 
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<?> handleResourceNotFoundException(ResourceNotFoundException ex)
+    {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                ResponseWrapper.builder()
+                .data(ex.getMessage())
+                .code(HttpStatus.NOT_FOUND.value())
+                .status(HttpStatus.NOT_FOUND)
+                .build()
+        );
+    }
 }
