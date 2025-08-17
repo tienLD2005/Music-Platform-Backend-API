@@ -1,5 +1,7 @@
 package com.ra.base_spring_boot.repository;
 
+import com.ra.base_spring_boot.dto.req.SongStatisticsFilterRequestDTO;
+import com.ra.base_spring_boot.dto.resp.SongStatisticsResponseDTO;
 import com.ra.base_spring_boot.dto.resp.TopSongDTO;
 import com.ra.base_spring_boot.model.Song;
 import org.springframework.data.domain.Page;
@@ -44,18 +46,18 @@ public interface ISongRepository extends JpaRepository<Song, Long> {
     long countTotalSongs();
 
     @Query("""
-    SELECT s.id, s.title, COUNT(sh) as playCount
-    FROM Song s
-    LEFT JOIN SongHistory sh ON sh.song = s
-    LEFT JOIN s.genres g
-    WHERE (:artistId IS NULL OR s.artist.id = :artistId)
-      AND (:genreId IS NULL OR g.id = :genreId)
-      AND (:albumId IS NULL OR s.album.id = :albumId)
-    GROUP BY s.id, s.title, s.createdAt
-    ORDER BY\s
-        CASE WHEN :sortBy = 'plays' THEN COUNT(sh) END DESC,
-        CASE WHEN :sortBy = 'release' THEN s.createdAt END DESC
-""")
+        SELECT s.id, s.title, COUNT(sh) as playCount
+        FROM Song s
+        LEFT JOIN SongHistory sh ON sh.song = s
+        LEFT JOIN s.genres g
+        WHERE (:artistId IS NULL OR s.artist.id = :artistId)
+          AND (:genreId IS NULL OR g.id = :genreId)
+          AND (:albumId IS NULL OR s.album.id = :albumId)
+        GROUP BY s.id, s.title, s.createdAt
+        ORDER BY
+            CASE WHEN :sortBy = 'plays' THEN COUNT(sh) END DESC,
+            CASE WHEN :sortBy = 'release' THEN s.createdAt END DESC
+    """)
     List<Object[]> getPlayCountBySong(
             @Param("artistId") Long artistId,
             @Param("genreId") Long genreId,
@@ -63,13 +65,21 @@ public interface ISongRepository extends JpaRepository<Song, Long> {
             @Param("sortBy") String sortBy
     );
 
-
     @Query("""
         SELECT s.id, s.title, COUNT(w) as wishlistCount
         FROM Song s
         LEFT JOIN s.usersWishlist w
+        LEFT JOIN s.genres g
+        WHERE (:artistId IS NULL OR s.artist.id = :artistId)
+          AND (:genreId IS NULL OR g.id = :genreId)
+          AND (:albumId IS NULL OR s.album.id = :albumId)
         GROUP BY s.id, s.title
         ORDER BY COUNT(w) DESC
     """)
-    List<Object[]> getTopFavoriteSongs();
+    List<Object[]> getTopFavoriteSongsFiltered(
+            @Param("artistId") Long artistId,
+            @Param("genreId") Long genreId,
+            @Param("albumId") Long albumId
+    );
+
 }
