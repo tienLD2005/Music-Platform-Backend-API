@@ -87,6 +87,9 @@ public class SecurityConfig
                                 //Album : allow guests to view
                                 .requestMatchers("/api/v1/albums").permitAll()
                                 .requestMatchers("/api/v1/albums/**").permitAll()
+                                //Wishlist
+                                .requestMatchers("/api/v1/wishlists").hasAuthority(RoleName.ROLE_USER.toString())
+                                .requestMatchers("/api/v1/wishlists/**").hasAuthority(RoleName.ROLE_USER.toString())
 
 
 //                                .requestMatchers("/api/v1/artist/**").hasAuthority(RoleName.ROLE_ARTIST.toString())

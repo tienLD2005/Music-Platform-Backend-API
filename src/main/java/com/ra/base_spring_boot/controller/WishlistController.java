@@ -21,9 +21,9 @@ public class WishlistController {
     private final IWishlistService wishlistService;
 
     @PostMapping("/{songId}")
-    public ResponseEntity<ResponseWrapper<Object>> addSongToWishlist(@PathVariable Long songId,
-                                                                     @RequestParam Long userId) {
-        String message = wishlistService.addSongToWishlist(userId, songId);
+    public ResponseEntity<ResponseWrapper<?>> addSongToWishlist(@PathVariable Long songId,
+                                                                Authentication authentication) {
+        String message = wishlistService.addSongToWishlist(songId, authentication);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 ResponseWrapper.builder()
@@ -36,7 +36,7 @@ public class WishlistController {
 
     @GetMapping
     public  ResponseEntity<?> getWishlist(@RequestParam(defaultValue = "1") int page,
-                                          @RequestParam(defaultValue = "5") int size,
+                                          @RequestParam(defaultValue = "10") int size,
                                           @RequestParam(defaultValue = "createdAt") String sortBy,
                                           @RequestParam(defaultValue = "desc") String sortDir,
                                           Authentication authentication) {

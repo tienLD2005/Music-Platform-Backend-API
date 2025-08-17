@@ -5,7 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 
 public interface IWishlistService {
-    String addSongToWishlist(Long userId, Long songId);
+    String addSongToWishlist(Long songId, Authentication authentication);
 
     Page<WishlistResponse> getWishlist(int page, int size, String sortBy, String sortDir, Authentication authentication);
 

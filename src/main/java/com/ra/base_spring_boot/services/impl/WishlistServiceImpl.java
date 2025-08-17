@@ -28,8 +28,10 @@ public class WishlistServiceImpl implements IWishlistService {
     private final IWishlistRepository wishlistRepository;
 
     @Override
-    public String addSongToWishlist(Long userId, Long songId) {
-        User user = userRepository.findById(userId).orElseThrow(()-> new HttpNotFound("User not found"));
+    public String addSongToWishlist(Long songId, Authentication authentication) {
+        String email = authentication.getName();
+
+        User user = userRepository.findByEmail(email).orElseThrow(()-> new HttpNotFound("User not found"));
 
         Song song = songRepository.findById(songId).orElseThrow(()-> new HttpNotFound("Song not found"));
 
