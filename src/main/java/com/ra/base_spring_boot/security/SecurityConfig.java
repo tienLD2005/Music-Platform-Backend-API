@@ -73,6 +73,12 @@ public class SecurityConfig
                 .authorizeHttpRequests(
                         url -> url
 
+                                // history song
+//                                .requestMatchers("/api/v1/song-history/**").authenticated().anyRequest().permitAll()
+
+                                // API Album Admin
+                                .requestMatchers("/api/v1/admin/albums/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
+
                                 // API Banner
                                 .requestMatchers("GET", "/api/v1/banner/**").permitAll()
                                 .requestMatchers("POST", "/api/v1/banner/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
