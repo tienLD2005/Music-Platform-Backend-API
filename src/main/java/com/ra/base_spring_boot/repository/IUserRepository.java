@@ -58,4 +58,20 @@ public interface IUserRepository extends JpaRepository<User, Long>
         ORDER BY (COUNT(DISTINCT sh.id) + COUNT(DISTINCT d.user.id)) DESC
         """)
     List<Object[]> findTrendingArtists();
+
+    @Query("SELECT u.status, COUNT(u) FROM User u GROUP BY u.status")
+    List<Object[]> countUsersByStatus();
+
+    @Query("""
+        SELECT\s
+            COALESCE(sp.planName, 'Free') AS accountType,
+            COUNT(DISTINCT u.id)
+        FROM User u
+        LEFT JOIN Subscription s ON s.user = u\s
+            AND s.endTime > CURRENT_TIMESTAMP\s
+            AND s.startTime <= CURRENT_TIMESTAMP
+        LEFT JOIN SubscriptionPlan sp ON s.plan_id = sp
+        GROUP BY COALESCE(sp.planName, 'Free')
+   \s""")
+    List<Object[]> countUsersByAccountType();
 }
