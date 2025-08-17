@@ -4,6 +4,7 @@ import com.ra.base_spring_boot.dto.req.CommentRequest;
 import com.ra.base_spring_boot.dto.resp.CommentResponseDTO;
 import com.ra.base_spring_boot.dto.resp.PageResponse;
 import com.ra.base_spring_boot.exception.HttpBadRequest;
+import com.ra.base_spring_boot.exception.HttpNotFound;
 import com.ra.base_spring_boot.mapper.CommentMapper;
 import com.ra.base_spring_boot.model.Comment;
 import com.ra.base_spring_boot.model.CommentEditHistory;
@@ -47,15 +48,28 @@ public class ClientCommentServiceImpl implements IClientCommentService {
         }
     }
 
-
     @Override
     public PageResponse<CommentResponseDTO> getCommentsBySong(Long songId, int page, int size, String sortBy, String sortDir) {
+
+        if (page < 0) {
+            throw new HttpBadRequest("Page must be greater than 0");
+        }
+
+        if (size <= 0) {
+            throw new HttpBadRequest("Size must be greater than 0");
+        }
+
+
         Sort sort = sortDir.equalsIgnoreCase("asc")
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
 
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<Comment> commentPage = commentRepository.findBySong_IdAndParentIsNull(songId, pageable);
+
+        if (page >= commentPage.getTotalPages() && commentPage.getTotalPages() > 0) {
+            throw new HttpBadRequest("Page must be less than total pages: " + commentPage.getTotalPages());
+        }
 
         return PageResponse.<CommentResponseDTO>builder()
                 .content(commentPage.map(CommentMapper::toDto).getContent())
@@ -70,11 +84,11 @@ public class ClientCommentServiceImpl implements IClientCommentService {
     public CommentResponseDTO addComment(CommentRequest request) {
 
         User user = userRepository.findById(getCurrentUserId())
-                .orElseThrow(() -> new HttpBadRequest("User not found"));
+                .orElseThrow(() -> new HttpNotFound("User not found"));
 
 
         Song song = songRepository.findById(request.getSongId())
-                .orElseThrow(() -> new HttpBadRequest("Song not found"));
+                .orElseThrow(() -> new HttpNotFound("Song not found"));
 
         validateCommentContent(request.getContent());
 
@@ -86,7 +100,7 @@ public class ClientCommentServiceImpl implements IClientCommentService {
 
         if (request.getParentId() != null) {
             Comment parent = commentRepository.findById(request.getParentId())
-                    .orElseThrow(() -> new HttpBadRequest("Parent comment not found"));
+                    .orElseThrow(() -> new HttpNotFound("Parent comment not found"));
             comment.setParent(parent);
         }
 
@@ -97,7 +111,7 @@ public class ClientCommentServiceImpl implements IClientCommentService {
     @Override
     public CommentResponseDTO updateComment(Long commentId, String newContent) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new HttpBadRequest("Comment not found"));
+                .orElseThrow(() -> new HttpNotFound("Comment not found"));
 
         if (!comment.getUser().getId().equals(getCurrentUserId())) {
             throw new HttpBadRequest("You can only edit your own comments");
@@ -122,7 +136,7 @@ public class ClientCommentServiceImpl implements IClientCommentService {
     @Transactional
     public void deleteComment(Long commentId) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new HttpBadRequest("Comment not found"));
+                .orElseThrow(() -> new HttpNotFound("Comment not found"));
 
         if (!comment.getUser().getId().equals(getCurrentUserId())) {
             throw new HttpBadRequest("You can only delete your own comments");
