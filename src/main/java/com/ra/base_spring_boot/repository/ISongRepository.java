@@ -40,4 +40,36 @@ public interface ISongRepository extends JpaRepository<Song, Long> {
 """)
     List<TopSongDTO> findTopSongsOfWeek(@Param("startDate") LocalDateTime startDate, Pageable pageable);
 
+    @Query("SELECT COUNT(s) FROM Song s")
+    long countTotalSongs();
+
+    @Query("""
+    SELECT s.id, s.title, COUNT(sh) as playCount
+    FROM Song s
+    LEFT JOIN SongHistory sh ON sh.song = s
+    LEFT JOIN s.genres g
+    WHERE (:artistId IS NULL OR s.artist.id = :artistId)
+      AND (:genreId IS NULL OR g.id = :genreId)
+      AND (:albumId IS NULL OR s.album.id = :albumId)
+    GROUP BY s.id, s.title, s.createdAt
+    ORDER BY\s
+        CASE WHEN :sortBy = 'plays' THEN COUNT(sh) END DESC,
+        CASE WHEN :sortBy = 'release' THEN s.createdAt END DESC
+""")
+    List<Object[]> getPlayCountBySong(
+            @Param("artistId") Long artistId,
+            @Param("genreId") Long genreId,
+            @Param("albumId") Long albumId,
+            @Param("sortBy") String sortBy
+    );
+
+
+    @Query("""
+        SELECT s.id, s.title, COUNT(w) as wishlistCount
+        FROM Song s
+        LEFT JOIN s.usersWishlist w
+        GROUP BY s.id, s.title
+        ORDER BY COUNT(w) DESC
+    """)
+    List<Object[]> getTopFavoriteSongs();
 }

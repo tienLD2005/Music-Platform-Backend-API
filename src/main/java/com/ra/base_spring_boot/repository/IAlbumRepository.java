@@ -78,4 +78,41 @@ public interface IAlbumRepository extends JpaRepository<Album, Long> {
                                    @Param("isPremium") boolean isPremium,
                                    Pageable pageable);
 
+
+    @Query("SELECT COUNT(a) FROM Album a")
+    Long countTotalAlbums();
+
+    @Query("""
+        SELECT a.id, a.title, COUNT(sh) as playCount
+        FROM Album a
+        JOIN a.songs s
+        LEFT JOIN SongHistory sh ON sh.song = s
+        GROUP BY a.id, a.title
+        ORDER BY playCount DESC
+    """)
+    List<Object[]> findMostPlayedAlbums();
+
+    @Query("""
+        SELECT ar.lastName, COUNT(a)
+        FROM Album a
+        JOIN a.artist ar
+        GROUP BY ar.id, ar.lastName
+    """)
+    List<Object[]> countAlbumsByArtist();
+
+    @Query("""
+        SELECT YEAR(a.releaseDate), COUNT(a)
+        FROM Album a
+        GROUP BY YEAR(a.releaseDate)
+        ORDER BY YEAR(a.releaseDate)
+    """)
+    List<Object[]> countAlbumsByYear();
+
+    @Query("""
+        SELECT a.status, COUNT(a)
+        FROM Album a
+        GROUP BY a.status
+    """)
+    List<Object[]> countAlbumsByStatus();
+
 }
