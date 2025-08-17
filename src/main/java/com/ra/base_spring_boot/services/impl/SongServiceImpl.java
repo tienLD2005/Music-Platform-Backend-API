@@ -30,9 +30,9 @@ public class SongServiceImpl implements ISongService {
 
     @Override
     public List<TopSongDTO> getTrendingSongs(int limit) {
-        LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(3);
+        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
         Pageable pageable = PageRequest.of(0, limit);
-        return songRepository.findTrendingSongs(threeDaysAgo, pageable);
+        return songRepository.findTrendingSongs(sevenDaysAgo, pageable);
     }
 
 }
