@@ -1,4 +1,4 @@
-package com.ra.base_spring_boot.services;
+package com.ra.base_spring_boot.services.impl;
 
 import com.ra.base_spring_boot.repository.IUserRepository;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +10,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class IUserStatisticsService {
+public class UserStatisticsService {
 
     private final IUserRepository userRepository;
 
