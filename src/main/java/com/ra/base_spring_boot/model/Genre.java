@@ -20,4 +20,6 @@ public class Genre extends BaseObject {
     @ManyToMany(mappedBy = "genres")
     private Set<Song> songs;
 
+    @Column(name = "description", length = 500)
+    private String description;
 }

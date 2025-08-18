@@ -338,7 +338,7 @@ public class AlbumServiceImpl implements IAlbumService {
     }
 
     @Override
-    public Page<AlbumResponse> getTopAlbums(int page, int size, String period) {
+    public Page<AlbumResponse> getTopAlbums(String period) {
 
         LocalDateTime fromDate = switch (period.toLowerCase()) {
             case "week" -> LocalDateTime.now().minusWeeks(1);
@@ -346,7 +346,7 @@ public class AlbumServiceImpl implements IAlbumService {
             default -> LocalDateTime.MIN;
         };
 
-        Pageable pageable = PageRequest.of(page - 1, size);
+        Pageable pageable = PageRequest.of(0, 15);
 
         Page<Album> albumPage = albumRepository.findTopAlbumsByViewsSince(AlbumStatus.ACTIVE, fromDate, pageable);
 
@@ -364,8 +364,8 @@ public class AlbumServiceImpl implements IAlbumService {
     }
 
     @Override
-    public Page<AlbumResponse> findFeaturedAlbums(int page, int size) {
-        Pageable pageable = PageRequest.of(page - 1, size);
+    public Page<AlbumResponse> findFeaturedAlbums() {
+        Pageable pageable = PageRequest.of(0, 5);
         Page<Album> albumPage = albumRepository.findFeaturedAlbums(pageable);
 
         return albumPage.map(album -> AlbumResponse.builder()

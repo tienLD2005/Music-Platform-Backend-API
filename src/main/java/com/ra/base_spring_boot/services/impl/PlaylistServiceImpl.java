@@ -3,6 +3,7 @@
     import com.ra.base_spring_boot.dto.req.PlaylistReq;
     import com.ra.base_spring_boot.dto.resp.PageResponse;
     import com.ra.base_spring_boot.dto.resp.PlaylistResp;
+    import com.ra.base_spring_boot.exception.HttpNotFound;
     import com.ra.base_spring_boot.model.Playlist;
     import com.ra.base_spring_boot.model.PlaylistSong;
     import com.ra.base_spring_boot.model.Song;
@@ -75,16 +76,16 @@
         @Override
         public void addSongToPlaylist(Long playlistId, Long songId) {
             Playlist playlist = playlistRepository.findById(playlistId)
-                    .orElseThrow(() -> new RuntimeException("Playlist not found"));
+                    .orElseThrow(() -> new HttpNotFound("Playlist not found"));
 
             Song song = songRepository.findById(songId)
-                    .orElseThrow(() -> new RuntimeException("Song not found"));
+                    .orElseThrow(() -> new HttpNotFound("Song not found"));
 
             PlaylistSongId id = new PlaylistSongId(playlistId, songId);
 
             // Check if already exists
             if (playlistSongRepository.existsById(id)) {
-                throw new RuntimeException("Song already in playlist");
+                throw new HttpNotFound("Song already in playlist");
             }
 
             PlaylistSong playlistSong = new PlaylistSong();
@@ -101,7 +102,7 @@
             PlaylistSongId id = new PlaylistSongId(playlistId, songId);
 
             if (!playlistSongRepository.existsById(id)) {
-                throw new RuntimeException("Song not found in playlist");
+                throw new HttpNotFound("Song not found in playlist");
             }
 
             playlistSongRepository.deleteById(id);
@@ -110,7 +111,7 @@
         @Override
         public PlaylistResp createPlaylist(Long userId, PlaylistReq request) {
             User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+                    .orElseThrow(() -> new HttpNotFound("User not found"));
 
             Playlist playlist = new Playlist();
             playlist.setName(request.getName());

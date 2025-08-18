@@ -7,22 +7,18 @@ import com.ra.base_spring_boot.dto.resp.PageResponse;
 import com.ra.base_spring_boot.dto.resp.PlaylistResp;
 import com.ra.base_spring_boot.services.IPlaylistService;
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @RestController
 @RequestMapping("/api/v1/users/{userId}/playlists")
-public class AdminPlaylistController {
+public class PlaylistController {
 
     private final IPlaylistService playlistService;
 
-    public AdminPlaylistController(IPlaylistService playlistService) {
+    public PlaylistController(IPlaylistService playlistService) {
         this.playlistService = playlistService;
     }
 
@@ -74,8 +70,8 @@ public class AdminPlaylistController {
         playlistService.addSongToPlaylist(playlistId, request.getSongId());
 
         ResponseWrapper<String> resp = ResponseWrapper.<String>builder()
-                .status(HttpStatus.OK)
-                .code(HttpStatus.OK.value())
+                .status(HttpStatus.CREATED)
+                .code(HttpStatus.CREATED.value())
                 .data("Song added successfully")
                 .build();
 

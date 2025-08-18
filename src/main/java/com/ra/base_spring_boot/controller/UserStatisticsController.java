@@ -1,7 +1,7 @@
 package com.ra.base_spring_boot.controller;
 
 import com.ra.base_spring_boot.dto.ResponseWrapper;
-import com.ra.base_spring_boot.services.impl.IUserStatisticsService;
+import com.ra.base_spring_boot.services.impl.UserStatisticsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +13,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class UserStatisticsController {
 
-    private final IUserStatisticsService statisticsService;
+    private final UserStatisticsService statisticsService;
 
     @GetMapping("/status")
     public ResponseWrapper<Map<String, Long>> getUserCountByStatus() {
