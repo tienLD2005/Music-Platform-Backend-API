@@ -39,11 +39,11 @@ public class AlbumAdminMapper {
     }
 
     private static String getStatusDisplay(AlbumStatus status) {
-        if (status == null) return "Chưa kiểm duyệt";
+        if (status == null) return "Not yet vetted";
         return switch (status) {
-            case PENDING -> "Chưa kiểm duyệt";
-            case ACTIVE -> "Đã duyệt";
-            case REJECTED -> "Không phù hợp";
+            case PENDING -> "Not yet vetted";
+            case ACTIVE -> "Approved";
+            case REJECTED -> "Not suitable";
         };
     }
 }

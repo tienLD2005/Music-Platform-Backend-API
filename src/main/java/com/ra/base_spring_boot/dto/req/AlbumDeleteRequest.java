@@ -10,10 +10,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AlbumDeleteRequest {
-    @NotNull(message = "Album ID không được để trống")
+    @NotNull(message = "Album ID cannot be empty.")
     private Long albumId;
 
-    @NotBlank(message = "Lý do xóa không được để trống")
+    @NotBlank(message = "The reason for deletion cannot be left blank.")
     private String reason;
 
     private String additionalNotes;

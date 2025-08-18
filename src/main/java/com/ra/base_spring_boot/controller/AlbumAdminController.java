@@ -29,25 +29,15 @@ public class AlbumAdminController {
     private final IAlbumAdminService albumAdminService;
 
     @GetMapping
-    @Operation(summary = "Lấy danh sách tất cả album",
-            description = "Admin xem danh sách album với tìm kiếm và phân trang")
+    @Operation(summary = "get all album")
     public ResponseEntity<ResponseWrapper<PageResponse<AlbumAdminResponse>>> getAllAlbums(
-            @Parameter(description = "Từ khóa tìm kiếm (tên album hoặc nghệ sĩ)")
             @RequestParam(required = false) String keyword,
-
-            @Parameter(description = "Trạng thái album")
             @RequestParam(required = false) AlbumStatus status,
-
-            @Parameter(description = "Trang hiện tại (bắt đầu từ 0)")
             @RequestParam(defaultValue = "0") int page,
-
-            @Parameter(description = "Số lượng item mỗi trang")
             @RequestParam(defaultValue = "10") int size,
-
-            @Parameter(description = "Sắp xếp theo (title, releaseDate, createdAt, status)")
+            @Parameter(description = "Short (title, releaseDate, createdAt, status)")
             @RequestParam(defaultValue = "createdAt") String sortBy,
-
-            @Parameter(description = "Hướng sắp xếp (asc, desc)")
+            @Parameter(description = "Sorting direction (asc, desc)")
             @RequestParam(defaultValue = "desc") String sortDir) {
 
         Sort.Direction direction = sortDir.equalsIgnoreCase("desc")
@@ -66,7 +56,7 @@ public class AlbumAdminController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Lấy chi tiết album", description = "Xem chi tiết một album")
+    @Operation(summary = "Get album details")
     public ResponseEntity<ResponseWrapper<AlbumAdminResponse>> getAlbumById(
             @PathVariable Long id) {
 
@@ -80,8 +70,7 @@ public class AlbumAdminController {
     }
 
     @DeleteMapping
-    @Operation(summary = "Xóa album",
-            description = "Admin xóa album không phù hợp và gửi email thông báo")
+    @Operation(summary = "Delete album")
     public ResponseEntity<ResponseWrapper<String>> deleteAlbum(
             @Valid @RequestBody AlbumDeleteRequest request) {
 
@@ -90,13 +79,12 @@ public class AlbumAdminController {
         return ResponseEntity.ok(ResponseWrapper.<String>builder()
                 .status(HttpStatus.OK)
                 .code(200)
-                .data("Album đã được xóa thành công và email thông báo đã được gửi đến nghệ sĩ")
+                .data("The album has been successfully deleted and a notification email has been sent to the artist.")
                 .build());
     }
 
     @PutMapping("/{id}/status")
-    @Operation(summary = "Cập nhật trạng thái album",
-            description = "Duyệt hoặc từ chối album")
+    @Operation(summary = "update status album")
     public ResponseEntity<ResponseWrapper<String>> updateAlbumStatus(
             @PathVariable Long id,
             @RequestParam AlbumStatus status,
@@ -107,7 +95,7 @@ public class AlbumAdminController {
         return ResponseEntity.ok(ResponseWrapper.<String>builder()
                 .status(HttpStatus.OK)
                 .code(200)
-                .data("Trạng thái album đã được cập nhật thành công")
+                .data("The album status has been updated successfully.")
                 .build());
     }
 }

@@ -9,34 +9,34 @@ public class ValidateAlbumAdmin {
 
     public void validateDeleteRequest(AlbumDeleteRequest request) {
         if (request == null) {
-            throw new HttpBadRequest("Yêu cầu xóa album không được để trống");
+            throw new HttpBadRequest("Album deletion request cannot be empty");
         }
         if (request.getAlbumId() == null || request.getAlbumId() <= 0) {
-            throw new HttpBadRequest("ID album không hợp lệ");
+            throw new HttpBadRequest("Album ID is invalid");
         }
         if (request.getReason() == null || request.getReason().trim().isEmpty()) {
-            throw new HttpBadRequest("Lý do xóa album không được để trống");
+            throw new HttpBadRequest("Album deletion reason cannot be empty");
         }
         if (request.getReason().length() > 500) {
-            throw new HttpBadRequest("Lý do xóa album không được vượt quá 500 ký tự");
+            throw new HttpBadRequest("Album deletion reason cannot exceed 500 characters");
         }
     }
 
     public void validateAlbumForDeletion(Album album) {
         if (album.getArtist() == null) {
-            throw new HttpBadRequest("Không thể xóa album không có thông tin nghệ sĩ");
+            throw new HttpBadRequest("Cannot delete album without artist information");
         }
         if (album.getArtist().getEmail() == null || album.getArtist().getEmail().trim().isEmpty()) {
-            throw new HttpBadRequest("Không thể gửi thông báo vì nghệ sĩ không có email");
+            throw new HttpBadRequest("Cannot send notification because artist has no email");
         }
     }
 
     public void validateStatusUpdate(Long albumId, AlbumStatus status) {
         if (albumId == null || albumId <= 0) {
-            throw new HttpBadRequest("ID album không hợp lệ");
+            throw new HttpBadRequest("Album ID is invalid");
         }
         if (status == null) {
-            throw new HttpBadRequest("Trạng thái album không được để trống");
+            throw new HttpBadRequest("Album status cannot be empty");
         }
     }
 }

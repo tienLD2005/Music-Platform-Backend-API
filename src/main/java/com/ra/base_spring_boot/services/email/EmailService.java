@@ -37,29 +37,29 @@ public class EmailService {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setTo(artistEmail);
-            message.setSubject("Thông báo: Album của bạn đã bị xóa - " + albumTitle);
+            message.setSubject("Notice: Your Album Has Been Deleted - " + albumTitle);
 
             StringBuilder content = new StringBuilder();
-            content.append("Xin chào,\n\n");
-            content.append("Chúng tôi xin thông báo rằng album \"").append(albumTitle)
-                    .append("\" của bạn đã bị xóa khỏi hệ thống.\n\n");
-            content.append("Lý do xóa: ").append(reason).append("\n\n");
+            content.append("Dear Artist,\n\n");
+            content.append("We are writing to inform you that your album \"").append(albumTitle)
+                    .append("\" has been removed from our platform.\n\n");
+            content.append("Reason for deletion: ").append(reason).append("\n\n");
 
             if (additionalNotes != null && !additionalNotes.isEmpty()) {
-                content.append("Ghi chú thêm: ").append(additionalNotes).append("\n\n");
+                content.append("Additional notes: ").append(additionalNotes).append("\n\n");
             }
 
-            content.append("Nếu bạn có bất kỳ thắc mắc nào hoặc muốn kháng nghị quyết định này, ")
-                    .append("vui lòng liên hệ với đội ngũ hỗ trợ của chúng tôi.\n\n");
-            content.append("Để tránh tình trạng này trong tương lai, vui lòng đảm bảo ")
-                    .append("nội dung album tuân thủ tiêu chuẩn cộng đồng của chúng tôi.\n\n");
-            content.append("Trân trọng,\nĐội ngũ quản lý Music Platform");
+            content.append("If you have any questions or would like to appeal this decision, ")
+                    .append("please contact our support team.\n\n");
+            content.append("To avoid this situation in the future, please ensure that ")
+                    .append("your album content complies with our community guidelines.\n\n");
+            content.append("Best regards,\nMusic Platform Management Team");
 
             message.setText(content.toString());
             mailSender.send(message);
 
         } catch (Exception e) {
-            throw new RuntimeException("Không thể gửi email thông báo: " + e.getMessage());
+            throw new RuntimeException("Unable to send notification email: " + e.getMessage());
         }
     }
 }

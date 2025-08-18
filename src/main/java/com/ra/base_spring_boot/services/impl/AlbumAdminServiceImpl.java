@@ -51,7 +51,7 @@ public class AlbumAdminServiceImpl implements IAlbumAdminService {
                 } catch (Exception e) {
                     log.error("Error mapping album with ID: {}", album.getId(), e);
                     throw new DatabaseOperationException(
-                            "Lỗi khi xử lý dữ liệu album ID: " + album.getId(), e);
+                            "Error processing album data with ID: " + album.getId(), e);
                 }
             });
 
@@ -59,10 +59,10 @@ public class AlbumAdminServiceImpl implements IAlbumAdminService {
 
         } catch (DataAccessException e) {
             log.error("Database error when fetching albums", e);
-            throw new DatabaseOperationException("Lỗi cơ sở dữ liệu khi lấy danh sách album", e);
+            throw new DatabaseOperationException("Database error when retrieving album list", e);
         } catch (Exception e) {
             log.error("Unexpected error when fetching albums", e);
-            throw new RuntimeException("Lỗi không xác định khi lấy danh sách album: " + e.getMessage(), e);
+            throw new RuntimeException("Unexpected error when retrieving album list: " + e.getMessage(), e);
         }
     }
 
@@ -72,7 +72,7 @@ public class AlbumAdminServiceImpl implements IAlbumAdminService {
             log.info("Fetching album with ID: {}", id);
 
             if (id == null || id <= 0) {
-                throw new HttpBadRequest("ID album không hợp lệ");
+                throw new HttpBadRequest("Invalid album ID");
             }
 
             Album album = albumRepository.findById(id)
@@ -86,10 +86,10 @@ public class AlbumAdminServiceImpl implements IAlbumAdminService {
             throw e;
         } catch (DataAccessException e) {
             log.error("Database error when fetching album with ID: {}", id, e);
-            throw new DatabaseOperationException("Lỗi cơ sở dữ liệu khi lấy thông tin album", e);
+            throw new DatabaseOperationException("Database error when retrieving album information", e);
         } catch (Exception e) {
             log.error("Unexpected error when fetching album with ID: {}", id, e);
-            throw new RuntimeException("Lỗi không xác định khi lấy thông tin album: " + e.getMessage(), e);
+            throw new RuntimeException("Unexpected error when retrieving album information: " + e.getMessage(), e);
         }
     }
 
@@ -129,16 +129,16 @@ public class AlbumAdminServiceImpl implements IAlbumAdminService {
             throw e;
         } catch (EmailSendException e) {
             log.error("Failed to send deletion notification", e);
-            throw new AlbumDeleteException("Album đã được xóa nhưng không thể gửi email thông báo: " + e.getMessage(), e);
+            throw new AlbumDeleteException("Album has been deleted but failed to send notification email: " + e.getMessage(), e);
         } catch (AuditLogException e) {
             log.error("Failed to create audit log", e);
-            throw new AlbumDeleteException("Không thể ghi lại nhật ký hành động: " + e.getMessage(), e);
+            throw new AlbumDeleteException("Unable to create audit log: " + e.getMessage(), e);
         } catch (DataAccessException e) {
             log.error("Database error during album deletion", e);
-            throw new DatabaseOperationException("Lỗi cơ sở dữ liệu khi xóa album", e);
+            throw new DatabaseOperationException("Database error when deleting album", e);
         } catch (Exception e) {
             log.error("Unexpected error during album deletion", e);
-            throw new AlbumDeleteException("Lỗi không xác định khi xóa album: " + e.getMessage(), e);
+            throw new AlbumDeleteException("Unexpected error when deleting album: " + e.getMessage(), e);
         }
     }
 
@@ -176,25 +176,24 @@ public class AlbumAdminServiceImpl implements IAlbumAdminService {
             throw e;
         } catch (AuditLogException e) {
             log.error("Failed to create audit log for status update", e);
-            throw new RuntimeException("Cập nhật trạng thái thành công nhưng không thể ghi lại nhật ký: " + e.getMessage(), e);
+            throw new RuntimeException("Status updated successfully but unable to create audit log: " + e.getMessage(), e);
         } catch (DataAccessException e) {
             log.error("Database error during status update", e);
-            throw new DatabaseOperationException("Lỗi cơ sở dữ liệu khi cập nhật trạng thái album", e);
+            throw new DatabaseOperationException("Database error when updating album status", e);
         } catch (Exception e) {
             log.error("Unexpected error during status update", e);
-            throw new RuntimeException("Lỗi không xác định khi cập nhật trạng thái album: " + e.getMessage(), e);
+            throw new RuntimeException("Unexpected error when updating album status: " + e.getMessage(), e);
         }
     }
-
 
     private User getCurrentAdmin() {
         try {
             Long currentUserId = SecurityUtil.getCurrentUserId();
             return userRepository.findById(currentUserId)
-                    .orElseThrow(() -> new HttpUnAuthorized("Không tìm thấy thông tin admin hiện tại"));
+                    .orElseThrow(() -> new HttpUnAuthorized("Current admin information not found"));
         } catch (RuntimeException e) {
             log.error("Error getting current admin", e);
-            throw new HttpUnAuthorized("Lỗi xác thực admin: " + e.getMessage());
+            throw new HttpUnAuthorized("Admin authentication error: " + e.getMessage());
         }
     }
 
@@ -214,10 +213,10 @@ public class AlbumAdminServiceImpl implements IAlbumAdminService {
 
         } catch (DataAccessException e) {
             log.error("Database error when creating audit log", e);
-            throw new AuditLogException("Lỗi cơ sở dữ liệu khi ghi nhật ký audit", e);
+            throw new AuditLogException("Database error when creating audit log", e);
         } catch (Exception e) {
             log.error("Unexpected error when creating audit log", e);
-            throw new AuditLogException("Lỗi không xác định khi ghi nhật ký audit", e);
+            throw new AuditLogException("Unexpected error when creating audit log", e);
         }
     }
 
@@ -231,10 +230,10 @@ public class AlbumAdminServiceImpl implements IAlbumAdminService {
             );
         } catch (IllegalArgumentException e) {
             log.error("Invalid email address: {}", album.getArtist().getEmail(), e);
-            throw new EmailSendException("Email nghệ sĩ không hợp lệ: " + e.getMessage(), e);
+            throw new EmailSendException("Invalid artist email address: " + e.getMessage(), e);
         } catch (Exception e) {
             log.error("Failed to send deletion notification", e);
-            throw new EmailSendException("Không thể gửi email thông báo: " + e.getMessage(), e);
+            throw new EmailSendException("Unable to send notification email: " + e.getMessage(), e);
         }
     }
 
@@ -243,10 +242,10 @@ public class AlbumAdminServiceImpl implements IAlbumAdminService {
             albumRepository.delete(album);
         } catch (DataAccessException e) {
             log.error("Database error when deleting album", e);
-            throw new DatabaseOperationException("Lỗi cơ sở dữ liệu khi xóa album", e);
+            throw new DatabaseOperationException("Database error when deleting album", e);
         } catch (Exception e) {
             log.error("Unexpected error when deleting album", e);
-            throw new AlbumDeleteException("Lỗi không xác định khi xóa album", e);
+            throw new AlbumDeleteException("Unexpected error when deleting album", e);
         }
     }
 
