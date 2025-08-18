@@ -109,6 +109,12 @@ public class SecurityConfig
                                 .requestMatchers("/api/v1/admin/song-statistics").hasAuthority(RoleName.ROLE_ADMIN.toString())
                                 .requestMatchers("/api/v1/admin/album-statistics").hasAuthority(RoleName.ROLE_ADMIN.toString())
                                 .requestMatchers("/api/v1/admin/artists-statistics").hasAuthority(RoleName.ROLE_ADMIN.toString())
+
+                                .requestMatchers(HttpMethod.POST, "/api/v1/comments/*/reactions").hasAuthority(RoleName.ROLE_USER.toString())
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/comments/*/reactions").hasAuthority(RoleName.ROLE_USER.toString())
+                                .requestMatchers(HttpMethod.GET, "/api/v1/comments/*/reactions").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/comments/*/reactions/count").permitAll()
+
                                 .anyRequest().permitAll()
                 )
                 .authenticationProvider(authenticationProvider())
