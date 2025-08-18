@@ -22,4 +22,17 @@ public class SongServiceImpl implements ISongService {
         return songRepository.findTopSongsOfWeek(sevenDaysAgo, top15);
     }
 
+    @Override
+    public List<TopSongDTO> getTopSongsAllTime(int limit) {
+        Pageable pageable = PageRequest.of(0, limit);
+        return songRepository.findTopSongsAllTime(pageable);
+    }
+
+    @Override
+    public List<TopSongDTO> getTrendingSongs(int limit) {
+        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
+        Pageable pageable = PageRequest.of(0, limit);
+        return songRepository.findTrendingSongs(sevenDaysAgo, pageable);
+    }
+
 }

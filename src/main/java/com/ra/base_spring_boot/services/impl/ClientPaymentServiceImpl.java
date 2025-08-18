@@ -1,25 +1,236 @@
 package com.ra.base_spring_boot.services.impl;
 
+import com.ra.base_spring_boot.dto.req.SubscriptionRequestDTO;
 import com.ra.base_spring_boot.dto.resp.PaymentResponseDTO;
+import com.ra.base_spring_boot.dto.resp.SubscriptionResponseDTO;
 import com.ra.base_spring_boot.model.Payment;
+import com.ra.base_spring_boot.model.Subscription;
+import com.ra.base_spring_boot.model.SubscriptionPlan;
+import com.ra.base_spring_boot.model.User;
+import com.ra.base_spring_boot.model.constants.PaymentMethod;
+import com.ra.base_spring_boot.model.constants.PaymentStatus;
+import com.ra.base_spring_boot.model.constants.Status;
 import com.ra.base_spring_boot.repository.IPaymentRepository;
+import com.ra.base_spring_boot.repository.ISubscriptionPlanRepository;
 import com.ra.base_spring_boot.repository.ISubscriptionRepository;
+import com.ra.base_spring_boot.repository.IUserRepository;
 import com.ra.base_spring_boot.services.IClientPaymentService;
+import com.ra.base_spring_boot.services.paypal.PaypalService;
+import com.ra.base_spring_boot.utils.SecurityUtil;
+import com.ra.base_spring_boot.utils.exception.AlreadyPurchasedException;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.rmi.AlreadyBoundException;
+import java.time.LocalDateTime;
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
-public class ClientPaymentServiceImpl implements IClientPaymentService{
+public class ClientPaymentServiceImpl implements IClientPaymentService {
 
     private final IPaymentRepository paymentRepository;
     private final ISubscriptionRepository subscriptionRepository;
-    
+    private final ISubscriptionPlanRepository subscriptionPlanRepository;
+    private final IUserRepository userRepository;
+
+    private final PaypalService paypalService;
+
     @Override
     public PaymentResponseDTO getPaymentDetail(Long paymentId) {
         Payment payment = paymentRepository.findById(paymentId)
-                .orElseThrow(() -> new RuntimeException("Payment not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Payment not found"));
         return mapToResponseDTO(payment);
+    }
+
+    @Override
+    @Transactional
+    public String createPayment(SubscriptionRequestDTO requestDTO) {
+        Long userId = SecurityUtil.getCurrentUserId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        SubscriptionPlan plan = subscriptionPlanRepository.findById(requestDTO.getPlanId())
+                .orElseThrow(() -> new EntityNotFoundException("Plan not found"));
+
+        if (subscriptionRepository.existsByUserIdAndStatus(userId, Status.ACTIVE)) {
+            throw new AlreadyPurchasedException("You already have an active subscription");
+        }
+
+        Map<String, String> orderResponse = paypalService.createOrder(
+                BigDecimal.valueOf(plan.getPrice()), "USD"
+        );
+
+        String orderId = orderResponse.get("orderId");
+        String approvalUrl = orderResponse.get("approvalUrl");
+
+        Payment payment = Payment.builder()
+                .user(user)
+                .subscriptionPlan(plan)
+                .amount(plan.getPrice())
+                .paymentMethod(PaymentMethod.PAYPAL)
+                .paymentStatus(PaymentStatus.PENDING)
+                .transactionId(orderId)
+                .build();
+        paymentRepository.save(payment);
+
+        return approvalUrl;
+    }
+
+
+    @Override
+    @Transactional
+    public SubscriptionResponseDTO capturePayment(String orderId, Long paymentId, PaymentMethod method) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new EntityNotFoundException("Payment not found"));
+
+        Map<String, Object> captureResult;
+        switch (method) {
+            case PAYPAL -> captureResult = paypalService.captureOrder(orderId);
+            default -> throw new IllegalArgumentException("Unsupported payment method");
+        }
+
+        if ("COMPLETED".equalsIgnoreCase((String) captureResult.get("status"))) {
+            payment.setTransactionId(orderId);
+            payment.setPaymentStatus(PaymentStatus.COMPLETED);
+
+            Subscription subscription = Subscription.builder()
+                    .user(payment.getUser())
+                    .plan_id(payment.getSubscriptionPlan())
+                    .startTime(LocalDateTime.now())
+                    .endTime(LocalDateTime.now().plusDays(payment.getSubscriptionPlan().getDurationDay()))
+                    .status(Status.ACTIVE)
+                    .build();
+            subscriptionRepository.save(subscription);
+
+            return SubscriptionResponseDTO.builder()
+                    .id(subscription.getId())
+                    .planName(subscription.getPlan_id().getPlanName())
+                    .price(subscription.getPlan_id().getPrice())
+                    .startTime(subscription.getStartTime())
+                    .endTime(subscription.getEndTime())
+                    .status(subscription.getStatus().name())
+                    .build();
+        } else {
+            payment.setTransactionId(orderId);
+            payment.setPaymentStatus(PaymentStatus.FAILED);
+            return null;
+        }
+    }
+
+    @Override
+    @Transactional
+    public SubscriptionResponseDTO processPaypalSuccess(String orderId, String payerId) {
+        Payment payment = paymentRepository.findByTransactionId(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("Payment not found"));
+
+        try {
+            Map<String, Object> captureResponse = paypalService.captureOrder(orderId);
+
+            payment.setPaymentStatus(PaymentStatus.COMPLETED);
+            payment.setPaymentDate(LocalDateTime.now());
+            paymentRepository.save(payment);
+
+            SubscriptionPlan plan = payment.getSubscriptionPlan();
+            Subscription subscription = Subscription.builder()
+                    .user(payment.getUser())
+                    .plan_id(plan)
+                    .status(Status.ACTIVE)
+                    .startTime(LocalDateTime.now())
+                    .endTime(LocalDateTime.now().plusDays(plan.getDurationDay()))
+                    .build();
+
+            subscriptionRepository.save(subscription);
+
+            return SubscriptionResponseDTO.builder()
+                    .id(subscription.getId())
+                    .planName(plan.getPlanName())
+                    .price(plan.getPrice())
+                    .startTime(subscription.getStartTime())
+                    .endTime(subscription.getEndTime())
+                    .status(subscription.getStatus().name())
+                    .build();
+
+        } catch (Exception e) {
+            if (payment.getPaymentStatus() == PaymentStatus.PENDING) {
+                paymentRepository.delete(payment);
+            }
+            throw new RuntimeException("Capture PayPal failed: " + e.getMessage(), e);
+        }
+    }
+
+
+
+    @Override
+    @Transactional
+    public void processPaypalCancel(String token) {
+        try {
+            Payment payment = findPaymentByToken(token);
+            payment.setTransactionId(token);
+            payment.setPaymentStatus(PaymentStatus.FAILED);
+            paymentRepository.save(payment);
+        } catch (EntityNotFoundException e) {
+
+        }
+    }
+
+    @Override
+    public Long getPaymentIdByToken(String token) {
+        Payment payment = findPaymentByToken(token);
+        return payment.getId();
+    }
+
+    private Payment findPaymentByToken(String token) {
+         Long userId = SecurityUtil.getCurrentUserId();
+         return paymentRepository.findPendingPaymentByUser(userId, PaymentStatus.PENDING)
+                 .orElseThrow(() -> new EntityNotFoundException("No pending payment found"));
+    }
+
+    private SubscriptionResponseDTO completePaymentAndCreateSubscription(
+            Payment payment, String token, Map<String, Object> captureResponse) {
+
+        payment.setTransactionId(token);
+        payment.setPaymentStatus(PaymentStatus.COMPLETED);
+        payment = paymentRepository.save(payment);
+        Subscription subscription = createSubscription(payment);
+
+        return mapToSubscriptionResponseDTO(subscription);
+    }
+
+    private void handleFailedPayment(Payment payment, String token, Map<String, Object> captureResponse) {
+        payment.setTransactionId(token);
+        payment.setPaymentStatus(PaymentStatus.FAILED);
+        paymentRepository.save(payment);
+    }
+
+    private Subscription createSubscription(Payment payment) {
+        if (subscriptionRepository.existsByUserIdAndStatus(payment.getUser().getId(), Status.ACTIVE)) {
+            throw new AlreadyPurchasedException("User already has an active subscription");
+        }
+
+        Subscription subscription = Subscription.builder()
+                .user(payment.getUser())
+                .plan_id(payment.getSubscriptionPlan())
+                .startTime(LocalDateTime.now())
+                .endTime(LocalDateTime.now().plusDays(payment.getSubscriptionPlan().getDurationDay()))
+                .status(Status.ACTIVE)
+                .build();
+
+        return subscriptionRepository.save(subscription);
+    }
+
+    private SubscriptionResponseDTO mapToSubscriptionResponseDTO(Subscription subscription) {
+        return SubscriptionResponseDTO.builder()
+                .id(subscription.getId())
+                .planName(subscription.getPlan_id().getPlanName())
+                .price(subscription.getPlan_id().getPrice())
+                .startTime(subscription.getStartTime())
+                .endTime(subscription.getEndTime())
+                .status(subscription.getStatus().name())
+                .build();
     }
 
     private PaymentResponseDTO mapToResponseDTO(Payment payment) {

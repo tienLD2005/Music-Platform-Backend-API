@@ -1,7 +1,10 @@
 package com.ra.base_spring_boot.controller;
 
 import com.ra.base_spring_boot.dto.ResponseWrapper;
+import com.ra.base_spring_boot.dto.req.SubscriptionRequestDTO;
 import com.ra.base_spring_boot.dto.resp.PaymentResponseDTO;
+import com.ra.base_spring_boot.dto.resp.SubscriptionResponseDTO;
+import com.ra.base_spring_boot.model.constants.PaymentMethod;
 import com.ra.base_spring_boot.services.IClientPaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,5 +26,14 @@ public class ClientPaymentController {
                 .build();
     }
 
-
+    @PostMapping("/create")
+    public ResponseWrapper<String> createPayment(@RequestBody SubscriptionRequestDTO requestDTO) {
+        String approvalUrl = paymentService.createPayment(requestDTO);
+        return ResponseWrapper.<String>builder()
+                .status(HttpStatus.CREATED)
+                .code(HttpStatus.CREATED.value())
+                .data(approvalUrl)
+                .build();
+    }
 }
+

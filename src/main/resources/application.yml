@@ -28,7 +28,12 @@ spring:
           auth: true
           starttls:
             enable: true
-
+paypal:
+  client-id: AS00QCzm53q8t3-Rgod_RR-3RAsAMky4RKOWKdyCEpAtfzStExX483Ypy7LYQgwkXhDfb43KyLtx3BNe
+  client-secret: EKfoA6t0ZhDpTLGdUbYnMO3hs87YL0dvppn1vyRZRBP6xIEmSFB3tvrxQICUiZF-tAXckfyOs0-TjFFi
+  base-url: https://api-m.sandbox.paypal.com
+  return-url: http://localhost:8080/api/paypal/success
+  cancel-url: http://localhost:8080/api/paypal/cancel
 jwt:
   secret:
     key: Ascmkkqdnmsdfrtgsyuhidj21ue120938219321ndsad
