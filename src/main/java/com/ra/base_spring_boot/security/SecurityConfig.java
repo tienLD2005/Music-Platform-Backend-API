@@ -99,6 +99,10 @@ public class SecurityConfig
                                 .requestMatchers("api/v1/subscriptions/**").hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ADMIN.toString())
                                 .requestMatchers("api/v1/payments/**").hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ADMIN.toString())
 
+                                .requestMatchers("/api/v1/admin/user-statistics").hasAuthority(RoleName.ROLE_ADMIN.toString())
+                                .requestMatchers("/api/v1/admin/song-statistics").hasAuthority(RoleName.ROLE_ADMIN.toString())
+                                .requestMatchers("/api/v1/admin/album-statistics").hasAuthority(RoleName.ROLE_ADMIN.toString())
+                                .requestMatchers("/api/v1/admin/artists-statistics").hasAuthority(RoleName.ROLE_ADMIN.toString())
                                 .anyRequest().permitAll()
                 )
                 .authenticationProvider(authenticationProvider())

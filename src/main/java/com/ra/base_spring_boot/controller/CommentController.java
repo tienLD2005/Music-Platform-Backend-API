@@ -5,9 +5,10 @@ import com.ra.base_spring_boot.dto.req.CommentRequest;
 import com.ra.base_spring_boot.dto.req.UpdateCommentRequest;
 import com.ra.base_spring_boot.dto.resp.CommentResponseDTO;
 import com.ra.base_spring_boot.dto.resp.PageResponse;
-import com.ra.base_spring_boot.exception.HttpBadRequest;
 import com.ra.base_spring_boot.services.IClientCommentService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -39,7 +40,7 @@ public class CommentController {
     }
     @PreAuthorize("hasAuthority('ROLE_USER')")
     @PostMapping
-    public ResponseEntity<ResponseWrapper<CommentResponseDTO>> addComment(@RequestBody CommentRequest request) {
+    public ResponseEntity<ResponseWrapper<CommentResponseDTO>> addComment(@Valid @RequestBody CommentRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ResponseWrapper.<CommentResponseDTO>builder()
                         .status(HttpStatus.CREATED)
@@ -50,6 +51,7 @@ public class CommentController {
     @PreAuthorize("hasAuthority('ROLE_USER')")
     @PutMapping("/{commentId}")
     public ResponseEntity<ResponseWrapper<CommentResponseDTO>> updateComment(
+            @Valid
             @PathVariable Long commentId,
             @RequestBody UpdateCommentRequest request
     ) {
@@ -71,8 +73,8 @@ public class CommentController {
         commentService.deleteComment(commentId);
         return ResponseEntity.ok(
                 ResponseWrapper.<String>builder()
-                        .status(HttpStatus.OK)
-                        .code(HttpStatus.OK.value())
+                        .status(HttpStatus.NO_CONTENT)
+                        .code(HttpStatus.NO_CONTENT.value())
                         .data("Comment deleted successfully")
                         .build()
         );
