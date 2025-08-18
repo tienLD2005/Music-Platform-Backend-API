@@ -3,6 +3,7 @@ package com.ra.base_spring_boot.controller;
 import com.ra.base_spring_boot.dto.resp.SubscriptionResponseDTO;
 import com.ra.base_spring_boot.services.IClientPaymentService;
 import com.ra.base_spring_boot.services.paypal.PaypalService;
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/paypal")
 @RequiredArgsConstructor
+@Hidden
 public class PaypalController {
     private final PaypalService paypalService;
     private final IClientPaymentService paymentService;
