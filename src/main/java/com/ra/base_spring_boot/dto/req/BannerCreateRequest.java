@@ -12,22 +12,22 @@ import java.time.LocalDateTime;
 
 @Data
 public class BannerCreateRequest {
-    @NotBlank(message = "Tiêu đề không được để trống")
+    @NotBlank(message = "The title must not be empty.")
     private String title;
 
     private String position;
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @NotNull(message = "Thời gian bắt đầu không được để trống")
+    @NotNull(message = "The start time cannot be left blank.")
     private LocalDateTime startTime;
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @NotNull(message = "Thời gian kết thúc không được để trống")
-    @Future(message = "Thời gian kết thúc phải ở tương lai")
+    @NotNull(message = "The end time must not be left blank.")
+    @Future(message = "The end time must be in the future.")
     private LocalDateTime endTime;
 
     private BannerStatus status;
 
-    @NotNull(message = "Ảnh không được để trống")
+    @NotNull(message = "The image cannot be empty.")
     private MultipartFile image;
 }

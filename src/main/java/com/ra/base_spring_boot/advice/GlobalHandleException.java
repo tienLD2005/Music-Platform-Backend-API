@@ -174,6 +174,24 @@ public class GlobalHandleException
                         .status(HttpStatus.NOT_FOUND)
         .build());
     }
+    @ExceptionHandler(NullPointerException.class)
+    public ResponseEntity<?> handleNullPointerException(NullPointerException ex) {
+        if (ex.getMessage() != null && ex.getMessage().contains("principal")) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("code", 401);
+            error.put("error", "Full authentication is required to access this resource");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+        }
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                ResponseWrapper.builder()
+                        .data(ex.getMessage())
+                        .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .build()
+        );
+    }
+
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<?> handleResourceNotFoundException(ResourceNotFoundException ex)
