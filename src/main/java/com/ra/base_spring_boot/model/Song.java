@@ -1,6 +1,7 @@
 package com.ra.base_spring_boot.model;
 
 import com.ra.base_spring_boot.model.base.BaseObject;
+import com.ra.base_spring_boot.model.constants.SongStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -67,4 +68,9 @@ public class Song extends BaseObject {
 
     @OneToMany(mappedBy = "song")
     private List<SongHistory> songHistories;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private SongStatus status;
+
 }
