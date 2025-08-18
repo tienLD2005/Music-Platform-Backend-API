@@ -1,6 +1,5 @@
 package com.ra.base_spring_boot.dto.resp;
 
-import com.ra.base_spring_boot.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserResponse {
+public class UserResponseDTO {
     private Long id;
     private String firstName;
     private String lastName;
