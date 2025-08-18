@@ -150,10 +150,8 @@ public class AlbumController {
     }
 
     @GetMapping("/top")
-    public ResponseEntity<?> getTopAlbums(@RequestParam(defaultValue = "1") int page,
-                                          @RequestParam(defaultValue = "15") int size,
-                                          @RequestParam(defaultValue = "week") String period) {
-        Page<AlbumResponse> topAlbums = albumService.getTopAlbums(page, size, period);
+    public ResponseEntity<?> getTopAlbums(@RequestParam(defaultValue = "week") String period) {
+        Page<AlbumResponse> topAlbums = albumService.getTopAlbums(period);
 
         PaginatedResponse<AlbumResponse> paginated = new PaginatedResponse<>();
         paginated.setItems(topAlbums.getContent());
@@ -175,9 +173,8 @@ public class AlbumController {
 
 
     @GetMapping("/featured")
-    public ResponseEntity<?> getFeaturedAlbums (@RequestParam(defaultValue = "1") int page,
-                                                @RequestParam(defaultValue = "5") int size) {
-        Page<AlbumResponse> albumsPage = albumService.findFeaturedAlbums(page, size);
+    public ResponseEntity<?> getFeaturedAlbums() {
+        Page<AlbumResponse> albumsPage = albumService.findFeaturedAlbums();
 
         PaginatedResponse<AlbumResponse> paginated = new PaginatedResponse<>();
         paginated.setItems(albumsPage.getContent());
