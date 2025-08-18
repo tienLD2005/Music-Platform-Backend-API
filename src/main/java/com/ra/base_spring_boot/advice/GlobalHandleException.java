@@ -2,7 +2,7 @@ package com.ra.base_spring_boot.advice;
 
 import com.ra.base_spring_boot.exception.*;
 import com.ra.base_spring_boot.dto.ResponseWrapper;
-import com.ra.base_spring_boot.utils.exception.AlreadyPurchasedException;
+import com.ra.base_spring_boot.exception.AlreadyPurchasedException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -175,9 +175,12 @@ public class GlobalHandleException
                         .status(HttpStatus.NOT_FOUND)
         .build());
     }
+
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<?> handleNullPointerException(NullPointerException ex) {
-        if (ex.getMessage() != null && ex.getMessage().contains("principal")) {
+        if (ex.getMessage() != null && (ex.getMessage().contains("principal"))
+        || (ex.getMessage().contains("userDetails") && ex.getMessage().contains("is null")
+        || ex.getMessage().contains("Authentication"))) {
             Map<String, Object> error = new HashMap<>();
             error.put("code", 401);
             error.put("error", "Full authentication is required to access this resource");

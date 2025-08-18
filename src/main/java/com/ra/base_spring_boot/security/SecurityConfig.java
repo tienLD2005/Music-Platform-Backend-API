@@ -74,7 +74,7 @@ public class SecurityConfig
                         url -> url
 
                                 // history song
-//                                .requestMatchers("/api/v1/song-history/**").authenticated().anyRequest().permitAll()
+                                .requestMatchers("/api/v1/song-history/**").permitAll()
 
                                 // API Album Admin
                                 .requestMatchers("/api/v1/admin/albums/**").hasAuthority(RoleName.ROLE_ADMIN.toString())

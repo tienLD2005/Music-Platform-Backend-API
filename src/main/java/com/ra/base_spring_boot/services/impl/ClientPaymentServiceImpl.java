@@ -17,14 +17,13 @@ import com.ra.base_spring_boot.repository.IUserRepository;
 import com.ra.base_spring_boot.services.IClientPaymentService;
 import com.ra.base_spring_boot.services.paypal.PaypalService;
 import com.ra.base_spring_boot.utils.SecurityUtil;
-import com.ra.base_spring_boot.utils.exception.AlreadyPurchasedException;
+import com.ra.base_spring_boot.exception.AlreadyPurchasedException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.rmi.AlreadyBoundException;
 import java.time.LocalDateTime;
 import java.util.Map;
 
