@@ -75,7 +75,7 @@ public class SecurityConfig
 
                                 .requestMatchers("/api/v1/admin/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
 
-                                // album and song
+                                // API Song (Artist)
                                 .requestMatchers(HttpMethod.GET,"/api/v1/albums/*/songs").hasAnyAuthority(RoleName.ROLE_ADMIN.toString(), RoleName.ROLE_USER.toString(), RoleName.ROLE_ARTIST.toString())
                                 .requestMatchers(HttpMethod.POST,"/api/v1/albums/*/songs").hasAuthority(RoleName.ROLE_ARTIST.toString())
                                 .requestMatchers(HttpMethod.DELETE,"/api/v1/albums/*/songs/**").hasAuthority(RoleName.ROLE_ARTIST.toString())
@@ -92,11 +92,11 @@ public class SecurityConfig
                                 //API Lyrics Artist
                                 .requestMatchers("api/v1/artist/lyrics/**").hasAuthority(RoleName.ROLE_ARTIST.toString())
 
-                                //Wishlist
+                                //API Wishlist
                                 .requestMatchers("/api/v1/wishlists/**").hasAuthority(RoleName.ROLE_USER.toString())
 
-                                //Subscription Plan
-                                .requestMatchers("/api/v1/subscription_plan/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
+                                //API Subscription Plan (Admin)
+                                .requestMatchers("/api/v1/admin/subscription_plan/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
 
                                 .requestMatchers("api/v1/subscriptions/**").hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ARTIST.toString())
                                 .requestMatchers("api/v1/payments/**").hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ARTIST.toString())
