@@ -1,6 +1,5 @@
 package com.ra.base_spring_boot.controller;
 
-import com.ra.base_spring_boot.dto.req.LyricsRequest;
 import com.ra.base_spring_boot.dto.resp.LyricsResponseDTO;
 import com.ra.base_spring_boot.services.ILyricsService;
 import lombok.RequiredArgsConstructor;
@@ -10,9 +9,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/lyrics")
+@RequestMapping("/api/v1/artist/lyrics")
 @RequiredArgsConstructor
-public class LyricsController {
+public class ArtistLyricsController {
 
     private final ILyricsService lyricsService;
 

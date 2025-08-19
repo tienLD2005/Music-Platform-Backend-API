@@ -1,32 +1,26 @@
 package com.ra.base_spring_boot.controller;
 
 import com.ra.base_spring_boot.dto.ResponseWrapper;
-import com.ra.base_spring_boot.dto.req.AlbumFilter;
 import com.ra.base_spring_boot.dto.req.AlbumRequest;
 import com.ra.base_spring_boot.dto.resp.*;
 import com.ra.base_spring_boot.dto.req.FormSongRequest;
-import com.ra.base_spring_boot.dto.resp.*;
-import com.ra.base_spring_boot.model.base.Pagination;
 import com.ra.base_spring_boot.services.IAlbumService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
 import java.util.List;
 
 
 @RestController
-@RequestMapping("/api/v1/albums")
+@RequestMapping("/api/v1/artist/albums")
 @RequiredArgsConstructor
-public class AlbumController {
+public class ArtistAlbumController {
 
     private final IAlbumService albumService;
 

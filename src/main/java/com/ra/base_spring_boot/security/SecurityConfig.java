@@ -85,16 +85,16 @@ public class SecurityConfig
                                 .requestMatchers(HttpMethod.DELETE,"/api/v1/albums/*/songs/**").hasAuthority(RoleName.ROLE_ARTIST.toString())
 
                                 //API artist album
-                                .requestMatchers("api/v1/albums/**").hasAuthority(RoleName.ROLE_ARTIST.toString())
+                                .requestMatchers("api/v1/artist/albums/**").hasAuthority(RoleName.ROLE_ARTIST.toString())
 
                                 //API Comment artist
                                 .requestMatchers("api/v1/artist/comments/**").hasAuthority(RoleName.ROLE_ARTIST.toString())
 
                                 //API Comment User
-                                .requestMatchers("api/v1/user/comments/**").hasAnyAuthority(RoleName.ROLE_ARTIST.toString(), RoleName.ROLE_USER.toString())
+                                .requestMatchers("api/v1/client/comments/**").hasAnyAuthority(RoleName.ROLE_ARTIST.toString(), RoleName.ROLE_USER.toString())
 
                                 //API Lyrics Artist
-                                .requestMatchers("api/v1/lyrics/**").hasAuthority(RoleName.ROLE_ARTIST.toString())
+                                .requestMatchers("api/v1/artist/lyrics/**").hasAuthority(RoleName.ROLE_ARTIST.toString())
 
                                 //Wishlist
                                 .requestMatchers("/api/v1/wishlists/**").hasAuthority(RoleName.ROLE_USER.toString())

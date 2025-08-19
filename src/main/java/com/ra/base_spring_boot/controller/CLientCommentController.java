@@ -8,16 +8,14 @@ import com.ra.base_spring_boot.dto.resp.PageResponse;
 import com.ra.base_spring_boot.services.IClientCommentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/user/comments")
+@RequestMapping("/api/v1/client/comments")
 @RequiredArgsConstructor
-public class CommentController {
+public class CLientCommentController {
 
     private final IClientCommentService commentService;
 
