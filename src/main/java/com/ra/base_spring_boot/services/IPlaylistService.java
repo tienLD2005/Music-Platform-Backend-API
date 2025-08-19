@@ -3,6 +3,7 @@ package com.ra.base_spring_boot.services;
 import com.ra.base_spring_boot.dto.req.PlaylistReq;
 import com.ra.base_spring_boot.dto.resp.PageResponse;
 import com.ra.base_spring_boot.dto.resp.PlaylistResp;
+import com.ra.base_spring_boot.dto.resp.SongResponse;
 import com.ra.base_spring_boot.model.Playlist;
 import org.springframework.data.domain.Page;
 
@@ -21,4 +22,6 @@ public interface IPlaylistService {
     PlaylistResp createPlaylist(Long userId, PlaylistReq request);
     void addSongToPlaylist(Long playlistId, Long songId);
     void removeSongFromPlaylist(Long playlistId, Long songId);
+    List<SongResponse> getSongsInPlaylist(Long playlistId);
+
 }
