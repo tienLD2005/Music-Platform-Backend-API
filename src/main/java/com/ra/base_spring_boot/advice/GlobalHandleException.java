@@ -175,9 +175,12 @@ public class GlobalHandleException
                         .status(HttpStatus.NOT_FOUND)
         .build());
     }
+
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<?> handleNullPointerException(NullPointerException ex) {
-        if (ex.getMessage() != null && ex.getMessage().contains("principal")) {
+        if (ex.getMessage() != null && (ex.getMessage().contains("principal"))
+        || (ex.getMessage().contains("userDetails") && ex.getMessage().contains("is null")
+        || ex.getMessage().contains("Authentication"))) {
             Map<String, Object> error = new HashMap<>();
             error.put("code", 401);
             error.put("error", "Full authentication is required to access this resource");

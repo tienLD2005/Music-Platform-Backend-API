@@ -11,10 +11,10 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(
-    name = "song_reactions",
-    uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"user_id", "song_id"})
-    }
+        name = "song_reactions",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"user_id", "song_id"})
+        }
 )
 @Getter
 @Setter
