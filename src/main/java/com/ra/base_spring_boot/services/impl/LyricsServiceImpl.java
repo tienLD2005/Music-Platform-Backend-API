@@ -2,6 +2,7 @@ package com.ra.base_spring_boot.services.impl;
 
 import com.ra.base_spring_boot.dto.req.LyricsRequest;
 import com.ra.base_spring_boot.dto.resp.LyricsResponseDTO;
+import com.ra.base_spring_boot.exception.HttpNotFound;
 import com.ra.base_spring_boot.mapper.LyricsMapper;
 import com.ra.base_spring_boot.model.Lyrics;
 import com.ra.base_spring_boot.model.Song;
@@ -23,24 +24,24 @@ public class LyricsServiceImpl implements ILyricsService {
     private final SpeechToTextService speechToTextService;
 
     @Override
-    public LyricsResponseDTO createLyrics(LyricsRequest request) {
-        // 1. Lấy song từ DB
-        Song song = songRepository.findById(request.getSongId())
-                .orElseThrow(() -> new RuntimeException("Song not found"));
-
-        // 2. Kiểm tra fileUrl của Song
-        if (song.getFileUrl() == null || song.getFileUrl().isBlank()) {
-            throw new IllegalArgumentException("Bài hát không có file âm thanh (fileUrl)");
+    public LyricsResponseDTO createLyrics(Long songId) {
+        if (songId == null || songId <= 0) {
+            throw new IllegalArgumentException("songId illegal");
         }
 
-        // 3. Gọi Speech-to-Text để lấy lyrics
+        Song song = songRepository.findById(songId)
+                .orElseThrow(() -> new HttpNotFound("Song not found"));
+
+        if (song.getFileUrl() == null || song.getFileUrl().isBlank()) {
+            throw new IllegalArgumentException("Song doesn't have file url");
+        }
+
         String content = speechToTextService.convertAudioToText(song.getFileUrl());
 
-        // 4. Lưu lyrics vào DB
         Lyrics lyrics = Lyrics.builder()
                 .song(song)
                 .content(content)
-                .sourceUrl(song.getFileUrl()) // Sử dụng fileUrl của Song
+                .sourceUrl(song.getFileUrl())
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -53,7 +54,7 @@ public class LyricsServiceImpl implements ILyricsService {
     public LyricsResponseDTO getLyricsBySong(Long songId) {
         Lyrics lyrics = lyricsRepository.findBySongId(songId);
         if (lyrics == null) {
-            throw new RuntimeException("Lyrics not found for songId " + songId);
+            throw new HttpNotFound("Lyrics not found for songId " + songId);
         }
         return LyricsMapper.toResponse(lyrics);
     }

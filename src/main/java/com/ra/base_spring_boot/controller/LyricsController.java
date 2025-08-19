@@ -6,6 +6,7 @@ import com.ra.base_spring_boot.services.ILyricsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,20 +16,14 @@ public class LyricsController {
 
     private final ILyricsService lyricsService;
 
-    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE) // Thêm produces để chỉ rõ JSON
+    @PreAuthorize("hasAuthority('ROLE_ARTIST')")
+    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<LyricsResponseDTO> createLyrics(@RequestParam Long songId) {
-        if (songId == null || songId <= 0) {
-            throw new IllegalArgumentException("songId không hợp lệ");
-        }
-
-        LyricsRequest request = LyricsRequest.builder()
-                .songId(songId)
-                .build();
-
-        return ResponseEntity.ok(lyricsService.createLyrics(request));
+        return ResponseEntity.ok(lyricsService.createLyrics(songId));
     }
 
-    @GetMapping(value = "/song/{songId}", produces = MediaType.APPLICATION_JSON_VALUE) // Thêm produces nếu cần
+    @PreAuthorize("hasAuthority('ROLE_ARTIST')")
+    @GetMapping(value = "/song/{songId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<LyricsResponseDTO> getLyricsBySong(@PathVariable Long songId) {
         return ResponseEntity.ok(lyricsService.getLyricsBySong(songId));
     }
