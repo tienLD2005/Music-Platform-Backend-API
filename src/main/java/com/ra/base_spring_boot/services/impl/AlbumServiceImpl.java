@@ -156,11 +156,7 @@ public class AlbumServiceImpl implements IAlbumService {
 
         // Check duplicate title
         if (albumRepository.existsByTitleIgnoreCaseAndArtistId(request.getTitle(), artistId)) {
-            return ResponseWrapper.<AlbumResponseDTO>builder()
-                    .status(HttpStatus.BAD_REQUEST)
-                    .code(HttpStatus.BAD_REQUEST.value())
-                    .data(null)
-                    .build();
+            throw new HttpBadRequest("Album with this title already exists");
         }
 
         String coverUrl = null;
@@ -293,13 +289,13 @@ public class AlbumServiceImpl implements IAlbumService {
         }
 
         Long songCount = albumRepository.countSongsInAlbum(albumId);
-        if (songCount > 0) {
-            return ResponseWrapper.<String>builder()
-                    .status(HttpStatus.BAD_REQUEST)
-                    .code(HttpStatus.BAD_REQUEST.value())
-                    .data("Album contains songs and cannot be deleted")
-                    .build();
-        }
+//        if (songCount > 0) {
+//            return ResponseWrapper.<String>builder()
+//                    .status(HttpStatus.BAD_REQUEST)
+//                    .code(HttpStatus.BAD_REQUEST.value())
+//                    .data("Album contains songs and cannot be deleted")
+//                    .build();
+//        }
 
         albumRepository.delete(album);
         return ResponseWrapper.<String>builder()

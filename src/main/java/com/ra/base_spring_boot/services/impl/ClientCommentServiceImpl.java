@@ -51,6 +51,9 @@ public class ClientCommentServiceImpl implements IClientCommentService {
     @Override
     public PageResponse<CommentResponseDTO> getCommentsBySong(Long songId, int page, int size, String sortBy, String sortDir) {
 
+        Song song = songRepository.findById(songId)
+                .orElseThrow(() -> new HttpNotFound("Song not found"));
+
         if (page < 0) {
             throw new HttpBadRequest("Page must be greater than 0");
         }

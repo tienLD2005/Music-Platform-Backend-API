@@ -47,6 +47,7 @@ dependencies {
     // https://mvnrepository.com/artifact/com.cloudinary/cloudinary-http44
     implementation("com.cloudinary:cloudinary-http44:1.32.2")
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
 }
 
 tasks.named('test') {
