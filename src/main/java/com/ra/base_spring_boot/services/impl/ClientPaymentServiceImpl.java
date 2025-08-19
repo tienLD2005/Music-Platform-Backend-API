@@ -17,17 +17,18 @@ import com.ra.base_spring_boot.repository.IUserRepository;
 import com.ra.base_spring_boot.services.IClientPaymentService;
 import com.ra.base_spring_boot.services.paypal.PaypalService;
 import com.ra.base_spring_boot.utils.SecurityUtil;
-import com.ra.base_spring_boot.utils.exception.AlreadyPurchasedException;
+import com.ra.base_spring_boot.exception.AlreadyPurchasedException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.rmi.AlreadyBoundException;
 import java.time.LocalDateTime;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ClientPaymentServiceImpl implements IClientPaymentService {
@@ -173,7 +174,7 @@ public class ClientPaymentServiceImpl implements IClientPaymentService {
             payment.setPaymentStatus(PaymentStatus.FAILED);
             paymentRepository.save(payment);
         } catch (EntityNotFoundException e) {
-
+            log.warn("No pending payment found for token: {}", token);
         }
     }
 
