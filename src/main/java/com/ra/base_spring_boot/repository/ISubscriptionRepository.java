@@ -22,4 +22,7 @@ public interface ISubscriptionRepository extends JpaRepository<Subscription, Lon
             @Param("status") Status status);
 
     Optional<Subscription> findByUserIdAndStatus(Long userId, Status status);
+
+    @Query("SELECT COUNT(s) > 0 FROM Subscription s WHERE s.plan_id.id = :planId")
+    boolean existsByPlanId(Long planId);
 }

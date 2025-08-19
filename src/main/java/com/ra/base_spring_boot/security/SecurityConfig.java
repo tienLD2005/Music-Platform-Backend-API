@@ -96,6 +96,9 @@ public class SecurityConfig
                                 //Wishlist
                                 .requestMatchers("/api/v1/wishlists").hasAuthority(RoleName.ROLE_USER.toString())
                                 .requestMatchers("/api/v1/wishlists/**").hasAuthority(RoleName.ROLE_USER.toString())
+                                //Subscription Plan
+                                .requestMatchers("/api/v1/subscription_plan").hasAuthority(RoleName.ROLE_ADMIN.toString())
+                                .requestMatchers("/api/v1/subscription_plan/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
 
 //                                .requestMatchers("/api/v1/artist/**").hasAuthority(RoleName.ROLE_ARTIST.toString())
                                 .requestMatchers("api/v1/artists/**").permitAll()
