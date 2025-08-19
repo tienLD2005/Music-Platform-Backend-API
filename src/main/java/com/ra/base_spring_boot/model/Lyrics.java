@@ -25,7 +25,6 @@ public class Lyrics {
     @Column(nullable = false)
     private String sourceUrl;
 
-    // Liên kết tới Song
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "song_id", nullable = false)
     private Song song;
