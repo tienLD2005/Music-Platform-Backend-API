@@ -419,14 +419,14 @@ public class AlbumServiceImpl implements IAlbumService {
     }
 
     @Override
-    public PaginatedResponse<AlbumResponse> getAlbumsByArtist(AlbumFilter filter) {
-        Sort sort = filter.getSortDir().equalsIgnoreCase("asc") ? Sort.by("releaseDate").ascending() : Sort.by("releaseDate").descending();
-        Pageable pageable = PageRequest.of(filter.getPage() - 1, filter.getSize(), sort);
+    public PaginatedResponse<AlbumResponse> getAlbumsByArtist(Long artistId, int page, int size, String keyword, String sortDir, boolean isPremium) {
+        Sort sort = sortDir.equalsIgnoreCase("asc") ? Sort.by("releaseDate").ascending() : Sort.by("releaseDate").descending();
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
 
         Page<Album> albumPage = albumRepository.findAlbumsByArtist(
-                filter.getArtistId(),
-                filter.getKeyword(),
-                filter.isPremium(),
+                artistId,
+                keyword,
+                isPremium,
                 pageable
         );
 
@@ -436,7 +436,7 @@ public class AlbumServiceImpl implements IAlbumService {
             if (AlbumType.FREE.equals(album.getType())) {
                 access = "Stream + Download";
             } else {
-                access = filter.isPremium() ? "Stream + Download" : "Stream Only";
+                access = isPremium ? "Stream + Download" : "Stream Only";
             }
 
             return AlbumResponse.builder()

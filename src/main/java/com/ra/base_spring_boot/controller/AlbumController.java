@@ -163,19 +163,12 @@ public class AlbumController {
                                                @RequestParam(required = false, defaultValue = "") String keyword,
                                                @RequestParam(defaultValue = "desc") String sortDir,
                                                @RequestParam(defaultValue = "false") boolean isPremium) {
-        AlbumFilter filter = new AlbumFilter();
-        filter.setArtistId(artistId);
-        filter.setPage(page);
-        filter.setSize(size);
-        filter.setKeyword(keyword);
-        filter.setSortDir(sortDir);
-        filter.setPremium(isPremium);
 
         return ResponseEntity.ok().body(
                 ResponseWrapper.builder()
                         .status(HttpStatus.OK)
                         .code(HttpStatus.OK.value())
-                        .data(albumService.getAlbumsByArtist(filter))
+                        .data(albumService.getAlbumsByArtist(artistId, page, size, keyword, sortDir, isPremium))
                         .build()
         );
     }

@@ -26,7 +26,7 @@ public interface IAlbumService {
     PaginatedResponse<AlbumResponse> getAllAlbums(int page, int size, String sortBy, String sortDir, String keyword);
     PaginatedResponse<AlbumResponse> getTopAlbums(String period);
     PaginatedResponse<AlbumResponse> findFeaturedAlbums();
-    PaginatedResponse<AlbumResponse> getAlbumsByArtist(AlbumFilter filter);
+    PaginatedResponse<AlbumResponse> getAlbumsByArtist(Long artistId, int page, int size, String keyword, String sortDir, boolean isPremium);
 
     List<AlbumResponse> getTopTrendingAlbums(int limit);
 }
