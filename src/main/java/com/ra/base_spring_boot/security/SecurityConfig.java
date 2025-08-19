@@ -79,8 +79,8 @@ public class SecurityConfig
                                 // API Album Admin
                                 .requestMatchers("/api/v1/admin/albums/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
 
-                                // API Banner
-                                .requestMatchers("GET", "/api/v1/banner/**").permitAll()
+//                                // API Banner
+//                                .requestMatchers("GET", "/api/v1/banner/**").permitAll()
                                 .requestMatchers("POST", "/api/v1/banner/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
                                 .requestMatchers("DELETE", "/api/v1/banner/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
 
@@ -97,7 +97,6 @@ public class SecurityConfig
                                 .requestMatchers("/api/v1/wishlists").hasAuthority(RoleName.ROLE_USER.toString())
                                 .requestMatchers("/api/v1/wishlists/**").hasAuthority(RoleName.ROLE_USER.toString())
 
-
 //                                .requestMatchers("/api/v1/artist/**").hasAuthority(RoleName.ROLE_ARTIST.toString())
                                 .requestMatchers("api/v1/artists/**").hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ADMIN.toString(), RoleName.ROLE_ARTIST.toString())
                                 .requestMatchers("api/v1/genres/**").hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ADMIN.toString(), RoleName.ROLE_ARTIST.toString())
@@ -109,6 +108,8 @@ public class SecurityConfig
                                 .requestMatchers("/api/v1/admin/song-statistics").hasAuthority(RoleName.ROLE_ADMIN.toString())
                                 .requestMatchers("/api/v1/admin/album-statistics").hasAuthority(RoleName.ROLE_ADMIN.toString())
                                 .requestMatchers("/api/v1/admin/artists-statistics").hasAuthority(RoleName.ROLE_ADMIN.toString())
+
+                                .requestMatchers("/api/v1/users/follows/**").hasAuthority(RoleName.ROLE_USER.toString())
                                 .anyRequest().permitAll()
                 )
                 .authenticationProvider(authenticationProvider())
