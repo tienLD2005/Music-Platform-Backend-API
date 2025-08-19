@@ -122,7 +122,7 @@ public class AlbumController {
                                        @RequestParam(defaultValue = "asc") String sortDir,
                                        @RequestParam(required = false) String keyword) {
 
-                return ResponseEntity.ok().body(
+        return ResponseEntity.ok().body(
                 ResponseWrapper.builder()
                         .status(HttpStatus.OK)
                         .code(HttpStatus.OK.value())

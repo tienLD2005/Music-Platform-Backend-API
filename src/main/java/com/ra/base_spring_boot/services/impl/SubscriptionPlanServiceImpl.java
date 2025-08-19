@@ -1,10 +1,12 @@
 package com.ra.base_spring_boot.services.impl;
 
 import com.ra.base_spring_boot.dto.req.SubscriptionPlanRequestDTO;
+import com.ra.base_spring_boot.dto.resp.PaginatedResponse;
 import com.ra.base_spring_boot.dto.resp.SubscriptionPlanResponseDTO;
 import com.ra.base_spring_boot.exception.HttpBadRequest;
 import com.ra.base_spring_boot.exception.HttpNotFound;
 import com.ra.base_spring_boot.model.SubscriptionPlan;
+import com.ra.base_spring_boot.model.base.Pagination;
 import com.ra.base_spring_boot.repository.ISubscriptionPlanRepository;
 import com.ra.base_spring_boot.repository.ISubscriptionRepository;
 import com.ra.base_spring_boot.services.ISubscriptionPlanService;
@@ -22,27 +24,37 @@ public class SubscriptionPlanServiceImpl implements ISubscriptionPlanService {
     private final ISubscriptionRepository subscriptionRepository;
 
     @Override
-    public Page<SubscriptionPlanResponseDTO> getAll(String keyword, int page, int size, String sortBy, String sortDir) {
+    public PaginatedResponse<SubscriptionPlanResponseDTO> getAll(String keyword, int page, int size, String sortBy, String sortDir) {
         Sort sort = sortDir.equalsIgnoreCase("asc")
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
 
         Pageable pageable = PageRequest.of(page - 1, size, sort);
 
-        Page<SubscriptionPlan> plans;
+        Page<SubscriptionPlan> planPage;
         if (keyword == null || keyword.isBlank()) {
-            plans = subscriptionPlanRepository.findAll(pageable);
+            planPage = subscriptionPlanRepository.findAll(pageable);
         } else {
-            plans = subscriptionPlanRepository.findAllByPlanNameContainingIgnoreCase(keyword, pageable);
+            planPage = subscriptionPlanRepository.findAllByPlanNameContainingIgnoreCase(keyword, pageable);
         }
 
-        return plans.map(subPlan -> new SubscriptionPlanResponseDTO(
+        Page<SubscriptionPlanResponseDTO> plans = planPage.map(subPlan -> new SubscriptionPlanResponseDTO(
                 subPlan.getId(),
                 subPlan.getPlanName(),
                 subPlan.getPrice(),
                 subPlan.getDurationDay(),
                 subPlan.getDescription()
         ));
+
+        return new PaginatedResponse<>(
+                plans.getContent(),
+                new Pagination(
+                        plans.getNumber() + 1,
+                        plans.getSize(),
+                        plans.getTotalPages(),
+                        plans.getTotalElements()
+                )
+        );
     }
 
     @Override

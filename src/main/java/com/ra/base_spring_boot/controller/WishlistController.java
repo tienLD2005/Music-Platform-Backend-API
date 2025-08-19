@@ -1,14 +1,8 @@
 package com.ra.base_spring_boot.controller;
 
 import com.ra.base_spring_boot.dto.ResponseWrapper;
-import com.ra.base_spring_boot.dto.resp.PaginatedResponse;
-import com.ra.base_spring_boot.dto.resp.WishlistResponse;
-import com.ra.base_spring_boot.model.Song;
-import com.ra.base_spring_boot.model.User;
-import com.ra.base_spring_boot.model.base.Pagination;
 import com.ra.base_spring_boot.services.IWishlistService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -23,13 +17,12 @@ public class WishlistController {
     @PostMapping("/{songId}")
     public ResponseEntity<ResponseWrapper<?>> addSongToWishlist(@PathVariable Long songId,
                                                                 Authentication authentication) {
-        String message = wishlistService.addSongToWishlist(songId, authentication);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 ResponseWrapper.builder()
                         .status(HttpStatus.CREATED)
                         .code(HttpStatus.CREATED.value())
-                        .data(message)
+                        .data(wishlistService.addSongToWishlist(songId, authentication))
                         .build()
         );
     }
@@ -54,12 +47,11 @@ public class WishlistController {
     @DeleteMapping("/{songId}")
     public ResponseEntity<ResponseWrapper<?>> removeFromWishlist(@PathVariable Long songId,
                                                                  Authentication authentication) {
-        String message = wishlistService.removeFromWishlist(songId, authentication);
         return ResponseEntity.status(HttpStatus.OK).body(
                 ResponseWrapper.builder()
                         .status(HttpStatus.OK)
                         .code(HttpStatus.OK.value())
-                        .data(message)
+                        .data(wishlistService.removeFromWishlist(songId, authentication))
                         .build()
         );
     }

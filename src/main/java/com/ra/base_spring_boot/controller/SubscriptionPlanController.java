@@ -25,22 +25,12 @@ public class SubscriptionPlanController {
                                                                       @RequestParam(defaultValue = "") String keyword,
                                                                       @RequestParam(defaultValue = "planName") String sortBy,
                                                                       @RequestParam(defaultValue = "asc") String sortDir){
-        Page<SubscriptionPlanResponseDTO> subscriptionPlans = subscriptionPlanService.getAll(keyword, page, size, sortBy, sortDir);
-
-        PaginatedResponse<SubscriptionPlanResponseDTO> paginated = new PaginatedResponse<>();
-        paginated.setItems(subscriptionPlans.getContent());
-        paginated.setPagination(new Pagination(
-                subscriptionPlans.getNumber() + 1,
-                subscriptionPlans.getSize(),
-                subscriptionPlans.getTotalPages(),
-                subscriptionPlans.getTotalElements()
-        ));
 
         return ResponseEntity.status(HttpStatus.OK).body(
                 ResponseWrapper.builder()
                         .status(HttpStatus.OK)
                         .code(HttpStatus.OK.value())
-                        .data(paginated)
+                        .data(subscriptionPlanService.getAll(keyword, page, size, sortBy, sortDir))
                         .build()
         );
     }
@@ -58,13 +48,12 @@ public class SubscriptionPlanController {
 
     @DeleteMapping("/{planId}")
     public ResponseEntity<ResponseWrapper<?>> deleteSubscriptionPlan(@PathVariable Long planId) {
-        String message = subscriptionPlanService.delete(planId);
 
         return ResponseEntity.status(HttpStatus.OK).body(
                 ResponseWrapper.builder()
                         .status(HttpStatus.OK)
                         .code(HttpStatus.OK.value())
-                        .data(message)
+                        .data(subscriptionPlanService.delete(planId))
                         .build()
         );
     }
