@@ -69,32 +69,23 @@ public class AlbumController {
         return ResponseEntity.ok(albumService.deleteAlbum(albumId));
     }
 
-        @GetMapping("/{albumId}/songs")
+
+    @GetMapping("/{albumId}/songs")
     public ResponseEntity<?> getSongsByAlbum(@PathVariable Long albumId,
                                              @RequestParam(defaultValue = "1") int page,
                                              @RequestParam(defaultValue = "10") int size,
                                              @RequestParam(defaultValue = "createdAt") String sortBy,
                                              @RequestParam(defaultValue = "DESC") String direction) {
-        Page<ResponseSong> songsPage = albumService.getSongsByAlbum(albumId, page - 1, size, sortBy, direction);
-
-        PaginatedResponse<ResponseSong> paginated = new PaginatedResponse<>();
-        paginated.setItems(songsPage.getContent());
-        paginated.setPagination(new Pagination(
-                songsPage.getNumber() + 1,
-                songsPage.getSize(),
-                songsPage.getTotalPages(),
-                songsPage.getTotalElements()
-        ));
         return ResponseEntity.ok().body(
                 ResponseWrapper.builder()
                         .status(HttpStatus.OK)
                         .code(HttpStatus.OK.value())
-                        .data(paginated)
+                        .data(albumService.getSongsByAlbum(albumId, page, size, sortBy, direction))
                         .build()
         );
     }
 
-    @PostMapping("/{albumId}/songs")
+    @PostMapping(value = "/{albumId}/songs", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> addSongToAlbum(@PathVariable Long albumId,
                                             @ModelAttribute @Valid FormSongRequest request,
                                             Authentication authentication) {
@@ -130,43 +121,24 @@ public class AlbumController {
                                        @RequestParam(defaultValue = "title") String sortBy,
                                        @RequestParam(defaultValue = "asc") String sortDir,
                                        @RequestParam(required = false) String keyword) {
-        Page<AlbumResponse> albumsPage = albumService.getAllAlbums(page, size, sortBy, sortDir, keyword);
-        PaginatedResponse<AlbumResponse> paginated = new PaginatedResponse<>();
-        paginated.setItems(albumsPage.getContent());
-        paginated.setPagination(new Pagination(
-                albumsPage.getNumber() + 1,
-                albumsPage.getSize(),
-                albumsPage.getTotalPages(),
-                albumsPage.getTotalElements()
-        ));
 
-        return ResponseEntity.ok().body(
+                return ResponseEntity.ok().body(
                 ResponseWrapper.builder()
                         .status(HttpStatus.OK)
                         .code(HttpStatus.OK.value())
-                        .data(paginated)
+                        .data(albumService.getAllAlbums(page, size, sortBy, sortDir, keyword))
                         .build()
         );
     }
 
     @GetMapping("/top")
     public ResponseEntity<?> getTopAlbums(@RequestParam(defaultValue = "week") String period) {
-        Page<AlbumResponse> topAlbums = albumService.getTopAlbums(period);
-
-        PaginatedResponse<AlbumResponse> paginated = new PaginatedResponse<>();
-        paginated.setItems(topAlbums.getContent());
-        paginated.setPagination(new Pagination(
-                topAlbums.getNumber() + 1,
-                topAlbums.getSize(),
-                topAlbums.getTotalPages(),
-                topAlbums.getTotalElements()
-        ));
 
         return  ResponseEntity.ok().body(
                 ResponseWrapper.builder()
                         .status(HttpStatus.OK)
                         .code(HttpStatus.OK.value())
-                        .data(paginated)
+                        .data(albumService.getTopAlbums(period))
                         .build()
         );
     }
@@ -174,22 +146,12 @@ public class AlbumController {
 
     @GetMapping("/featured")
     public ResponseEntity<?> getFeaturedAlbums() {
-        Page<AlbumResponse> albumsPage = albumService.findFeaturedAlbums();
-
-        PaginatedResponse<AlbumResponse> paginated = new PaginatedResponse<>();
-        paginated.setItems(albumsPage.getContent());
-        paginated.setPagination(new Pagination(
-                albumsPage.getNumber() + 1,
-                albumsPage.getSize(),
-                albumsPage.getTotalPages(),
-                albumsPage.getTotalElements()
-        ));
 
         return ResponseEntity.ok().body(
                 ResponseWrapper.builder()
                         .status(HttpStatus.OK)
                         .code(HttpStatus.OK.value())
-                        .data(paginated)
+                        .data(albumService.findFeaturedAlbums())
                         .build()
         );
     }
@@ -209,22 +171,11 @@ public class AlbumController {
         filter.setSortDir(sortDir);
         filter.setPremium(isPremium);
 
-        Page<AlbumResponse> albumPage = albumService.getAlbumsByArtist(filter);
-
-        PaginatedResponse<AlbumResponse> paginated = new PaginatedResponse<>();
-        paginated.setItems(albumPage.getContent());
-        paginated.setPagination(new Pagination(
-                albumPage.getNumber() + 1,
-                albumPage.getSize(),
-                albumPage.getTotalPages(),
-                albumPage.getTotalElements()
-        ));
-
         return ResponseEntity.ok().body(
                 ResponseWrapper.builder()
                         .status(HttpStatus.OK)
                         .code(HttpStatus.OK.value())
-                        .data(paginated)
+                        .data(albumService.getAlbumsByArtist(filter))
                         .build()
         );
     }

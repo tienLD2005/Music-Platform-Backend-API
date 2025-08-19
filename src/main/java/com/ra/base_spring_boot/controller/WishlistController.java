@@ -41,20 +41,11 @@ public class WishlistController {
                                           @RequestParam(defaultValue = "desc") String sortDir,
                                           Authentication authentication) {
 
-        Page<WishlistResponse> wishlists = wishlistService.getWishlist(page - 1, size, sortBy, sortDir, authentication);
-        PaginatedResponse<WishlistResponse> paginated = new PaginatedResponse<>();
-        paginated.setItems(wishlists.getContent());
-        paginated.setPagination(new Pagination(
-                wishlists.getNumber() + 1,
-                wishlists.getSize(),
-                wishlists.getTotalPages(),
-                wishlists.getTotalElements()
-        ));
         return ResponseEntity.status(HttpStatus.OK).body(
                 ResponseWrapper.builder()
                         .status(HttpStatus.OK)
                         .code(HttpStatus.OK.value())
-                        .data(paginated)
+                        .data(wishlistService.getWishlist(page, size, sortBy, sortDir, authentication))
                         .build()
         );
 

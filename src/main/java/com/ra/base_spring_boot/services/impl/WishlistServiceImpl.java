@@ -1,11 +1,13 @@
 package com.ra.base_spring_boot.services.impl;
 
+import com.ra.base_spring_boot.dto.resp.PaginatedResponse;
 import com.ra.base_spring_boot.dto.resp.SongResponseDTO;
 import com.ra.base_spring_boot.dto.resp.WishlistResponse;
 import com.ra.base_spring_boot.exception.HttpBadRequest;
 import com.ra.base_spring_boot.exception.HttpNotFound;
 import com.ra.base_spring_boot.model.Song;
 import com.ra.base_spring_boot.model.User;
+import com.ra.base_spring_boot.model.base.Pagination;
 import com.ra.base_spring_boot.repository.IRoleRepository;
 import com.ra.base_spring_boot.repository.ISongRepository;
 import com.ra.base_spring_boot.repository.IUserRepository;
@@ -47,9 +49,9 @@ public class WishlistServiceImpl implements IWishlistService {
     }
 
     @Override
-    public Page<WishlistResponse> getWishlist(int page, int size, String sortBy, String sortDir, Authentication authentication) {
+    public PaginatedResponse<WishlistResponse> getWishlist(int page, int size, String sortBy, String sortDir, Authentication authentication) {
         String email = authentication.getName();
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page - 1, size);
 
         Page<Song> songs;
         if ("popular".equalsIgnoreCase(sortBy)) {
@@ -62,7 +64,7 @@ public class WishlistServiceImpl implements IWishlistService {
                     : wishlistRepository.findWishlistOrderByCreatedAtDesc(email, pageable);
         }
 
-        return songs.map(song -> WishlistResponse.builder()
+        Page<WishlistResponse> wishlists = songs.map(song -> WishlistResponse.builder()
                 .id(song.getId())
                 .title(song.getTitle())
                 .artistName(song.getArtist().getFirstName() + " " + song.getArtist().getLastName())
@@ -72,7 +74,18 @@ public class WishlistServiceImpl implements IWishlistService {
                 .duration(song.getDuration())
                 .build()
         );
+
+        return new PaginatedResponse<>(
+                wishlists.getContent(),
+                new Pagination(
+                        wishlists.getNumber() + 1,
+                        wishlists.getSize(),
+                        wishlists.getTotalPages(),
+                        wishlists.getTotalElements()
+                )
+        );
     }
+
 
     @Override
     public String removeFromWishlist(Long songId, Authentication authentication) {
