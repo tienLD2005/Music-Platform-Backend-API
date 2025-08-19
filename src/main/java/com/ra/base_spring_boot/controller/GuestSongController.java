@@ -1,26 +1,19 @@
 package com.ra.base_spring_boot.controller;
 
 import com.ra.base_spring_boot.dto.ResponseWrapper;
-import com.ra.base_spring_boot.dto.req.DeleteSongRequest;
-import com.ra.base_spring_boot.dto.resp.PageResponse;
-import com.ra.base_spring_boot.dto.resp.SongResponse;
 import com.ra.base_spring_boot.dto.resp.TopSongDTO;
 import com.ra.base_spring_boot.services.ISongService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/songs")
+@RequestMapping("/api/v1/guest/songs")
 @RequiredArgsConstructor
-public class SongController {
+public class GuestSongController {
     private final ISongService songService;
 
     @GetMapping("/top-week")

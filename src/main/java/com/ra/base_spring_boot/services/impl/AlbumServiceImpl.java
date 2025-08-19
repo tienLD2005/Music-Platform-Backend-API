@@ -1,12 +1,11 @@
 package com.ra.base_spring_boot.services.impl;
 
 import com.ra.base_spring_boot.dto.ResponseWrapper;
-import com.ra.base_spring_boot.dto.req.AlbumFilter;
 import com.ra.base_spring_boot.dto.req.AlbumRequest;
 import com.ra.base_spring_boot.dto.req.FormSongRequest;
 import com.ra.base_spring_boot.dto.resp.*;
 import com.ra.base_spring_boot.exception.HttpBadRequest;
-import com.ra.base_spring_boot.exception.HttpForbiden;
+import com.ra.base_spring_boot.exception.HttpForbidden;
 import com.ra.base_spring_boot.exception.HttpNotFound;
 import com.ra.base_spring_boot.model.Album;
 import com.ra.base_spring_boot.model.Genre;
@@ -36,7 +35,6 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -116,7 +114,7 @@ public class AlbumServiceImpl implements IAlbumService {
                 .orElseThrow(()-> new HttpNotFound("Song not found"));
 
         if (!song.getArtist().getEmail().equals(name)) {
-            throw new HttpForbiden("You do not have permission to delete this song");
+            throw new HttpForbidden("You do not have permission to delete this song");
         }
 
         if (!song.getAlbum().getId().equals(albumId)) {

@@ -46,7 +46,7 @@ import java.util.List;
         type = SecuritySchemeType.HTTP,
         scheme = "bearer",
         bearerFormat = "JWT",
-        description = "Nhập token JWT bắt đầu với 'Bearer '"
+        description = "Nhập token JWT"
 )
 public class SecurityConfig
 {
@@ -73,19 +73,12 @@ public class SecurityConfig
                 .authorizeHttpRequests(
                         url -> url
 
-                                // history song
-//                                .requestMatchers("/api/v1/song-history/**").permitAll()
-
-                                // API Album Admin
-//                                .requestMatchers("/api/v1/admin/albums/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
-
                                 // API Banner
-//                                .requestMatchers("GET", "/api/v1/banner/**").permitAll()
                                 .requestMatchers("POST", "/api/v1/banner/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
                                 .requestMatchers("DELETE", "/api/v1/banner/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
 
                                 .requestMatchers("/api/v1/admin/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
-                                .requestMatchers("/api/v1/user/**").hasAuthority(RoleName.ROLE_USER.toString())
+
                                 // album and song
                                 .requestMatchers(HttpMethod.GET,"/api/v1/albums/*/songs").hasAnyAuthority(RoleName.ROLE_ADMIN.toString(), RoleName.ROLE_USER.toString(), RoleName.ROLE_ARTIST.toString())
                                 .requestMatchers(HttpMethod.POST,"/api/v1/albums/*/songs").hasAuthority(RoleName.ROLE_ARTIST.toString())
@@ -104,31 +97,36 @@ public class SecurityConfig
                                 .requestMatchers("api/v1/lyrics/**").hasAuthority(RoleName.ROLE_ARTIST.toString())
 
                                 //Wishlist
-//                                .requestMatchers("/api/v1/wishlists").hasAuthority(RoleName.ROLE_USER.toString())
                                 .requestMatchers("/api/v1/wishlists/**").hasAuthority(RoleName.ROLE_USER.toString())
-                                //Subscription Plan
-//                                .requestMatchers("/api/v1/subscription_plan").hasAuthority(RoleName.ROLE_ADMIN.toString())
-                                .requestMatchers("/api/v1/subscription_plan/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
 
-////                                .requestMatchers("/api/v1/artist/**").hasAuthority(RoleName.ROLE_ARTIST.toString())
-//                                .requestMatchers("api/v1/artists/**").permitAll()
-//                                .requestMatchers("api/v1/genres/**").permitAll()
+                                //Subscription Plan
+                                .requestMatchers("/api/v1/subscription_plan/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
 
                                 .requestMatchers("api/v1/subscriptions/**").hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ARTIST.toString())
                                 .requestMatchers("api/v1/payments/**").hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ARTIST.toString())
-//
-//                                .requestMatchers("/api/v1/admin/user-statistics").hasAuthority(RoleName.ROLE_ADMIN.toString())
-//                                .requestMatchers("/api/v1/admin/song-statistics").hasAuthority(RoleName.ROLE_ADMIN.toString())
-//                                .requestMatchers("/api/v1/admin/album-statistics").hasAuthority(RoleName.ROLE_ADMIN.toString())
-//                                .requestMatchers("/api/v1/admin/artists-statistics").hasAuthority(RoleName.ROLE_ADMIN.toString())
 
                                 .requestMatchers(HttpMethod.POST, "/api/v1/comments/*/reactions").hasAuthority(RoleName.ROLE_USER.toString())
                                 .requestMatchers(HttpMethod.DELETE, "/api/v1/comments/*/reactions").hasAuthority(RoleName.ROLE_USER.toString())
-//                                .requestMatchers(HttpMethod.GET, "/api/v1/comments/*/reactions").permitAll()
-//                                .requestMatchers(HttpMethod.GET, "/api/v1/comments/*/reactions/count").permitAll()
 
                                 .requestMatchers(HttpMethod.POST, "/api/v1/comment-reactions/*").hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ARTIST.toString())
                                 .requestMatchers(HttpMethod.DELETE, "/api/v1/comment-reactions/*").hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ARTIST.toString())
+
+                                .requestMatchers("/api/v1/admin/statistics/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
+
+                                .requestMatchers(HttpMethod.POST, "/api/v1/follows/artists/*")
+                                .hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ARTIST.toString())
+
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/follows/artists/*")
+                                .hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ARTIST.toString())
+
+                                .requestMatchers(HttpMethod.GET, "/api/v1/follows/me/artists")
+                                .hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ARTIST.toString())
+
+                                .requestMatchers(HttpMethod.GET, "/api/v1/follows/artists/*/followers")
+                                .hasAnyAuthority(RoleName.ROLE_ADMIN.toString(), RoleName.ROLE_ARTIST.toString())
+
+                                .requestMatchers(HttpMethod.GET, "/api/v1/follows/artists/*/followers/count")
+                                .hasAnyAuthority(RoleName.ROLE_ADMIN.toString(), RoleName.ROLE_ARTIST.toString())
 
                                 .anyRequest().permitAll()
                 )
