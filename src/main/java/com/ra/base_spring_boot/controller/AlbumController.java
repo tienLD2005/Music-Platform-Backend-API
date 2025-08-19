@@ -54,7 +54,7 @@ public class AlbumController {
         return ResponseEntity.status(HttpStatus.CREATED).body(albumService.createAlbum(request));
     }
 
-    @PutMapping("/{albumId}")
+    @PutMapping(value = "/{albumId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAuthority('ROLE_ARTIST')")
     public ResponseEntity<ResponseWrapper<AlbumResponseDTO>> updateAlbum(
             @Valid
@@ -85,7 +85,7 @@ public class AlbumController {
         );
     }
 
-    @PostMapping(value = "/{albumId}/songs", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping( value = "/{albumId}/songs", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> addSongToAlbum(@PathVariable Long albumId,
                                             @ModelAttribute @Valid FormSongRequest request,
                                             Authentication authentication) {

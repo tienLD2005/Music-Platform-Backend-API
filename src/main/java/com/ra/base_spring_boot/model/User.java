@@ -103,4 +103,9 @@ public class User extends BaseObject {
     // I add this one for trending artists
     @OneToMany(mappedBy = "artist")
     private List<Song> songs;
+
+    // For reactions
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SongReaction> songReactions;
+
 }
