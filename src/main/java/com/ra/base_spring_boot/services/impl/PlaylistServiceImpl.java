@@ -3,6 +3,7 @@
     import com.ra.base_spring_boot.dto.req.PlaylistReq;
     import com.ra.base_spring_boot.dto.resp.PageResponse;
     import com.ra.base_spring_boot.dto.resp.PlaylistResp;
+    import com.ra.base_spring_boot.dto.resp.SongResponse;
     import com.ra.base_spring_boot.exception.HttpNotFound;
     import com.ra.base_spring_boot.model.Playlist;
     import com.ra.base_spring_boot.model.PlaylistSong;
@@ -129,6 +130,35 @@
                     playlist.getCreatedAt(),
                     playlist.getUpdatedAt()
             );
+        }
+
+
+        @Override
+        public List<SongResponse> getSongsInPlaylist(Long playlistId) {
+            Playlist playlist = playlistRepository.findById(playlistId)
+                    .orElseThrow(() -> new HttpNotFound("Playlist not found"));
+
+            return playlist.getPlaylistSongs()
+                    .stream()
+                    .map(PlaylistSong::getSong)
+                    .map(song -> SongResponse.builder()
+                            .id(song.getId())
+                            .title(song.getTitle())
+                            .duration(song.getDuration())
+                            .artistName(song.getArtist().getFirstName())
+                            .artistId(song.getArtist().getId())
+                            .albumName(song.getAlbum().getTitle())
+                            .albumId(song.getAlbum().getId())
+                            .fileUrl(song.getFileUrl())
+                            .views(song.getViews())
+                            .createdAt(song.getCreatedAt())
+//                            .status(song.getStatus())
+                            .genres(song.getGenres().stream()
+                                    .map(g -> g.getGenreName())
+                                    .toList())
+                            .build()
+                    )
+                    .toList();
         }
 
 

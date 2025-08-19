@@ -21,5 +21,7 @@ public class SongResponse {
     private String fileUrl;
     private Integer views;
     private LocalDateTime createdAt;
+    private String status;
     private List<String> genres;
+
 }
