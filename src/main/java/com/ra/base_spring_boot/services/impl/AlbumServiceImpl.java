@@ -15,6 +15,7 @@ import com.ra.base_spring_boot.model.User;
 import com.ra.base_spring_boot.model.base.Pagination;
 import com.ra.base_spring_boot.model.constants.AlbumStatus;
 import com.ra.base_spring_boot.model.constants.AlbumType;
+import com.ra.base_spring_boot.model.constants.SongStatus;
 import com.ra.base_spring_boot.repository.IAlbumRepository;
 import com.ra.base_spring_boot.repository.IGenreRepository;
 import com.ra.base_spring_boot.repository.ISongRepository;
@@ -102,6 +103,7 @@ public class AlbumServiceImpl implements IAlbumService {
                 .album(album)
                 .genres(genres)
                 .artist(artist)
+                .status(SongStatus.PENDING)
                 .views(0)
                 .build();
         songRepository.save(song);
@@ -300,13 +302,15 @@ public class AlbumServiceImpl implements IAlbumService {
         }
 
         Long songCount = albumRepository.countSongsInAlbum(albumId);
-//        if (songCount > 0) {
-//            return ResponseWrapper.<String>builder()
-//                    .status(HttpStatus.BAD_REQUEST)
-//                    .code(HttpStatus.BAD_REQUEST.value())
-//                    .data("Album contains songs and cannot be deleted")
-//                    .build();
-//        }
+        if (songCount > 0) {
+            return ResponseWrapper.<String>builder()
+                    .status(HttpStatus.BAD_REQUEST)
+                    .code(HttpStatus.BAD_REQUEST.value())
+                    .data("Album contains songs and cannot be deleted")
+                    .build();
+        }
+
+
 
         albumRepository.delete(album);
         return ResponseWrapper.<String>builder()

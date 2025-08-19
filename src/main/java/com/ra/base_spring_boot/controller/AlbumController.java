@@ -31,7 +31,6 @@ public class AlbumController {
     private final IAlbumService albumService;
 
     @GetMapping("/my-album")
-    @PreAuthorize("hasAuthority('ROLE_ARTIST')")
     public ResponseEntity<ResponseWrapper<PageResponse<AlbumResponseDTO>>> getMyAlbums(
             @RequestParam(required = false) String title,
             @RequestParam(defaultValue = "0") int page,
@@ -49,13 +48,11 @@ public class AlbumController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAuthority('ROLE_ARTIST')")
     public ResponseEntity<ResponseWrapper<AlbumResponseDTO>> createAlbum(@Valid @ModelAttribute AlbumRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(albumService.createAlbum(request));
     }
 
     @PutMapping(value = "/{albumId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAuthority('ROLE_ARTIST')")
     public ResponseEntity<ResponseWrapper<AlbumResponseDTO>> updateAlbum(
             @Valid
             @PathVariable Long albumId,
@@ -64,11 +61,9 @@ public class AlbumController {
     }
 
     @DeleteMapping("/{albumId}")
-    @PreAuthorize("hasAuthority('ROLE_ARTIST')")
     public ResponseEntity<ResponseWrapper<String>> deleteAlbum(@PathVariable Long albumId){
         return ResponseEntity.ok(albumService.deleteAlbum(albumId));
     }
-
 
     @GetMapping("/{albumId}/songs")
     public ResponseEntity<?> getSongsByAlbum(@PathVariable Long albumId,

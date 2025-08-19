@@ -59,33 +59,4 @@ public class SongController {
         );
     }
 
-    @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<PageResponse<SongResponse>> getAllSongs(
-            @RequestParam(defaultValue = "") String keyword,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
-        Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok(songService.getAllSongs(keyword, pageable));
-    }
-
-
-    @DeleteMapping("/{songId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ResponseWrapper<String>> deleteSong(
-            @PathVariable Long songId,
-            @RequestBody @Valid DeleteSongRequest request
-    ) {
-        songService.deleteSong(songId, request.getReason());
-        return ResponseEntity.ok(
-                ResponseWrapper.<String>builder()
-                        .status(HttpStatus.OK)
-                        .code(200)
-                        .data("Song deleted successfully and artist notified.")
-                        .build()
-        );
-    }
-
-
 }
