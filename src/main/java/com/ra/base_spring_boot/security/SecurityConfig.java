@@ -97,10 +97,9 @@ public class SecurityConfig
                                 .requestMatchers("/api/v1/wishlists").hasAuthority(RoleName.ROLE_USER.toString())
                                 .requestMatchers("/api/v1/wishlists/**").hasAuthority(RoleName.ROLE_USER.toString())
 
-
 //                                .requestMatchers("/api/v1/artist/**").hasAuthority(RoleName.ROLE_ARTIST.toString())
-                                .requestMatchers("api/v1/artists/**").hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ADMIN.toString(), RoleName.ROLE_ARTIST.toString())
-                                .requestMatchers("api/v1/genres/**").hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ADMIN.toString(), RoleName.ROLE_ARTIST.toString())
+                                .requestMatchers("api/v1/artists/**").permitAll()
+                                .requestMatchers("api/v1/genres/**").permitAll()
 
                                 .requestMatchers("api/v1/subscriptions/**").hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ADMIN.toString())
                                 .requestMatchers("api/v1/payments/**").hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ADMIN.toString())
