@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/admin/albums")
 @RequiredArgsConstructor
 
-@PreAuthorize("hasRole('ADMIN')")
 public class AlbumAdminController {
 
     private final IAlbumAdminService albumAdminService;
@@ -35,18 +34,13 @@ public class AlbumAdminController {
             @RequestParam(required = false) AlbumStatus status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @Parameter(description = "Short (title, releaseDate, createdAt, status)")
+            @Parameter(description = "Sort (title, releaseDate, createdAt, status)")
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @Parameter(description = "Sorting direction (asc, desc)")
             @RequestParam(defaultValue = "desc") String sortDir) {
 
-        Sort.Direction direction = sortDir.equalsIgnoreCase("desc")
-                ? Sort.Direction.DESC
-                : Sort.Direction.ASC;
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
-
-        PageResponse<AlbumAdminResponse> result = albumAdminService.getAllAlbums(keyword, status, pageable);
+        PageResponse<AlbumAdminResponse> result = albumAdminService.getAllAlbums(
+                keyword, status, page, size, sortBy, sortDir);
 
         return ResponseEntity.ok(ResponseWrapper.<PageResponse<AlbumAdminResponse>>builder()
                 .status(HttpStatus.OK)
