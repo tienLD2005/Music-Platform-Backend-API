@@ -2,6 +2,7 @@ package com.ra.base_spring_boot.advice;
 
 import com.ra.base_spring_boot.exception.*;
 import com.ra.base_spring_boot.dto.ResponseWrapper;
+import com.ra.base_spring_boot.utils.exception.AlreadyPurchasedException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -174,6 +175,36 @@ public class GlobalHandleException
                         .status(HttpStatus.NOT_FOUND)
         .build());
     }
+    @ExceptionHandler(NullPointerException.class)
+    public ResponseEntity<?> handleNullPointerException(NullPointerException ex) {
+        if (ex.getMessage() != null && ex.getMessage().contains("principal")) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("code", 401);
+            error.put("error", "Full authentication is required to access this resource");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+        }
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                ResponseWrapper.builder()
+                        .data(ex.getMessage())
+                        .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .build()
+        );
+    }
+
+
+    @ExceptionHandler(AlreadyPurchasedException.class)
+    public ResponseEntity<?> handleAlreadyPurchased(AlreadyPurchasedException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                ResponseWrapper.builder()
+                        .data(ex.getMessage())
+                        .code(HttpStatus.CONFLICT.value())
+                        .status(HttpStatus.CONFLICT)
+                        .build()
+        );
+    }
+
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<?> handleResourceNotFoundException(ResourceNotFoundException ex)

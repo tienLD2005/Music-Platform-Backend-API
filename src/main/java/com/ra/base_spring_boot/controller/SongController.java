@@ -35,6 +35,30 @@ public class SongController {
         );
     }
 
+    @GetMapping("/top-all-time")
+    public ResponseEntity<?> getTopSongsAllTime(@RequestParam(defaultValue = "15") int limit) {
+        List<TopSongDTO> topSongs = songService.getTopSongsAllTime(limit);
+        return ResponseEntity.ok(
+                ResponseWrapper.builder()
+                        .status(HttpStatus.OK)
+                        .code(200)
+                        .data(topSongs)
+                        .build()
+        );
+    }
+
+    @GetMapping("/trending")
+    public ResponseEntity<?> getTrendingSongs(@RequestParam(defaultValue = "15") int limit) {
+        List<TopSongDTO> trendingSongs = songService.getTrendingSongs(limit);
+        return ResponseEntity.ok(
+                ResponseWrapper.builder()
+                        .status(HttpStatus.OK)
+                        .code(200)
+                        .data(trendingSongs)
+                        .build()
+        );
+    }
+
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PageResponse<SongResponse>> getAllSongs(

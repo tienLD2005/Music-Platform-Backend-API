@@ -73,6 +73,12 @@ public class SecurityConfig
                 .authorizeHttpRequests(
                         url -> url
 
+                                // history song
+//                                .requestMatchers("/api/v1/song-history/**").authenticated().anyRequest().permitAll()
+
+                                // API Album Admin
+                                .requestMatchers("/api/v1/admin/albums/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
+
                                 // API Banner
                                 .requestMatchers("GET", "/api/v1/banner/**").permitAll()
                                 .requestMatchers("POST", "/api/v1/banner/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
@@ -87,6 +93,9 @@ public class SecurityConfig
                                 //Album : allow guests to view
                                 .requestMatchers("/api/v1/albums").permitAll()
                                 .requestMatchers("/api/v1/albums/**").permitAll()
+                                //Wishlist
+                                .requestMatchers("/api/v1/wishlists").hasAuthority(RoleName.ROLE_USER.toString())
+                                .requestMatchers("/api/v1/wishlists/**").hasAuthority(RoleName.ROLE_USER.toString())
 
 
 //                                .requestMatchers("/api/v1/artist/**").hasAuthority(RoleName.ROLE_ARTIST.toString())

@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -83,6 +84,36 @@ public interface ISongRepository extends JpaRepository<Song, Long> {
             @Param("genreId") Long genreId,
             @Param("albumId") Long albumId
     );
+
+    @Query("""
+    SELECT new com.ra.base_spring_boot.dto.resp.TopSongDTO(
+        s.id, s.title, s.duration, s.fileUrl, s.views, COUNT(d)
+    )
+    FROM Song s
+    LEFT JOIN Download d
+        ON s.id = d.song.id
+    GROUP BY s.id, s.title, s.duration, s.fileUrl, s.views
+    ORDER BY s.views DESC
+""")
+    List<TopSongDTO> findTopSongsAllTime(Pageable pageable);
+
+    @Query("""
+    SELECT new com.ra.base_spring_boot.dto.resp.TopSongDTO(
+        s.id,
+        s.title,
+        s.duration,
+        s.fileUrl,
+        s.views,
+        COUNT(DISTINCT d)
+    )
+    FROM SongHistory sh
+    JOIN sh.song s
+    LEFT JOIN Download d ON s.id = d.song.id
+    WHERE sh.playedAt >= :startDate
+    GROUP BY s.id, s.title, s.duration, s.fileUrl, s.views
+    ORDER BY COUNT(sh) DESC
+""")
+    List<TopSongDTO> findTrendingSongs(@Param("startDate") LocalDateTime startDate, Pageable pageable);
 
 
 

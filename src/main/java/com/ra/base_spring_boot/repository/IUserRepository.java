@@ -74,4 +74,6 @@ public interface IUserRepository extends JpaRepository<User, Long>
         GROUP BY COALESCE(sp.planName, 'Free')
    \s""")
     List<Object[]> countUsersByAccountType();
+
+
 }

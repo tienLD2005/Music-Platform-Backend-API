@@ -17,7 +17,7 @@ public class BannerUpdateReq {
     private LocalDateTime startTime;
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @Future(message = "Thời gian kết thúc phải ở tương lai")
+    @Future(message = "The end time must be in the future.")
     private LocalDateTime endTime;
 
     private BannerStatus status;

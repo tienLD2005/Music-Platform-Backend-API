@@ -12,6 +12,8 @@ import java.util.List;
 
 public interface ISongService {
     List<TopSongDTO> getTop15SongsOfWeek();
+    List<TopSongDTO> getTopSongsAllTime(int limit);
+    List<TopSongDTO> getTrendingSongs(int limit);
 
     PageResponse<SongResponse> getAllSongs(String keyword, Pageable pageable);
 
