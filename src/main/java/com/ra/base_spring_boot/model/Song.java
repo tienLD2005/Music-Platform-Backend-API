@@ -69,6 +69,10 @@ public class Song extends BaseObject {
     @OneToMany(mappedBy = "song")
     private List<SongHistory> songHistories;
 
+    // For reactions
+    @OneToMany(mappedBy = "song", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SongReaction> reactions;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private SongStatus status;
