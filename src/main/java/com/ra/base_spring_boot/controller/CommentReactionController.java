@@ -37,10 +37,10 @@ public class CommentReactionController {
                 .reactionEnum(reaction.getReactionEnum())
                 .build();
 
-        return ResponseEntity.ok(
+        return ResponseEntity.status(HttpStatus.CREATED).body(
                 ResponseWrapper.<ReactionResponseDTO>builder()
-                        .status(HttpStatus.OK)
-                        .code(HttpStatus.OK.value())
+                        .status(HttpStatus.CREATED)
+                        .code(HttpStatus.CREATED.value())
                         .data(responseDTO)
                         .build()
         );
@@ -51,10 +51,10 @@ public class CommentReactionController {
     public ResponseEntity<ResponseWrapper<String>> removeReaction(@PathVariable Long commentId) {
         commentReactionService.removeReaction(commentId);
 
-        return ResponseEntity.ok(
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
                 ResponseWrapper.<String>builder()
-                        .status(HttpStatus.OK)
-                        .code(HttpStatus.OK.value())
+                        .status(HttpStatus.NO_CONTENT)
+                        .code(HttpStatus.NO_CONTENT.value())
                         .data("Reaction removed successfully")
                         .build()
         );
