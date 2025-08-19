@@ -33,10 +33,10 @@ public class SongReactionController {
         SongReaction songReaction = songReactionService.reactToSong(songId, userDetails.getId(), reaction);
         SongReactionResponseDto responseDto = songReactionMapper.toResponseDto(songReaction);
 
-        return ResponseEntity.ok(
+        return ResponseEntity.status(HttpStatus.CREATED).body(
                 ResponseWrapper.<SongReactionResponseDto>builder()
-                        .status(HttpStatus.OK)
-                        .code(HttpStatus.OK.value())
+                        .status(HttpStatus.CREATED)
+                        .code(HttpStatus.CREATED.value())
                         .data(responseDto)
                         .build()
         );
@@ -48,10 +48,10 @@ public class SongReactionController {
             @AuthenticationPrincipal MyUserDetails userDetails
     ) {
         songReactionService.removeReaction(songId, userDetails.getId());
-        return ResponseEntity.ok(
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
                 ResponseWrapper.<Void>builder()
-                        .status(HttpStatus.OK)
-                        .code(HttpStatus.OK.value())
+                        .status(HttpStatus.NO_CONTENT)
+                        .code(HttpStatus.NO_CONTENT.value())
                         .data(null)
                         .build()
         );
