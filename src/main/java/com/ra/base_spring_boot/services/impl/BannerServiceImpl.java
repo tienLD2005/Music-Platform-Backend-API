@@ -111,17 +111,6 @@ public class BannerServiceImpl implements IBannerService {
     public List<BannerResponse> getActiveBanners(String position) {
         LocalDateTime now = LocalDateTime.now();
 
-        if (position == null || position.isBlank()) {
-            return bannerRepository.findActiveBanners(BannerStatus.ACTIVE, now,position)
-                    .stream()
-                    .map(BannerMapper::toBannerResponse)
-                    .toList();
-        }
-
-        if (!bannerRepository.existsByPosition(position)) {
-            throw new ResourceNotFoundException("Position '" + position + "' does not exist");
-        }
-
         return bannerRepository.findActiveBanners(BannerStatus.ACTIVE, now, position)
                 .stream()
                 .map(BannerMapper::toBannerResponse)
