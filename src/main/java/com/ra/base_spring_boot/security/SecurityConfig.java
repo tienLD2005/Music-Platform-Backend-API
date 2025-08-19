@@ -73,10 +73,6 @@ public class SecurityConfig
                 .authorizeHttpRequests(
                         url -> url
 
-                                // API Banner
-                                .requestMatchers("POST", "/api/v1/banner/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
-                                .requestMatchers("DELETE", "/api/v1/banner/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
-
                                 .requestMatchers("/api/v1/admin/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
 
                                 // album and song
@@ -127,6 +123,12 @@ public class SecurityConfig
 
                                 .requestMatchers(HttpMethod.GET, "/api/v1/follows/artists/*/followers/count")
                                 .hasAnyAuthority(RoleName.ROLE_ADMIN.toString(), RoleName.ROLE_ARTIST.toString())
+
+                                // Song history
+                                .requestMatchers("/api/v1/song-history/**").hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ARTIST.toString())
+
+                                // Song reactions
+                                .requestMatchers("/api/v1/song-reactions/**").hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ARTIST.toString())
 
                                 .anyRequest().permitAll()
                 )
