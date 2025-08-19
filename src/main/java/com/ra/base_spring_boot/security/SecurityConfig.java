@@ -79,8 +79,8 @@ public class SecurityConfig
                                 // API Album Admin
                                 .requestMatchers("/api/v1/admin/albums/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
 
-//                                // API Banner
-//                                .requestMatchers("GET", "/api/v1/banner/**").permitAll()
+                                // API Banner
+                                .requestMatchers("GET", "/api/v1/banner/**").permitAll()
                                 .requestMatchers("POST", "/api/v1/banner/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
                                 .requestMatchers("DELETE", "/api/v1/banner/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
 
@@ -98,8 +98,8 @@ public class SecurityConfig
                                 .requestMatchers("/api/v1/wishlists/**").hasAuthority(RoleName.ROLE_USER.toString())
 
 //                                .requestMatchers("/api/v1/artist/**").hasAuthority(RoleName.ROLE_ARTIST.toString())
-                                .requestMatchers("api/v1/artists/**").hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ADMIN.toString(), RoleName.ROLE_ARTIST.toString())
-                                .requestMatchers("api/v1/genres/**").hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ADMIN.toString(), RoleName.ROLE_ARTIST.toString())
+                                .requestMatchers("api/v1/artists/**").permitAll()
+                                .requestMatchers("api/v1/genres/**").permitAll()
 
                                 .requestMatchers("api/v1/subscriptions/**").hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ADMIN.toString())
                                 .requestMatchers("api/v1/payments/**").hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ADMIN.toString())
@@ -109,7 +109,11 @@ public class SecurityConfig
                                 .requestMatchers("/api/v1/admin/album-statistics").hasAuthority(RoleName.ROLE_ADMIN.toString())
                                 .requestMatchers("/api/v1/admin/artists-statistics").hasAuthority(RoleName.ROLE_ADMIN.toString())
 
-                                .requestMatchers("/api/v1/users/follows/**").hasAuthority(RoleName.ROLE_USER.toString())
+                                .requestMatchers(HttpMethod.POST, "/api/v1/comments/*/reactions").hasAuthority(RoleName.ROLE_USER.toString())
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/comments/*/reactions").hasAuthority(RoleName.ROLE_USER.toString())
+                                .requestMatchers(HttpMethod.GET, "/api/v1/comments/*/reactions").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/comments/*/reactions/count").permitAll()
+
                                 .anyRequest().permitAll()
                 )
                 .authenticationProvider(authenticationProvider())
