@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/songs")
+@RequestMapping("/api/v1/songs-reactions")
 @RequiredArgsConstructor
 public class SongReactionController {
 

@@ -8,20 +8,17 @@ import com.ra.base_spring_boot.dto.resp.PageResponse;
 import com.ra.base_spring_boot.services.IClientCommentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/comments")
+@RequestMapping("/api/v1/client/comments")
 @RequiredArgsConstructor
-public class CommentController {
+public class ClientCommentController {
 
     private final IClientCommentService commentService;
 
-    @PreAuthorize("hasAuthority('ROLE_USER')")
     @GetMapping("/song/{songId}")
     public ResponseEntity<ResponseWrapper<PageResponse<CommentResponseDTO>>> getCommentsBySong(
             @PathVariable Long songId,
@@ -38,7 +35,6 @@ public class CommentController {
                         .build()
         );
     }
-    @PreAuthorize("hasAuthority('ROLE_USER')")
     @PostMapping
     public ResponseEntity<ResponseWrapper<CommentResponseDTO>> addComment(@Valid @RequestBody CommentRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -48,7 +44,6 @@ public class CommentController {
                         .data(commentService.addComment(request))
                         .build());
     }
-    @PreAuthorize("hasAuthority('ROLE_USER')")
     @PutMapping("/{commentId}")
     public ResponseEntity<ResponseWrapper<CommentResponseDTO>> updateComment(
             @Valid
@@ -64,7 +59,6 @@ public class CommentController {
         );
     }
 
-    @PreAuthorize("hasAuthority('ROLE_USER')")
     @DeleteMapping("/{commentId}")
     public ResponseEntity<ResponseWrapper<String>> deleteComment(
             @PathVariable Long commentId

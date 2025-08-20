@@ -1,5 +1,8 @@
 package com.ra.base_spring_boot.model.constants;
 
+import lombok.Getter;
+
+@Getter
 public enum SongStatus {
     PENDING("PENDING"),
     APPROVED("APPROVED"),
@@ -11,7 +14,4 @@ public enum SongStatus {
         this.display = display;
     }
 
-    public String getDisplay() {
-        return display;
-    }
 }

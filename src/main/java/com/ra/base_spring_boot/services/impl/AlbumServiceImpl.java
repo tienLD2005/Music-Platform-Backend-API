@@ -1,12 +1,11 @@
 package com.ra.base_spring_boot.services.impl;
 
 import com.ra.base_spring_boot.dto.ResponseWrapper;
-import com.ra.base_spring_boot.dto.req.AlbumFilter;
 import com.ra.base_spring_boot.dto.req.AlbumRequest;
 import com.ra.base_spring_boot.dto.req.FormSongRequest;
 import com.ra.base_spring_boot.dto.resp.*;
 import com.ra.base_spring_boot.exception.HttpBadRequest;
-import com.ra.base_spring_boot.exception.HttpForbiden;
+import com.ra.base_spring_boot.exception.HttpForbidden;
 import com.ra.base_spring_boot.exception.HttpNotFound;
 import com.ra.base_spring_boot.model.Album;
 import com.ra.base_spring_boot.model.Genre;
@@ -15,6 +14,7 @@ import com.ra.base_spring_boot.model.User;
 import com.ra.base_spring_boot.model.base.Pagination;
 import com.ra.base_spring_boot.model.constants.AlbumStatus;
 import com.ra.base_spring_boot.model.constants.AlbumType;
+import com.ra.base_spring_boot.model.constants.SongStatus;
 import com.ra.base_spring_boot.repository.IAlbumRepository;
 import com.ra.base_spring_boot.repository.IGenreRepository;
 import com.ra.base_spring_boot.repository.ISongRepository;
@@ -35,7 +35,6 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -102,6 +101,7 @@ public class AlbumServiceImpl implements IAlbumService {
                 .album(album)
                 .genres(genres)
                 .artist(artist)
+                .status(SongStatus.PENDING)
                 .views(0)
                 .build();
         songRepository.save(song);
@@ -114,7 +114,7 @@ public class AlbumServiceImpl implements IAlbumService {
                 .orElseThrow(()-> new HttpNotFound("Song not found"));
 
         if (!song.getArtist().getEmail().equals(name)) {
-            throw new HttpForbiden("You do not have permission to delete this song");
+            throw new HttpForbidden("You do not have permission to delete this song");
         }
 
         if (!song.getAlbum().getId().equals(albumId)) {
@@ -300,13 +300,15 @@ public class AlbumServiceImpl implements IAlbumService {
         }
 
         Long songCount = albumRepository.countSongsInAlbum(albumId);
-//        if (songCount > 0) {
-//            return ResponseWrapper.<String>builder()
-//                    .status(HttpStatus.BAD_REQUEST)
-//                    .code(HttpStatus.BAD_REQUEST.value())
-//                    .data("Album contains songs and cannot be deleted")
-//                    .build();
-//        }
+        if (songCount > 0) {
+            return ResponseWrapper.<String>builder()
+                    .status(HttpStatus.BAD_REQUEST)
+                    .code(HttpStatus.BAD_REQUEST.value())
+                    .data("Album contains songs and cannot be deleted")
+                    .build();
+        }
+
+
 
         albumRepository.delete(album);
         return ResponseWrapper.<String>builder()

@@ -8,7 +8,9 @@ import org.springframework.data.domain.Pageable;
 
 public interface IAlbumAdminService {
 
-    PageResponse<AlbumAdminResponse> getAllAlbums(String keyword, AlbumStatus status, Pageable pageable);
+    PageResponse<AlbumAdminResponse> getAllAlbums(String keyword, AlbumStatus status,
+                                                  int page, int size, String sortBy, String sortDir);
+
 
     AlbumAdminResponse getAlbumById(Long id);
 

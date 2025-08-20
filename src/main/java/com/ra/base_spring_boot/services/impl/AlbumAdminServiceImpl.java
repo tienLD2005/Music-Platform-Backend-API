@@ -21,7 +21,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,13 +39,15 @@ public class AlbumAdminServiceImpl implements IAlbumAdminService {
     private ValidateAlbumAdmin validateAlbumAdmin;
 
     @Override
-    public PageResponse<AlbumAdminResponse> getAllAlbums(String keyword, AlbumStatus status, Pageable pageable) {
+    public PageResponse<AlbumAdminResponse> getAllAlbums(String keyword, AlbumStatus status,
+                                                         int page, int size, String sortBy, String sortDir) {
         try {
-            log.info("Fetching albums with keyword: {}, status: {}, page: {}",
-                    keyword, status, pageable.getPageNumber());
+            log.info("Fetching albums with keyword: {}, status: {}, page: {}, size: {}, sortBy: {}, sortDir: {}",
+                    keyword, status, page, size, sortBy, sortDir);
+
+            Pageable pageable = createPageable(page, size, sortBy, sortDir);
 
             Page<Album> albumPage = albumRepository.findAlbumsWithFilters(keyword, status, pageable);
-
             Page<AlbumAdminResponse> responsePage = albumPage.map(album -> {
                 try {
                     Long songCount = albumRepository.countSongsByAlbumId(album.getId());
@@ -54,9 +58,7 @@ public class AlbumAdminServiceImpl implements IAlbumAdminService {
                             "Error processing album data with ID: " + album.getId(), e);
                 }
             });
-
             return PageMapper.toPageResponse(responsePage);
-
         } catch (DataAccessException e) {
             log.error("Database error when fetching albums", e);
             throw new DatabaseOperationException("Database error when retrieving album list", e);
@@ -65,6 +67,37 @@ public class AlbumAdminServiceImpl implements IAlbumAdminService {
             throw new RuntimeException("Unexpected error when retrieving album list: " + e.getMessage(), e);
         }
     }
+
+    private Pageable createPageable(int page, int size, String sortBy, String sortDir) {
+        try {
+            if (page < 0) {
+                log.warn("Invalid page number: {}, using default 0", page);
+                page = 0;
+            }
+            if (size <= 0 || size > 100) {
+                log.warn("Invalid page size: {}, using default 10", size);
+                size = 10;
+            }
+
+            if (sortBy == null || sortBy.trim().isEmpty()) {
+                sortBy = "createdAt";
+            }
+
+            if (sortDir == null || (!sortDir.equalsIgnoreCase("asc") && !sortDir.equalsIgnoreCase("desc"))) {
+                sortDir = "desc";
+            }
+
+            Sort.Direction direction = sortDir.equalsIgnoreCase("desc")
+                    ? Sort.Direction.DESC
+                    : Sort.Direction.ASC;
+
+            return PageRequest.of(page, size, Sort.by(direction, sortBy));
+        } catch (Exception e) {
+            log.error("Error creating Pageable object", e);
+            return PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
+        }
+    }
+
 
     @Override
     public AlbumAdminResponse getAlbumById(Long id) {

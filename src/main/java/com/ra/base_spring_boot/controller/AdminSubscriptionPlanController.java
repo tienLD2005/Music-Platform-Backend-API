@@ -2,21 +2,18 @@ package com.ra.base_spring_boot.controller;
 
 import com.ra.base_spring_boot.dto.ResponseWrapper;
 import com.ra.base_spring_boot.dto.req.SubscriptionPlanRequestDTO;
-import com.ra.base_spring_boot.dto.resp.PaginatedResponse;
 import com.ra.base_spring_boot.dto.resp.SubscriptionPlanResponseDTO;
-import com.ra.base_spring_boot.model.base.Pagination;
 import com.ra.base_spring_boot.services.ISubscriptionPlanService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/subscription_plan")
+@RequestMapping("/api/v1/admin/subscription_plan")
 @RequiredArgsConstructor
-public class SubscriptionPlanController {
+public class AdminSubscriptionPlanController {
     private final ISubscriptionPlanService subscriptionPlanService;
 
     @GetMapping

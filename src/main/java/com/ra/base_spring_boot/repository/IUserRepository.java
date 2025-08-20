@@ -1,11 +1,13 @@
 package com.ra.base_spring_boot.repository;
 
 import com.ra.base_spring_boot.model.User;
+import com.ra.base_spring_boot.model.constants.UStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -74,6 +76,9 @@ public interface IUserRepository extends JpaRepository<User, Long>
         GROUP BY COALESCE(sp.planName, 'Free')
    \s""")
     List<Object[]> countUsersByAccountType();
+
+    List<User> findByStatusAndAccountExpirationBefore(
+            UStatus status, LocalDateTime time);
 
 
 }

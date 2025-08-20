@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -94,8 +95,8 @@ public class GlobalHandleException
         );
     }
 
-    @ExceptionHandler(HttpForbiden.class)
-    public ResponseEntity<?> handleHttpForbidden(HttpForbiden ex)
+    @ExceptionHandler(HttpForbidden.class)
+    public ResponseEntity<?> handleHttpForbidden(HttpForbidden ex)
     {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                 ResponseWrapper.builder()
@@ -140,18 +141,6 @@ public class GlobalHandleException
                 .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .build()
-        );
-    }
-
-
-    @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<?> handleBadRequest(BadRequestException ex) {
-        return ResponseEntity.badRequest().body(
-                ResponseWrapper.builder()
-                        .data(ex.getMessage())
-                        .code(HttpStatus.BAD_REQUEST.value())
-                        .status(HttpStatus.BAD_REQUEST)
-                        .build()
         );
     }
 
@@ -220,4 +209,5 @@ public class GlobalHandleException
                 .build()
         );
     }
+
 }
