@@ -1,5 +1,6 @@
 package com.ra.base_spring_boot.repository;
 
+import com.ra.base_spring_boot.dto.resp.SubscriptionPlanStatisticDTO;
 import com.ra.base_spring_boot.model.SubscriptionPlan;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,5 +14,4 @@ public interface ISubscriptionPlanRepository extends JpaRepository<SubscriptionP
 
     boolean existsByPlanName(String planName);
     Page<SubscriptionPlan> findAllByPlanNameContainingIgnoreCase(String keyword, Pageable pageable);
-
 }
