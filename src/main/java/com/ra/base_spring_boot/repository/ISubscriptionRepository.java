@@ -2,6 +2,8 @@ package com.ra.base_spring_boot.repository;
 
 import com.ra.base_spring_boot.model.Subscription;
 import com.ra.base_spring_boot.model.constants.Status;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -25,4 +27,7 @@ public interface ISubscriptionRepository extends JpaRepository<Subscription, Lon
 
     @Query("SELECT COUNT(s) > 0 FROM Subscription s WHERE s.plan_id.id = :planId")
     boolean existsByPlanId(Long planId);
+
+    @Query("SELECT s FROM Subscription s WHERE s.plan_id.id = :planId")
+    List<Subscription> findByPlanIdId(@Param("planId") Long planId);
 }
