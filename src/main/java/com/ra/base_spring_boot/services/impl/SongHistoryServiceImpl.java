@@ -47,9 +47,14 @@ public class SongHistoryServiceImpl implements ISongHistoryService {
             sh.setSong(songRepository.getReferenceById(songId));
             return sh;
         });
-        history.setPlayedAt(LocalDateTime.now());
-        songHistoryRepository.save(history);
 
-        songRepository.incrementViews(songId);
+        LocalDateTime now = LocalDateTime.now();
+
+        if (history.getPlayedAt() == null || history.getPlayedAt().isBefore(now.minusMinutes(1))) {
+            songRepository.incrementViews(songId);
+        }
+
+        history.setPlayedAt(now);
+        songHistoryRepository.save(history);
     }
 }
