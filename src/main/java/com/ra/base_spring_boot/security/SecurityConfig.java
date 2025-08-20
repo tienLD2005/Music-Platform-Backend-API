@@ -73,6 +73,10 @@ public class SecurityConfig
                 .authorizeHttpRequests(
                         url -> url
 
+                                // API Banner
+                                .requestMatchers("POST", "/api/v1/banner/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
+                                .requestMatchers("DELETE", "/api/v1/banner/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
+
                                 .requestMatchers("/api/v1/admin/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
 
                                 // API Song (Artist)
