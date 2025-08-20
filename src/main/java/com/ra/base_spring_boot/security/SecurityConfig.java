@@ -114,6 +114,9 @@ public class SecurityConfig
                                 .requestMatchers(HttpMethod.GET, "/api/v1/comments/*/reactions").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/comments/*/reactions/count").permitAll()
 
+                                // download songs
+                                .requestMatchers("/api/v1/download-song/**").hasAuthority(RoleName.ROLE_USER.toString())
+
                                 .anyRequest().permitAll()
                 )
                 .authenticationProvider(authenticationProvider())
