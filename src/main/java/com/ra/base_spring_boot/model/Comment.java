@@ -46,10 +46,4 @@ public class Comment extends BaseObject
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @Column(nullable = false)
-    private int likes = 0;
-
-    @Column(nullable = false)
-    private boolean reported = false;
-
 }
