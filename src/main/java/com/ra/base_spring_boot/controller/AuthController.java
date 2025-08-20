@@ -98,21 +98,8 @@ public class AuthController {
     }
 
     @PostMapping("/resend-verification")
-    public ResponseEntity<?> resendVerification(@RequestParam String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new HttpBadRequest("User not found"));
-
-        if (user.getStatus() == UStatus.ACTIVE) {
-            throw new HttpBadRequest("Account already verified");
-        }
-
-        String newCode = UUID.randomUUID().toString();
-        user.setVerificationCode(newCode);
-        userRepository.save(user);
-
-        emailService.sendEmail(user.getEmail(), "Resend Account Verification",
-                "Click the link to verify your account: http://localhost:8080/api/v1/auth/verify?code=" + newCode);
-
+    public ResponseEntity<String> resendVerification(@RequestParam String email) {
+        authService.resendVerification(email);
         return ResponseEntity.ok("Verification email resent successfully");
     }
 

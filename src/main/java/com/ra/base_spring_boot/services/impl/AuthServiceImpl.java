@@ -149,6 +149,26 @@ public class AuthServiceImpl implements IAuthService {
     }
 
     @Override
+    public void resendVerification(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new HttpBadRequest("User not found"));
+
+        if (user.getStatus() == UStatus.ACTIVE) {
+            throw new HttpBadRequest("Account already verified");
+        }
+
+        String newCode = UUID.randomUUID().toString();
+        user.setVerificationCode(newCode);
+        userRepository.save(user);
+
+        emailService.sendEmail(
+                user.getEmail(),
+                "Resend Account Verification",
+                "Click the link to verify your account: http://localhost:8080/api/v1/auth/verify?code=" + newCode
+        );
+    }
+
+    @Override
     public void forgotPassword(ForgotPasswordRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new HttpNotFound("Email does not exist"));
