@@ -6,6 +6,7 @@ import com.ra.base_spring_boot.model.Payment;
 import com.ra.base_spring_boot.model.Subscription;
 import com.ra.base_spring_boot.model.SubscriptionPlan;
 import com.ra.base_spring_boot.model.constants.PaymentStatus;
+import com.ra.base_spring_boot.model.constants.Status;
 import com.ra.base_spring_boot.repository.IPaymentRepository;
 import com.ra.base_spring_boot.repository.ISubscriptionPlanRepository;
 import com.ra.base_spring_boot.repository.ISubscriptionRepository;
@@ -48,12 +49,17 @@ public class SubscriptionPlanStatisticServiceImpl implements ISubscriptionPlanSt
                     .mapToDouble(Payment::getAmount)
                     .sum();
 
+            Long cancelledSubscriptions = subscriptions.stream()
+                    .filter(s -> s.getStatus() == Status.CANCELLED)
+                    .count();
+
             return new SubscriptionPlanStatisticDTO(
                     plan.getId(),
                     plan.getPlanName(),
                     totalSubscriptions,
                     totalUsers,
-                    totalRevenue
+                    totalRevenue,
+                    cancelledSubscriptions
             );
         }).toList();
 

@@ -13,4 +13,5 @@ public class SubscriptionPlanStatisticDTO {
     private Long totalSubscriptions;
     private Long totalUsers;
     private Double totalRevenue;
+    private Long cancelledSubscriptions;
 }

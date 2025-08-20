@@ -12,8 +12,8 @@
     import com.ra.base_spring_boot.model.base.PlaylistSongId;
     import com.ra.base_spring_boot.repository.ISongRepository;
     import com.ra.base_spring_boot.repository.IUserRepository;
-    import com.ra.base_spring_boot.repository.PlaylistRepository;
-    import com.ra.base_spring_boot.repository.PlaylistSongRepository;
+    import com.ra.base_spring_boot.repository.IPlaylistRepository;
+    import com.ra.base_spring_boot.repository.IPlaylistSongRepository;
     import com.ra.base_spring_boot.services.IPlaylistService;
     import org.springframework.data.domain.*;
     import org.springframework.stereotype.Service;
@@ -25,26 +25,26 @@
     @Service
     public class PlaylistServiceImpl implements IPlaylistService {
 
-        private final PlaylistRepository playlistRepository;
+        private final IPlaylistRepository IPlaylistRepository;
         private final IUserRepository userRepository;
         private final ISongRepository songRepository;
         private static final Set<String> ALLOWED_SORTS = Set.of("createdAt", "name");
-        private final PlaylistSongRepository playlistSongRepository;
+        private final IPlaylistSongRepository IPlaylistSongRepository;
 
         public PlaylistServiceImpl(
-                PlaylistRepository playlistRepository,
+                IPlaylistRepository IPlaylistRepository,
                 IUserRepository userRepository,
                 ISongRepository songRepository,
-                PlaylistSongRepository playlistSongRepository) {
-            this.playlistRepository = playlistRepository;
+                IPlaylistSongRepository IPlaylistSongRepository) {
+            this.IPlaylistRepository = IPlaylistRepository;
             this.userRepository = userRepository;
             this.songRepository = songRepository;
-            this.playlistSongRepository = playlistSongRepository;
+            this.IPlaylistSongRepository = IPlaylistSongRepository;
         }
 
         @Override
         public List<Playlist> getAllPlaylists() {
-            return playlistRepository.findAll();
+            return IPlaylistRepository.findAll();
         }
 
         @Override
@@ -56,7 +56,7 @@
                     : Sort.by(sortField).descending();
 
             Pageable pageable = PageRequest.of(Math.max(page, 0), Math.max(size, 1), sort);
-            Page<Playlist> playlists = playlistRepository.findByUserIdAndKeyword(userId, keyword, pageable);
+            Page<Playlist> playlists = IPlaylistRepository.findByUserIdAndKeyword(userId, keyword, pageable);
 
             return PageResponse.<PlaylistResp>builder()
                     .content(playlists.getContent().stream().map(pl -> new PlaylistResp(
@@ -76,7 +76,7 @@
 
         @Override
         public void addSongToPlaylist(Long playlistId, Long songId) {
-            Playlist playlist = playlistRepository.findById(playlistId)
+            Playlist playlist = IPlaylistRepository.findById(playlistId)
                     .orElseThrow(() -> new HttpNotFound("Playlist not found"));
 
             Song song = songRepository.findById(songId)
@@ -85,7 +85,7 @@
             PlaylistSongId id = new PlaylistSongId(playlistId, songId);
 
             // Check if already exists
-            if (playlistSongRepository.existsById(id)) {
+            if (IPlaylistSongRepository.existsById(id)) {
                 throw new HttpNotFound("Song already in playlist");
             }
 
@@ -95,18 +95,18 @@
             playlistSong.setSong(song);
             playlistSong.setAddedAt(LocalDateTime.now());
 
-            playlistSongRepository.save(playlistSong);
+            IPlaylistSongRepository.save(playlistSong);
         }
 
         @Override
         public void removeSongFromPlaylist(Long playlistId, Long songId) {
             PlaylistSongId id = new PlaylistSongId(playlistId, songId);
 
-            if (!playlistSongRepository.existsById(id)) {
+            if (!IPlaylistSongRepository.existsById(id)) {
                 throw new HttpNotFound("Song not found in playlist");
             }
 
-            playlistSongRepository.deleteById(id);
+            IPlaylistSongRepository.deleteById(id);
         }
 
         @Override
@@ -121,7 +121,7 @@
             playlist.setCreatedAt(LocalDateTime.now());
             playlist.setUpdatedAt(LocalDateTime.now());
 
-            playlistRepository.save(playlist);
+            IPlaylistRepository.save(playlist);
 
             return new PlaylistResp(
                     playlist.getId(),
@@ -135,7 +135,7 @@
 
         @Override
         public List<SongResponse> getSongsInPlaylist(Long playlistId) {
-            Playlist playlist = playlistRepository.findById(playlistId)
+            Playlist playlist = IPlaylistRepository.findById(playlistId)
                     .orElseThrow(() -> new HttpNotFound("Playlist not found"));
 
             return playlist.getPlaylistSongs()
