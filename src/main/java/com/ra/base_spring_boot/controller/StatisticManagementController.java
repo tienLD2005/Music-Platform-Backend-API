@@ -2,8 +2,11 @@ package com.ra.base_spring_boot.controller;
 
 import com.ra.base_spring_boot.dto.ResponseWrapper;
 import com.ra.base_spring_boot.dto.req.SongStatisticsFilterRequestDTO;
+import com.ra.base_spring_boot.dto.resp.PageResponse;
 import com.ra.base_spring_boot.dto.resp.SongStatisticsResponseDTO;
+import com.ra.base_spring_boot.dto.resp.SubscriptionPlanStatisticDTO;
 import com.ra.base_spring_boot.services.ISongStatisticsService;
+import com.ra.base_spring_boot.services.ISubscriptionPlanStatisticService;
 import com.ra.base_spring_boot.services.impl.AlbumStatisticsServiceImpl;
 import com.ra.base_spring_boot.services.impl.ArtistStatisticsServiceImpl;
 import com.ra.base_spring_boot.services.impl.UserStatisticsService;
@@ -26,6 +29,7 @@ public class StatisticManagementController {
     private final ISongStatisticsService songStatisticsService;
     private final ArtistStatisticsServiceImpl artistStatisticsService;
     private final AlbumStatisticsServiceImpl albumStatisticsService;
+    private final ISubscriptionPlanStatisticService statisticService;
 
     @GetMapping("/user/status")
     public ResponseWrapper<Map<String, Long>> getUserCountByStatus() {
@@ -86,5 +90,22 @@ public class StatisticManagementController {
                 .code(HttpStatus.OK.value())
                 .data(data)
                 .build();
+    }
+
+    @GetMapping("subscriptions")
+    public ResponseEntity<ResponseWrapper<PageResponse<SubscriptionPlanStatisticDTO>>> getStatistics(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        PageResponse<SubscriptionPlanStatisticDTO> stats = statisticService.getStatistics(page, size);
+
+        ResponseWrapper<PageResponse<SubscriptionPlanStatisticDTO>> response =
+                ResponseWrapper.<PageResponse<SubscriptionPlanStatisticDTO>>builder()
+                        .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
+                        .data(stats)
+                        .build();
+
+        return ResponseEntity.ok(response);
     }
 }
