@@ -1,0 +1,99 @@
+package com.ra.base_spring_boot.services.impl;
+
+import com.ra.base_spring_boot.dto.req.ChangePasswordRequest;
+import com.ra.base_spring_boot.dto.req.UpdateProfileRequest;
+import com.ra.base_spring_boot.dto.resp.UserProfileResponseDTO;
+import com.ra.base_spring_boot.exception.HttpBadRequest;
+import com.ra.base_spring_boot.exception.HttpNotFound;
+import com.ra.base_spring_boot.model.User;
+import com.ra.base_spring_boot.repository.IUserRepository;
+import com.ra.base_spring_boot.services.IProfileService;
+import com.ra.base_spring_boot.services.cloudinary.CloudinaryService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class ProfileServiceImpl implements IProfileService {
+
+    private final IUserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final CloudinaryService cloudinaryService;
+
+    @Override
+    public UserProfileResponseDTO getProfile(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new HttpNotFound("User not found"));
+
+        return new UserProfileResponseDTO(
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getProfileImage(),
+                user.getBio(),
+                user.getRoles().stream().map(r -> r.getRoleName().name()).collect(Collectors.toSet())
+        );
+    }
+
+    @Override
+    public UserProfileResponseDTO updateProfile(Long userId, UpdateProfileRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new HttpNotFound("User not found"));
+
+        if (request.getFirstName() != null) {
+            user.setFirstName(request.getFirstName().trim());
+        }
+        if (request.getLastName() != null) {
+            user.setLastName(request.getLastName().trim());
+        }
+        if (request.getProfileImage() != null && !request.getProfileImage().isEmpty()) {
+            try {
+                String imageUrl = cloudinaryService.uploadImage(request.getProfileImage());
+                user.setProfileImage(imageUrl);
+            } catch (IOException e) {
+                throw new RuntimeException("Upload ảnh thất bại", e);
+            }
+        }
+        if (request.getBio() != null) {
+            user.setBio(request.getBio().trim());
+        }
+
+        userRepository.save(user);
+
+        return getProfile(user.getId());
+    }
+
+
+
+    @Override
+    public void changePassword(Long userId, ChangePasswordRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new HttpNotFound("User not found"));
+
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new HttpBadRequest("Old password is incorrect");
+        }
+
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+            throw new HttpBadRequest("New password must be different from old password");
+        }
+
+        if (request.getConfirmPassword() != null
+                && !request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new HttpBadRequest("Password confirmation does not match");
+        }
+
+        if (request.getNewPassword().length() < 8) {
+            throw new HttpBadRequest("Password must be at least 8 characters long");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+    }
+
+}
