@@ -2,7 +2,9 @@ package com.ra.base_spring_boot.controller;
 
 import com.ra.base_spring_boot.dto.ResponseWrapper;
 import com.ra.base_spring_boot.dto.req.SongStatisticsFilterRequestDTO;
+import com.ra.base_spring_boot.dto.resp.CommentStatisticsResponseDTO;
 import com.ra.base_spring_boot.dto.resp.SongStatisticsResponseDTO;
+import com.ra.base_spring_boot.services.ICommentStatisticsService;
 import com.ra.base_spring_boot.services.ISongStatisticsService;
 import com.ra.base_spring_boot.services.impl.AlbumStatisticsServiceImpl;
 import com.ra.base_spring_boot.services.impl.ArtistStatisticsServiceImpl;
@@ -26,7 +28,7 @@ public class StatisticManagementController {
     private final ISongStatisticsService songStatisticsService;
     private final ArtistStatisticsServiceImpl artistStatisticsService;
     private final AlbumStatisticsServiceImpl albumStatisticsService;
-
+    private final ICommentStatisticsService commentStatisticsService;
     @GetMapping("/user/status")
     public ResponseWrapper<Map<String, Long>> getUserCountByStatus() {
         Map<String, Long> data = statisticsService.getUserCountByStatus();
@@ -87,4 +89,16 @@ public class StatisticManagementController {
                 .data(data)
                 .build();
     }
+
+    @GetMapping("/comment")
+    public ResponseEntity<ResponseWrapper<CommentStatisticsResponseDTO>> getCommentStatistics() {
+        return ResponseEntity.ok(
+                ResponseWrapper.<CommentStatisticsResponseDTO>builder()
+                        .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
+                        .data(commentStatisticsService.getCommentsStatistics())
+                        .build()
+        );
+    }
+
 }

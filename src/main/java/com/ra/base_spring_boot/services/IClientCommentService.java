@@ -14,4 +14,6 @@ public interface IClientCommentService {
     CommentResponseDTO updateComment(Long commentId, String newContent);
 
     void deleteComment(Long commentId);
+
+
 }

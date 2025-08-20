@@ -103,64 +103,6 @@ public class ArtistAlbumController {
         );
     }
 
-    // List Ablums
-    @GetMapping
-    public ResponseEntity<?> getAlbums(@RequestParam(defaultValue = "1") int page,
-                                       @RequestParam(defaultValue = "10") int size,
-                                       @RequestParam(defaultValue = "title") String sortBy,
-                                       @RequestParam(defaultValue = "asc") String sortDir,
-                                       @RequestParam(required = false) String keyword) {
-
-        return ResponseEntity.ok().body(
-                ResponseWrapper.builder()
-                        .status(HttpStatus.OK)
-                        .code(HttpStatus.OK.value())
-                        .data(albumService.getAllAlbums(page, size, sortBy, sortDir, keyword))
-                        .build()
-        );
-    }
-
-    @GetMapping("/top")
-    public ResponseEntity<?> getTopAlbums(@RequestParam(defaultValue = "week") String period) {
-
-        return  ResponseEntity.ok().body(
-                ResponseWrapper.builder()
-                        .status(HttpStatus.OK)
-                        .code(HttpStatus.OK.value())
-                        .data(albumService.getTopAlbums(period))
-                        .build()
-        );
-    }
-
-
-    @GetMapping("/featured")
-    public ResponseEntity<?> getFeaturedAlbums() {
-
-        return ResponseEntity.ok().body(
-                ResponseWrapper.builder()
-                        .status(HttpStatus.OK)
-                        .code(HttpStatus.OK.value())
-                        .data(albumService.findFeaturedAlbums())
-                        .build()
-        );
-    }
-
-    @GetMapping("/{artistId}")
-    public ResponseEntity<?> getAlbumsByArtist(@PathVariable Long artistId,
-                                               @RequestParam(defaultValue = "1") int page,
-                                               @RequestParam(defaultValue = "10") int size,
-                                               @RequestParam(required = false, defaultValue = "") String keyword,
-                                               @RequestParam(defaultValue = "desc") String sortDir,
-                                               @RequestParam(defaultValue = "false") boolean isPremium) {
-
-        return ResponseEntity.ok().body(
-                ResponseWrapper.builder()
-                        .status(HttpStatus.OK)
-                        .code(HttpStatus.OK.value())
-                        .data(albumService.getAlbumsByArtist(artistId, page, size, keyword, sortDir, isPremium))
-                        .build()
-        );
-    }
 
     @GetMapping("/top-trending")
     public ResponseEntity<?> getTopTrendingAlbums(@RequestParam(defaultValue = "5") int limit) {
