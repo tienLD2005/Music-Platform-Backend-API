@@ -10,8 +10,6 @@ public interface IAlbumAdminService {
 
     PageResponse<AlbumAdminResponse> getAllAlbums(String keyword, AlbumStatus status,
                                                   int page, int size, String sortBy, String sortDir);
-
-
     AlbumAdminResponse getAlbumById(Long id);
 
     void deleteAlbum(AlbumDeleteRequest request);

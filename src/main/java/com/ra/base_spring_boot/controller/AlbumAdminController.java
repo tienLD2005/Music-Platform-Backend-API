@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/admin/albums")
 @RequiredArgsConstructor
 
-@PreAuthorize("hasRole('ADMIN')")
 public class AlbumAdminController {
 
     private final IAlbumAdminService albumAdminService;

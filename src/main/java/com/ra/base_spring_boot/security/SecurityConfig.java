@@ -134,6 +134,9 @@ public class SecurityConfig
                                 // Song reactions
                                 .requestMatchers("/api/v1/song-reactions/**").hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ARTIST.toString())
 
+                                // download songs
+                                .requestMatchers("/api/v1/download-song/**").hasAuthority(RoleName.ROLE_USER.toString())
+
                                 // profile
                                 .requestMatchers("/api/v1/profile/**").hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ARTIST.toString())
 
