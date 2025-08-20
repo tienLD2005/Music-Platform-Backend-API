@@ -3,7 +3,6 @@ package com.ra.base_spring_boot.services.impl;
 import com.ra.base_spring_boot.dto.req.DownloadSongRequest;
 import com.ra.base_spring_boot.dto.resp.DownloadResponse;
 import com.ra.base_spring_boot.dto.resp.DownloadedSongResponse;
-import com.ra.base_spring_boot.mapper.DownloadSongMapper;
 import com.ra.base_spring_boot.model.*;
 import com.ra.base_spring_boot.model.constants.AlbumType;
 import com.ra.base_spring_boot.repository.IDownloadSongRepository;
@@ -34,7 +33,6 @@ public class DownloadSongServiceImpl implements IDownloadSongService {
     private final ISongRepository songRepository;
     private final IUserRepository userRepository;
     private final DownloadFile downloadFile;
-    private DownloadSongMapper downloadSongMapper;
 
     private static final String DOWNLOAD_BASE_PATH = "C:\\music\\";
 
@@ -104,7 +102,7 @@ public class DownloadSongServiceImpl implements IDownloadSongService {
         Page<Download> downloads = downloadRepository.findByUserId(userId, pageable);
 
         List<DownloadedSongResponse> responses = downloads.getContent().stream()
-                .map(downloadSongMapper::mapToDownloadedSongResponse)
+                .map(this::mapToDownloadedSongResponse)
                 .collect(Collectors.toList());
 
         return new PageImpl<>(responses, pageable, downloads.getTotalElements());
@@ -125,7 +123,7 @@ public class DownloadSongServiceImpl implements IDownloadSongService {
         }
 
         return downloads.stream()
-                .map(downloadSongMapper::mapToDownloadedSongResponse)
+                .map(this::mapToDownloadedSongResponse)
                 .collect(Collectors.toList());
     }
 
@@ -193,5 +191,21 @@ public class DownloadSongServiceImpl implements IDownloadSongService {
 
     private String sanitizeFileName(String fileName) {
         return fileName.replaceAll("[^a-zA-Z0-9._-]", "_");
+    }
+    public DownloadedSongResponse mapToDownloadedSongResponse(Download download) {
+        Song song = download.getSong();
+        Album album = song.getAlbum();
+        User artist = song.getArtist();
+
+        return DownloadedSongResponse.builder()
+                .songId(song.getId())
+                .songTitle(song.getTitle())
+                .artistName(artist.getFirstName() + " " + artist.getLastName())
+                .albumTitle(album != null ? album.getTitle() : "Single")
+                .filePath(download.getFilePath())
+                .addedAt(download.getAddedAt())
+                .duration(song.getDuration() != null ? song.getDuration().toString() : "Unknown")
+                .coverImage(album != null ? album.getCoverImage() : null)
+                .build();
     }
 }
