@@ -5,6 +5,7 @@ import com.ra.base_spring_boot.dto.resp.SongResponse;
 import com.ra.base_spring_boot.dto.resp.SongStatisticsResponseDTO;
 import com.ra.base_spring_boot.dto.resp.TopSongDTO;
 import com.ra.base_spring_boot.model.Song;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -142,4 +143,5 @@ public interface ISongRepository extends JpaRepository<Song, Long> {
             "GROUP BY g.genreName " +
             "ORDER BY COUNT(sh) DESC")
     List<Object[]> countPlaysByGenre();
+
 }
