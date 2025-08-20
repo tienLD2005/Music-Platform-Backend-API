@@ -6,8 +6,8 @@ import com.ra.base_spring_boot.dto.req.FormRegisterRequest;
 import com.ra.base_spring_boot.dto.req.ResetPasswordRequest;
 import com.ra.base_spring_boot.dto.resp.JwtResponse;
 import com.ra.base_spring_boot.dto.resp.UserResponseDTO;
-import com.ra.base_spring_boot.exception.BadRequestException;
 import com.ra.base_spring_boot.exception.HttpBadRequest;
+import com.ra.base_spring_boot.exception.HttpNotFound;
 import com.ra.base_spring_boot.model.BlacklistedToken;
 import com.ra.base_spring_boot.model.Role;
 import com.ra.base_spring_boot.model.User;
@@ -49,16 +49,16 @@ public class AuthServiceImpl implements IAuthService {
     @Override
     public void register(FormRegisterRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new BadRequestException("Email already exists");
+            throw new HttpBadRequest("Email already exists");
         }
 
         if (!request.getPassword().equals(request.getConfirmPassword())) {
-            throw new BadRequestException("Password and confirm password do not match");
+            throw new HttpBadRequest("Password and confirm password do not match");
         }
 
         Set<Role> roles;
         Role userRole = roleRepository.findByRoleName(RoleName.ROLE_USER)
-                .orElseThrow(() -> new BadRequestException("Default role not found"));
+                .orElseThrow(() -> new HttpBadRequest("Default role not found"));
         roles = Set.of(userRole);
 
         String code = UUID.randomUUID().toString();
@@ -69,6 +69,8 @@ public class AuthServiceImpl implements IAuthService {
                 .lastName(request.getLastName())
                 .status(UStatus.VERIFY)
                 .verificationCode(code)
+                .verificationExpiration(LocalDateTime.now().plusMinutes(10))
+                .accountExpiration(LocalDateTime.now().plusDays(7))
                 .roles(roles)
                 .build();
 
@@ -129,17 +131,50 @@ public class AuthServiceImpl implements IAuthService {
     @Override
     public void verifyEmail(String code) {
         User user = userRepository.findByVerificationCode(code)
-                .orElseThrow(() -> new RuntimeException("Invalid verification code"));
+                .orElseThrow(() -> new HttpBadRequest("Invalid verification code"));
+
+        if (user.getVerificationExpiration().isBefore(LocalDateTime.now())) {
+            throw new HttpBadRequest("Verification code has expired");
+        }
+
+        if (user.getAccountExpiration().isBefore(LocalDateTime.now())) {
+            throw new HttpBadRequest("Account expired. Please register again.");
+        }
+
         user.setStatus(UStatus.ACTIVE);
         user.setVerificationCode(null);
+        user.setVerificationExpiration(null);
+        user.setAccountExpiration(null);
         userRepository.save(user);
+    }
+
+    @Override
+    public void resendVerification(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new HttpBadRequest("User not found"));
+
+        if (user.getStatus() == UStatus.ACTIVE) {
+            throw new HttpBadRequest("Account already verified");
+        }
+
+        String newCode = UUID.randomUUID().toString();
+        user.setVerificationCode(newCode);
+        userRepository.save(user);
+
+        emailService.sendEmail(
+                user.getEmail(),
+                "Resend Account Verification",
+                "Click the link to verify your account: http://localhost:8080/api/v1/auth/verify?code=" + newCode
+        );
     }
 
     @Override
     public void forgotPassword(ForgotPasswordRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Email does not exist"));
-        String code = UUID.randomUUID().toString().substring(0, 6);
+                .orElseThrow(() -> new HttpNotFound("Email does not exist"));
+
+        String code = String.format("%06d", new Random().nextInt(999999));
+
         user.setResetPasswordCode(code);
         user.setResetPasswordExpiration(LocalDateTime.now().plusMinutes(15));
         userRepository.save(user);
@@ -150,10 +185,14 @@ public class AuthServiceImpl implements IAuthService {
     @Override
     public void resetPassword(ResetPasswordRequest request) {
         User user = userRepository.findByResetPasswordCode(request.getCode())
-                .orElseThrow(() -> new RuntimeException("Invalid OTP code"));
+                .orElseThrow(() -> new HttpBadRequest("Invalid OTP code"));
 
         if (user.getResetPasswordExpiration() == null || LocalDateTime.now().isAfter(user.getResetPasswordExpiration())) {
-            throw new RuntimeException("OTP has expired");
+            throw new HttpBadRequest("OTP has expired");
+        }
+
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+            throw new HttpBadRequest("New password must be different from the old password");
         }
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
@@ -170,6 +209,8 @@ public class AuthServiceImpl implements IAuthService {
 
         String token = rawToken.substring(7);
 
+        if (blacklistedTokenRepository.existsByToken(token)) return;
+
         Date expiryDate = jwtProvider.extractExpiration(token);
 
         BlacklistedToken blacklisted = BlacklistedToken.builder()
@@ -180,6 +221,4 @@ public class AuthServiceImpl implements IAuthService {
                 .build();
         blacklistedTokenRepository.save(blacklisted);
     }
-
-
 }

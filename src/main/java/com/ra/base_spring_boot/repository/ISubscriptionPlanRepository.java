@@ -12,5 +12,6 @@ import java.util.Optional;
 public interface ISubscriptionPlanRepository extends JpaRepository<SubscriptionPlan, Long>{
     Optional<SubscriptionPlan> findByPlanName(String planName);
 
-
+    boolean existsByPlanName(String planName);
+    Page<SubscriptionPlan> findAllByPlanNameContainingIgnoreCase(String keyword, Pageable pageable);
 }

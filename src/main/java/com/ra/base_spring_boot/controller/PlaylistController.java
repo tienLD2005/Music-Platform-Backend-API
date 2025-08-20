@@ -5,12 +5,15 @@ import com.ra.base_spring_boot.dto.req.AddSongToPlaylistReq;
 import com.ra.base_spring_boot.dto.req.PlaylistReq;
 import com.ra.base_spring_boot.dto.resp.PageResponse;
 import com.ra.base_spring_boot.dto.resp.PlaylistResp;
+import com.ra.base_spring_boot.dto.resp.SongResponse;
 import com.ra.base_spring_boot.services.IPlaylistService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/users/{userId}/playlists")
@@ -31,7 +34,7 @@ public class PlaylistController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
-            @RequestParam(defaultValue = "desc") String direction
+               @RequestParam(defaultValue = "desc") String direction
     ) {
         PageResponse<PlaylistResp> pageResponse = playlistService.searchOfUser(userId, keyword, page, size, sortBy, direction);
 
@@ -46,7 +49,7 @@ public class PlaylistController {
 
     // 2. Create playlist
     @PostMapping
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<ResponseWrapper<PlaylistResp>> createPlaylist(
             @PathVariable Long userId,
             @RequestBody @Valid PlaylistReq request) {
@@ -63,7 +66,7 @@ public class PlaylistController {
 
     // 3. Add song
     @PostMapping("/{playlistId}/songs")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<ResponseWrapper<String>> addSongToPlaylist(
             @PathVariable Long playlistId,
             @RequestBody @Valid AddSongToPlaylistReq request) {
@@ -79,7 +82,7 @@ public class PlaylistController {
     }
 
     @DeleteMapping("/{playlistId}/songs/{songId}")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<ResponseWrapper<String>> removeSongFromPlaylist(
             @PathVariable Long playlistId,
             @PathVariable Long songId) {
@@ -93,5 +96,24 @@ public class PlaylistController {
 
         return ResponseEntity.ok(resp);
     }
+
+    //show songs playlist
+    @GetMapping("/{playlistId}/songs")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<ResponseWrapper<List<SongResponse>>> getSongsInPlaylist(
+            @PathVariable Long playlistId
+    ) {
+        List<SongResponse> songs = playlistService.getSongsInPlaylist(playlistId);
+
+        ResponseWrapper<List<SongResponse>> resp = ResponseWrapper.<List<SongResponse>>builder()
+                .status(HttpStatus.OK)
+                .code(HttpStatus.OK.value())
+                .data(songs)
+                .build();
+
+        return ResponseEntity.ok(resp);
+    }
+
+
 
 }

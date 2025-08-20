@@ -25,6 +25,9 @@ public interface ISubscriptionRepository extends JpaRepository<Subscription, Lon
 
     Optional<Subscription> findByUserIdAndStatus(Long userId, Status status);
 
+    @Query("SELECT COUNT(s) > 0 FROM Subscription s WHERE s.plan_id.id = :planId")
+    boolean existsByPlanId(Long planId);
+
     @Query("SELECT s FROM Subscription s WHERE s.plan_id.id = :planId")
     List<Subscription> findByPlanIdId(@Param("planId") Long planId);
 }

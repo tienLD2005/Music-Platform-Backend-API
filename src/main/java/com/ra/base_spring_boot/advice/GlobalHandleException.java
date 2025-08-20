@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -94,8 +95,8 @@ public class GlobalHandleException
         );
     }
 
-    @ExceptionHandler(HttpForbiden.class)
-    public ResponseEntity<?> handleHttpForbidden(HttpForbiden ex)
+    @ExceptionHandler(HttpForbidden.class)
+    public ResponseEntity<?> handleHttpForbidden(HttpForbidden ex)
     {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                 ResponseWrapper.builder()
@@ -143,18 +144,6 @@ public class GlobalHandleException
         );
     }
 
-
-    @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<?> handleBadRequest(BadRequestException ex) {
-        return ResponseEntity.badRequest().body(
-                ResponseWrapper.builder()
-                        .data(ex.getMessage())
-                        .code(HttpStatus.BAD_REQUEST.value())
-                        .status(HttpStatus.BAD_REQUEST)
-                        .build()
-        );
-    }
-
     @ExceptionHandler(MissingRequestHeaderException.class)
     public ResponseEntity<?> handleMissingHeader(MissingRequestHeaderException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
@@ -175,9 +164,12 @@ public class GlobalHandleException
                         .status(HttpStatus.NOT_FOUND)
         .build());
     }
+
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<?> handleNullPointerException(NullPointerException ex) {
-        if (ex.getMessage() != null && ex.getMessage().contains("principal")) {
+        if (ex.getMessage() != null && (ex.getMessage().contains("principal"))
+        || (ex.getMessage().contains("userDetails") && ex.getMessage().contains("is null")
+        || ex.getMessage().contains("Authentication"))) {
             Map<String, Object> error = new HashMap<>();
             error.put("code", 401);
             error.put("error", "Full authentication is required to access this resource");
@@ -217,4 +209,5 @@ public class GlobalHandleException
                 .build()
         );
     }
+
 }

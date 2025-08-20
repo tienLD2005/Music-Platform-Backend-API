@@ -16,14 +16,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/v1/comments")
+@RequestMapping("/api/v1/comment-reactions")
 @RequiredArgsConstructor
 public class CommentReactionController {
 
     private final ICommentReactionService commentReactionService;
 
-    @PreAuthorize("hasAuthority('ROLE_USER')")
-    @PostMapping("/{commentId}/reactions")
+    @PostMapping("/{commentId}")
     public ResponseEntity<ResponseWrapper<ReactionResponseDTO>> reactToComment(
             @PathVariable Long commentId,
             @RequestBody ReactionRequestDTO request
@@ -46,8 +45,7 @@ public class CommentReactionController {
         );
     }
 
-    @PreAuthorize("hasAuthority('ROLE_USER')")
-    @DeleteMapping("/{commentId}/reactions")
+    @DeleteMapping("/{commentId}")
     public ResponseEntity<ResponseWrapper<String>> removeReaction(@PathVariable Long commentId) {
         commentReactionService.removeReaction(commentId);
 
@@ -60,7 +58,7 @@ public class CommentReactionController {
         );
     }
 
-    @GetMapping("/{commentId}/reactions")
+    @GetMapping("/{commentId}")
     public ResponseEntity<ResponseWrapper<List<ReactionResponseDTO>>> getReactions(@PathVariable Long commentId) {
         List<ReactionResponseDTO> reactions = commentReactionService.getReactionsByComment(commentId)
                 .stream()
@@ -81,7 +79,7 @@ public class CommentReactionController {
         );
     }
 
-    @GetMapping("/{commentId}/reactions/count")
+    @GetMapping("/{commentId}/count")
     public ResponseEntity<ResponseWrapper<Long>> countReactions(@PathVariable Long commentId) {
         Long count = commentReactionService.countReactions(commentId);
 

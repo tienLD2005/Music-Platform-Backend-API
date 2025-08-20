@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/artist/comments")
 @RequiredArgsConstructor
-@PreAuthorize("hasAuthority('ROLE_ARTIST')")
 public class ArtistCommentController {
 
     private final IArtistCommentService artistCommentService;

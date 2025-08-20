@@ -19,16 +19,20 @@ public class PlaylistSong {
 
     @ManyToOne
     @MapsId("playlistId")
-    @JoinColumn(name = "playlist_id")
+    @JoinColumn(name = "playlist_id", nullable = false)
     private Playlist playlist;
 
     @ManyToOne
     @MapsId("songId")
-    @JoinColumn(name = "song_id")
+    @JoinColumn(name = "song_id",nullable = false)
     private Song song;
 
     @Column(name = "added_at")
     private LocalDateTime addedAt;
+
+
+    @Column(name = "position")
+    private Integer position;
 }
 
 
