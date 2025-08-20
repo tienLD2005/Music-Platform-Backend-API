@@ -49,6 +49,7 @@ public class AlbumAdminController {
                 .build());
     }
 
+
     @GetMapping("/{id}")
     @Operation(summary = "Get album details")
     public ResponseEntity<ResponseWrapper<AlbumAdminResponse>> getAlbumById(

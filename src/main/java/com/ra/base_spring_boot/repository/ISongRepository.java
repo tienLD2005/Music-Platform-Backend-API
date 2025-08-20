@@ -1,6 +1,7 @@
 package com.ra.base_spring_boot.repository;
 
 import com.ra.base_spring_boot.dto.req.SongStatisticsFilterRequestDTO;
+import com.ra.base_spring_boot.dto.resp.SongResponse;
 import com.ra.base_spring_boot.dto.resp.SongStatisticsResponseDTO;
 import com.ra.base_spring_boot.dto.resp.TopSongDTO;
 import com.ra.base_spring_boot.model.Song;
@@ -10,6 +11,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -112,5 +114,15 @@ public interface ISongRepository extends JpaRepository<Song, Long> {
     ORDER BY COUNT(sh) DESC
 """)
     List<TopSongDTO> findTrendingSongs(@Param("startDate") LocalDateTime startDate, Pageable pageable);
+
+
+
+    Page<Song> findByTitle(String keyword, Pageable pageable);
+
+    @Query("SELECT g.genreName FROM Song s JOIN s.genres g WHERE s.id = :songId")
+    List<String> findGenresBySongId(@Param("songId") Long songId);
+
+
+
 
 }

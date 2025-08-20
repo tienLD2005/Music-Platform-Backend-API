@@ -12,4 +12,6 @@ public class FollowResponseDTO {
     private Long artistId;
     private String artistName;
     private String message;
+    private Long followerId;
+    private String followerName;
 }

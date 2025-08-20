@@ -70,7 +70,6 @@ public class AlbumAdminServiceImpl implements IAlbumAdminService {
 
     private Pageable createPageable(int page, int size, String sortBy, String sortDir) {
         try {
-            // Validate tham số đầu vào
             if (page < 0) {
                 log.warn("Invalid page number: {}, using default 0", page);
                 page = 0;
@@ -80,12 +79,10 @@ public class AlbumAdminServiceImpl implements IAlbumAdminService {
                 size = 10;
             }
 
-            // Validate sortBy (có thể thêm whitelist các field được phép sort)
             if (sortBy == null || sortBy.trim().isEmpty()) {
                 sortBy = "createdAt";
             }
 
-            // Validate sortDir
             if (sortDir == null || (!sortDir.equalsIgnoreCase("asc") && !sortDir.equalsIgnoreCase("desc"))) {
                 sortDir = "desc";
             }
@@ -97,10 +94,10 @@ public class AlbumAdminServiceImpl implements IAlbumAdminService {
             return PageRequest.of(page, size, Sort.by(direction, sortBy));
         } catch (Exception e) {
             log.error("Error creating Pageable object", e);
-            // Return default Pageable nếu có lỗi
             return PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
         }
     }
+
 
     @Override
     public AlbumAdminResponse getAlbumById(Long id) {

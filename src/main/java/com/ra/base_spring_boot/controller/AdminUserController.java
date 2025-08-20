@@ -1,10 +1,9 @@
 package com.ra.base_spring_boot.controller;
 
 import com.ra.base_spring_boot.dto.ResponseWrapper;
-import com.ra.base_spring_boot.dto.resp.JwtResponse;
 import com.ra.base_spring_boot.dto.resp.PageResponse;
 import com.ra.base_spring_boot.dto.resp.UserListItemResponse;
-import com.ra.base_spring_boot.services.UserService;
+import com.ra.base_spring_boot.services.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,9 +12,9 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/admin/users")
 @RequiredArgsConstructor
-public class UserController {
+public class AdminUserController {
 
-    private final UserService userService;
+    private final IUserService userService;
 
     @GetMapping
     public ResponseEntity<ResponseWrapper<PageResponse<UserListItemResponse>>> getAllUsers(

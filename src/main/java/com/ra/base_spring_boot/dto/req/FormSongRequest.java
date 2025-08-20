@@ -1,5 +1,7 @@
 package com.ra.base_spring_boot.dto.req;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -7,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalTime;
@@ -17,12 +20,15 @@ import java.util.Set;
 @NoArgsConstructor
 @Builder
 public class FormSongRequest {
-    @NotBlank(message = "Tiêu đề không được để trống")
+    @NotBlank(message = "Title cannot be blank")
     private String title;
-    @NotNull(message = "Thể loại không được để trống")
+
+    @NotNull(message = "Duration cannot be blank")
+    @Schema(type = "string", pattern = "HH:mm:ss", example = "00:00:00")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
     private LocalTime duration;
     private MultipartFile fileUrl;
-    @Min(value = 0, message = "Số lượt nghe không được nhỏ hơn 0")
+    @Min(value = 0, message = "View must not be less than 0")
     private Integer views;
     private Set<Long> genreIds;
 }

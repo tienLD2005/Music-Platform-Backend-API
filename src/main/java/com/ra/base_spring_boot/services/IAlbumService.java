@@ -1,20 +1,15 @@
 package com.ra.base_spring_boot.services;
 
 import com.ra.base_spring_boot.dto.ResponseWrapper;
-import com.ra.base_spring_boot.dto.req.AlbumFilter;
 import com.ra.base_spring_boot.dto.req.AlbumRequest;
-import com.ra.base_spring_boot.dto.resp.AlbumResponse;
+import com.ra.base_spring_boot.dto.resp.*;
 import com.ra.base_spring_boot.dto.req.FormSongRequest;
-import com.ra.base_spring_boot.dto.resp.AlbumResponseDTO;
-import com.ra.base_spring_boot.dto.resp.PageResponse;
-import com.ra.base_spring_boot.dto.resp.ResponseSong;
-import org.springframework.data.domain.Page;
 
 import java.util.List;
 
 
 public interface IAlbumService {
-    Page<ResponseSong> getSongsByAlbum(Long albumId, int page, int size, String sortBy, String direction);
+    PaginatedResponse<ResponseSong> getSongsByAlbum(Long albumId, int page, int size, String sortBy, String direction);
 
     ResponseSong addSongToAlbum(Long albumId, FormSongRequest request, String username);
     String deleteSongFromAlbum(Long albumId, Long songId, String name);
@@ -26,10 +21,10 @@ public interface IAlbumService {
     ResponseWrapper<String> deleteAlbum(Long albumId);
 
     // List Ablum
-    Page<AlbumResponse> getAllAlbums(int page, int size, String sortBy, String sortDir, String keyword);
-    Page<AlbumResponse> getTopAlbums(String period);
-    Page<AlbumResponse> findFeaturedAlbums();
-    Page<AlbumResponse> getAlbumsByArtist(AlbumFilter filter);
+    PaginatedResponse<AlbumResponse> getAllAlbums(int page, int size, String sortBy, String sortDir, String keyword);
+    PaginatedResponse<AlbumResponse> getTopAlbums(String period);
+    PaginatedResponse<AlbumResponse> findFeaturedAlbums();
+    PaginatedResponse<AlbumResponse> getAlbumsByArtist(Long artistId, int page, int size, String keyword, String sortDir, boolean isPremium);
 
     List<AlbumResponse> getTopTrendingAlbums(int limit);
 }

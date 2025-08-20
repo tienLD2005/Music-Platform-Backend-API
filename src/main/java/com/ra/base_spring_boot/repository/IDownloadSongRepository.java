@@ -13,20 +13,15 @@ import java.util.Optional;
 
 public interface IDownloadSongRepository extends JpaRepository<Download, DownloadId> {
 
-    // Tìm danh sách bài hát đã tải của user
     @Query("SELECT d FROM Download d WHERE d.user.id = :userId")
     Page<Download> findByUserId(@Param("userId") Long userId, Pageable pageable);
 
-    // Kiểm tra xem user đã tải bài hát này chưa
     boolean existsByUserIdAndSongId(Long userId, Long songId);
 
-    // Tìm download cụ thể
     Optional<Download> findByUserIdAndSongId(Long userId, Long songId);
 
-    // Đếm số lượng bài hát đã tải của user
     long countByUserId(Long userId);
 
-    // Tìm danh sách download theo sắp xếp
     @Query("SELECT d FROM Download d WHERE d.user.id = :userId ORDER BY d.addedAt DESC")
     List<Download> findByUserIdOrderByDownloadedAtDesc(@Param("userId") Long userId);
 

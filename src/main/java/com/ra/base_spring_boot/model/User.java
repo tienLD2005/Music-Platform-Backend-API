@@ -58,6 +58,13 @@ public class User extends BaseObject {
     @Column(name = "reset_password_expiration")
     private LocalDateTime resetPasswordExpiration;
 
+    @Column(name = "verification_expiration")
+    private LocalDateTime verificationExpiration;
+
+    @Column(name = "account_expiration")
+    private LocalDateTime accountExpiration;
+
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_role",
