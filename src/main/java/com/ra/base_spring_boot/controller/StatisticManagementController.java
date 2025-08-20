@@ -3,8 +3,10 @@ package com.ra.base_spring_boot.controller;
 import com.ra.base_spring_boot.dto.ResponseWrapper;
 import com.ra.base_spring_boot.dto.req.SongStatisticsFilterRequestDTO;
 import com.ra.base_spring_boot.dto.resp.PageResponse;
+import com.ra.base_spring_boot.dto.resp.CommentStatisticsResponseDTO;
 import com.ra.base_spring_boot.dto.resp.SongStatisticsResponseDTO;
 import com.ra.base_spring_boot.dto.resp.SubscriptionPlanStatisticDTO;
+import com.ra.base_spring_boot.services.ICommentStatisticsService;
 import com.ra.base_spring_boot.services.ISongStatisticsService;
 import com.ra.base_spring_boot.services.ISubscriptionPlanStatisticService;
 import com.ra.base_spring_boot.services.impl.AlbumStatisticsServiceImpl;
@@ -31,6 +33,7 @@ public class StatisticManagementController {
     private final AlbumStatisticsServiceImpl albumStatisticsService;
     private final ISubscriptionPlanStatisticService statisticService;
 
+    private final ICommentStatisticsService commentStatisticsService;
     @GetMapping("/user/status")
     public ResponseWrapper<Map<String, Long>> getUserCountByStatus() {
         Map<String, Long> data = statisticsService.getUserCountByStatus();
@@ -108,4 +111,16 @@ public class StatisticManagementController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/comment")
+    public ResponseEntity<ResponseWrapper<CommentStatisticsResponseDTO>> getCommentStatistics() {
+        return ResponseEntity.ok(
+                ResponseWrapper.<CommentStatisticsResponseDTO>builder()
+                        .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
+                        .data(commentStatisticsService.getCommentsStatistics())
+                        .build()
+        );
+    }
+
 }

@@ -15,13 +15,10 @@ public class ArtistLyricsController {
 
     private final ILyricsService lyricsService;
 
-    @PreAuthorize("hasAuthority('ROLE_ARTIST')")
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<LyricsResponseDTO> createLyrics(@RequestParam Long songId) {
         return ResponseEntity.ok(lyricsService.createLyrics(songId));
     }
-
-    @PreAuthorize("hasAuthority('ROLE_ARTIST')")
     @GetMapping(value = "/song/{songId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<LyricsResponseDTO> getLyricsBySong(@PathVariable Long songId) {
         return ResponseEntity.ok(lyricsService.getLyricsBySong(songId));
