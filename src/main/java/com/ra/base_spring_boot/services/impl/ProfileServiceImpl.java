@@ -12,6 +12,7 @@ import com.ra.base_spring_boot.services.cloudinary.CloudinaryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.util.stream.Collectors;
@@ -45,10 +46,10 @@ public class ProfileServiceImpl implements IProfileService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new HttpNotFound("User not found"));
 
-        if (request.getFirstName() != null) {
+        if (StringUtils.hasText(request.getFirstName())) {
             user.setFirstName(request.getFirstName().trim());
         }
-        if (request.getLastName() != null) {
+        if (StringUtils.hasText(request.getLastName())) {
             user.setLastName(request.getLastName().trim());
         }
         if (request.getProfileImage() != null && !request.getProfileImage().isEmpty()) {
@@ -59,21 +60,28 @@ public class ProfileServiceImpl implements IProfileService {
                 throw new RuntimeException("Upload ảnh thất bại", e);
             }
         }
-        if (request.getBio() != null) {
+        if (StringUtils.hasText(request.getBio())) {
             user.setBio(request.getBio().trim());
         }
 
         userRepository.save(user);
-
         return getProfile(user.getId());
     }
-
-
 
     @Override
     public void changePassword(Long userId, ChangePasswordRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new HttpNotFound("User not found"));
+
+        if (!StringUtils.hasText(request.getOldPassword())) {
+            throw new HttpBadRequest("Old password must not be empty");
+        }
+        if (!StringUtils.hasText(request.getNewPassword())) {
+            throw new HttpBadRequest("New password must not be empty");
+        }
+        if (!StringUtils.hasText(request.getConfirmPassword())) {
+            throw new HttpBadRequest("Password confirmation must not be empty");
+        }
 
         if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
             throw new HttpBadRequest("Old password is incorrect");
@@ -83,8 +91,7 @@ public class ProfileServiceImpl implements IProfileService {
             throw new HttpBadRequest("New password must be different from old password");
         }
 
-        if (request.getConfirmPassword() != null
-                && !request.getNewPassword().equals(request.getConfirmPassword())) {
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
             throw new HttpBadRequest("Password confirmation does not match");
         }
 
@@ -95,5 +102,4 @@ public class ProfileServiceImpl implements IProfileService {
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
     }
-
 }
