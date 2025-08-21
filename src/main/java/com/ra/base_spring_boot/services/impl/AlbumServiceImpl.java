@@ -72,11 +72,16 @@ public class AlbumServiceImpl implements IAlbumService {
 
     @Override
     public ResponseSong addSongToAlbum(Long albumId, FormSongRequest request, String username) {
+
         Album album = albumRepository.findById(albumId)
                 .orElseThrow(() -> new HttpNotFound("Album not found"));
 
         User artist = userRepository.findById(album.getArtist().getId())
                 .orElseThrow(() -> new HttpNotFound("Artist not found"));
+
+        if (album.getStatus()!=AlbumStatus.ACTIVE){
+            throw new HttpForbidden("Album is not active");
+        }
 
         // Check duplicate title song
         if (songRepository.existsByTitleAndAlbumId(request.getTitle(), albumId)) {
@@ -169,6 +174,7 @@ public class AlbumServiceImpl implements IAlbumService {
         if (albumRepository.existsByTitleIgnoreCaseAndArtistId(request.getTitle(), artistId)) {
             throw new HttpBadRequest("Album with this title already exists");
         }
+
 
         String coverUrl = null;
         MultipartFile file = request.getCoverImageFile();
