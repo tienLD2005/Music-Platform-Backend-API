@@ -2,13 +2,17 @@ package com.ra.base_spring_boot.services.impl;
 
 import com.ra.base_spring_boot.dto.resp.PageResponse;
 import com.ra.base_spring_boot.dto.resp.SongHistoryResponse;
+import com.ra.base_spring_boot.exception.HttpForbidden;
+import com.ra.base_spring_boot.exception.HttpNotFound;
 import com.ra.base_spring_boot.model.*;
 import com.ra.base_spring_boot.model.base.SongHistoryId;
+import com.ra.base_spring_boot.model.constants.SongStatus;
 import com.ra.base_spring_boot.repository.*;
 import com.ra.base_spring_boot.services.ISongHistoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -34,8 +38,16 @@ public class SongHistoryServiceImpl implements ISongHistoryService {
                 .build();
     }
 
+
     @Override
+    @Transactional
     public void addPlay(Long userId, Long songId) {
+        Song song = songRepository.findById(songId).orElseThrow(()-> new HttpNotFound("Song not found"));
+
+        if (song.getStatus() != SongStatus.APPROVED) {
+            throw new HttpForbidden("Song status is not APPROVED");
+        }
+
         SongHistoryId id = new SongHistoryId(userId, songId);
         SongHistory history = songHistoryRepository.findById(id).orElseGet(() -> {
             SongHistory sh = new SongHistory();
@@ -44,7 +56,14 @@ public class SongHistoryServiceImpl implements ISongHistoryService {
             sh.setSong(songRepository.getReferenceById(songId));
             return sh;
         });
-        history.setPlayedAt(LocalDateTime.now());
+
+        LocalDateTime now = LocalDateTime.now();
+
+        if (history.getPlayedAt() == null || history.getPlayedAt().isBefore(now.minusMinutes(1))) {
+            songRepository.incrementViews(songId);
+        }
+
+        history.setPlayedAt(now);
         songHistoryRepository.save(history);
     }
 }

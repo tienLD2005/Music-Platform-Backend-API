@@ -5,9 +5,11 @@ import com.ra.base_spring_boot.dto.resp.SongResponse;
 import com.ra.base_spring_boot.dto.resp.SongStatisticsResponseDTO;
 import com.ra.base_spring_boot.dto.resp.TopSongDTO;
 import com.ra.base_spring_boot.model.Song;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.security.core.Authentication;
@@ -122,7 +124,24 @@ public interface ISongRepository extends JpaRepository<Song, Long> {
     @Query("SELECT g.genreName FROM Song s JOIN s.genres g WHERE s.id = :songId")
     List<String> findGenresBySongId(@Param("songId") Long songId);
 
+    // Increase View in Song
+    @Modifying
+    @Query("UPDATE Song s SET s.views = s.views + 1 WHERE s.id = :songId")
+    void incrementViews(@Param("songId") Long songId);
 
 
+    // Statistic Genre
+    @Query("SELECT g.genreName, COUNT(s) " +
+            "FROM Song s JOIN s.genres g " +
+            "GROUP BY g.genreName")
+    List<Object[]> countSongsByGenre();
+
+    @Query("SELECT g.genreName, COUNT(sh) " +
+            "FROM SongHistory sh " +
+            "JOIN sh.song s " +
+            "JOIN s.genres g " +
+            "GROUP BY g.genreName " +
+            "ORDER BY COUNT(sh) DESC")
+    List<Object[]> countPlaysByGenre();
 
 }

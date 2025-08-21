@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/users/{userId}/playlists")
+@RequestMapping("/api/v1/playlists")
 public class PlaylistController {
 
     private final IPlaylistService playlistService;
@@ -25,95 +25,109 @@ public class PlaylistController {
         this.playlistService = playlistService;
     }
 
-    // 1. Search playlists of user
     @GetMapping
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public ResponseEntity<ResponseWrapper<PageResponse<PlaylistResp>>> listPlaylistsOfUser(
-            @PathVariable Long userId,
+    public ResponseEntity<ResponseWrapper<PageResponse<PlaylistResp>>> listPlaylistsOfCurrentUser(
             @RequestParam(name = "q", required = false) String keyword,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
-               @RequestParam(defaultValue = "desc") String direction
+            @RequestParam(defaultValue = "desc") String direction
     ) {
-        PageResponse<PlaylistResp> pageResponse = playlistService.searchOfUser(userId, keyword, page, size, sortBy, direction);
+        PageResponse<PlaylistResp> pageResponse = playlistService.searchOfCurrentUser(keyword, page, size, sortBy, direction);
 
-        ResponseWrapper<PageResponse<PlaylistResp>> resp = ResponseWrapper.<PageResponse<PlaylistResp>>builder()
-                .status(HttpStatus.OK)
-                .code(HttpStatus.OK.value())
-                .data(pageResponse)
-                .build();
-
-        return ResponseEntity.ok(resp);
+        return ResponseEntity.ok(
+                ResponseWrapper.<PageResponse<PlaylistResp>>builder()
+                        .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
+                        .data(pageResponse)
+                        .build()
+        );
     }
 
-    // 2. Create playlist
     @PostMapping
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<ResponseWrapper<PlaylistResp>> createPlaylist(
-            @PathVariable Long userId,
             @RequestBody @Valid PlaylistReq request) {
-        PlaylistResp playlist = playlistService.createPlaylist(userId, request);
+        PlaylistResp playlist = playlistService.createPlaylist(request);
 
-        ResponseWrapper<PlaylistResp> resp = ResponseWrapper.<PlaylistResp>builder()
-                .status(HttpStatus.CREATED)
-                .code(HttpStatus.CREATED.value())
-                .data(playlist)
-                .build();
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(resp);
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                ResponseWrapper.<PlaylistResp>builder()
+                        .status(HttpStatus.CREATED)
+                        .code(HttpStatus.CREATED.value())
+                        .data(playlist)
+                        .build()
+        );
     }
 
-    // 3. Add song
     @PostMapping("/{playlistId}/songs")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<ResponseWrapper<String>> addSongToPlaylist(
             @PathVariable Long playlistId,
             @RequestBody @Valid AddSongToPlaylistReq request) {
         playlistService.addSongToPlaylist(playlistId, request.getSongId());
 
-        ResponseWrapper<String> resp = ResponseWrapper.<String>builder()
-                .status(HttpStatus.CREATED)
-                .code(HttpStatus.CREATED.value())
-                .data("Song added successfully")
-                .build();
-
-        return ResponseEntity.ok(resp);
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                ResponseWrapper.<String>builder()
+                        .status(HttpStatus.CREATED)
+                        .code(HttpStatus.CREATED.value())
+                        .data("Song added successfully")
+                        .build()
+        );
     }
 
     @DeleteMapping("/{playlistId}/songs/{songId}")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<ResponseWrapper<String>> removeSongFromPlaylist(
             @PathVariable Long playlistId,
             @PathVariable Long songId) {
         playlistService.removeSongFromPlaylist(playlistId, songId);
 
-        ResponseWrapper<String> resp = ResponseWrapper.<String>builder()
-                .status(HttpStatus.OK)
-                .code(HttpStatus.OK.value())
-                .data("Song removed successfully")
-                .build();
-
-        return ResponseEntity.ok(resp);
+        return ResponseEntity.ok(
+                ResponseWrapper.<String>builder()
+                        .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
+                        .data("Song removed successfully")
+                        .build()
+        );
     }
 
-    //show songs playlist
     @GetMapping("/{playlistId}/songs")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<ResponseWrapper<List<SongResponse>>> getSongsInPlaylist(
             @PathVariable Long playlistId
     ) {
         List<SongResponse> songs = playlistService.getSongsInPlaylist(playlistId);
 
-        ResponseWrapper<List<SongResponse>> resp = ResponseWrapper.<List<SongResponse>>builder()
-                .status(HttpStatus.OK)
-                .code(HttpStatus.OK.value())
-                .data(songs)
-                .build();
+        return ResponseEntity.ok(
+                ResponseWrapper.<List<SongResponse>>builder()
+                        .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
+                        .data(songs)
+                        .build()
+        );
+    }
+    @PutMapping("/{playlistId}")
+    public ResponseEntity<ResponseWrapper<PlaylistResp>> updatePlaylist(
+            @PathVariable Long playlistId,
+            @RequestBody @Valid PlaylistReq request) {
+        PlaylistResp updated = playlistService.updatePlaylist(playlistId, request);
 
-        return ResponseEntity.ok(resp);
+        return ResponseEntity.ok(
+                ResponseWrapper.<PlaylistResp>builder()
+                        .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
+                        .data(updated)
+                        .build()
+        );
     }
 
+    @DeleteMapping("/{playlistId}")
+    public ResponseEntity<ResponseWrapper<String>> deletePlaylist(@PathVariable Long playlistId) {
+        playlistService.deletePlaylist(playlistId);
 
-
+        return ResponseEntity.ok(
+                ResponseWrapper.<String>builder()
+                        .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
+                        .data("Playlist deleted successfully")
+                        .build()
+        );
+    }
 }
+

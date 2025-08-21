@@ -1,6 +1,5 @@
 package com.ra.base_spring_boot.model;
 
-import com.ra.base_spring_boot.model.base.BaseObject;
 import com.ra.base_spring_boot.model.base.DownloadId;
 import jakarta.persistence.*;
 import lombok.*;
@@ -27,6 +26,14 @@ public class Download {
     @JoinColumn(name = "song_id", nullable = false)
     private Song song;
 
-    @Column(name = "added_at", nullable = false)
+    @Column(name = "added_at ", nullable = false)
     private LocalDateTime addedAt;
+
+    @Column(name = "file_path", length = 500)
+    private String filePath;
+
+    @PrePersist
+    public void prePersist() {
+        addedAt = LocalDateTime.now();
+    }
 }
