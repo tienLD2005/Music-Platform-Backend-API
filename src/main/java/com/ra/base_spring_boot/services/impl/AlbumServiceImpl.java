@@ -470,22 +470,20 @@ public class AlbumServiceImpl implements IAlbumService {
 
     @Override
     public List<AlbumResponse> getTopTrendingAlbums(int limit) {
-        return albumRepository.findTopTrendingAlbumsWithViews(PageRequest.of(0, limit))
+        Pageable pageable = PageRequest.of(0, limit);
+        return albumRepository.findTopTrendingAlbumsWithViews(pageable)
                 .stream()
-                .map(obj -> {
-                    Album a = (Album) obj[0];
-                    Long totalPlays = (Long) obj[1];
-                    return AlbumResponse.builder()
-                            .id(a.getId())
-                            .title(a.getTitle())
-                            .coverImage(a.getCoverImage())
-                            .artistName(a.getArtist() != null
-                                    ? a.getArtist().getFirstName() + " " + a.getArtist().getLastName()
-                                    : null)
-                            .songCount((long) (a.getSongs() != null ? a.getSongs().size() : 0))
-                            .totalPlays(totalPlays)
-                            .build();
-                })
+                .map(dto -> AlbumResponse.builder()
+                        .id(dto.getId())
+                        .title(dto.getTitle())
+                        .coverImage(dto.getCoverImage())
+                        .artistName(dto.getArtistFirstName() != null
+                                ? dto.getArtistFirstName() + " " + dto.getArtistLastName()
+                                : null)
+                        .songCount(dto.getSongCount())
+                        .totalPlays(dto.getTotalPlays())
+                        .build()
+                )
                 .toList();
     }
 
