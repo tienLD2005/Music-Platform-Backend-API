@@ -5,24 +5,19 @@ import com.ra.base_spring_boot.dto.resp.GenreRequestDTO;
 import com.ra.base_spring_boot.dto.resp.GenreResponseDTO;
 import com.ra.base_spring_boot.dto.resp.GenreTrendingDTO;
 import com.ra.base_spring_boot.dto.resp.PageResponse;
-import com.ra.base_spring_boot.model.Genre;
 import com.ra.base_spring_boot.services.GenreService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.awt.print.Pageable;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/g-genres")
 @RequiredArgsConstructor
-public class GenreController {
+public class GenreAdminController {
 
     private final GenreService genreService;
 
@@ -42,7 +37,7 @@ public class GenreController {
 
         //search,sort,show
     @GetMapping
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+//    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> getGenres(
             @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "0") int page,
@@ -62,7 +57,7 @@ public class GenreController {
 
     //CRUD
     @PostMapping
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+//    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> createGenre(@RequestBody @Valid GenreRequestDTO request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 ResponseWrapper.<GenreResponseDTO>builder()
@@ -74,7 +69,7 @@ public class GenreController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+//    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> updateGenre(
             @PathVariable Long id,
             @RequestBody @Valid GenreRequestDTO request
@@ -89,7 +84,7 @@ public class GenreController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+//    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> deleteGenre(@PathVariable Long id) {
         genreService.deleteGenre(id);
         return ResponseEntity.ok(

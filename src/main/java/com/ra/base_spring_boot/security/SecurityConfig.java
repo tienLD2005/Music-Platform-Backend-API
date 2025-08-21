@@ -136,6 +136,29 @@ public class SecurityConfig
                                 // profile
                                 .requestMatchers("/api/v1/profile/**").hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ARTIST.toString())
 
+
+                                // Genres
+                                .requestMatchers(HttpMethod.GET, "/api/v1/genres/trending").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/genres/**")
+                                .hasAnyAuthority(RoleName.ROLE_ADMIN.toString(), RoleName.ROLE_USER.toString(), RoleName.ROLE_ARTIST.toString())
+                                .requestMatchers(HttpMethod.POST, "/api/v1/genres/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/genres/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/genres/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
+
+
+                                // Playlists
+                                .requestMatchers(HttpMethod.GET, "/api/v1/users/*/playlists/**")
+                                .hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ADMIN.toString())
+                                .requestMatchers(HttpMethod.POST, "/api/v1/users/*/playlists/**")
+                                .hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ADMIN.toString())
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/users/*/playlists/**")
+                                .hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ADMIN.toString())
+
+
+                                // Song
+                                .requestMatchers(HttpMethod.GET, "/api/v1/songs/**").permitAll()
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/songs/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
+
                                 .anyRequest().permitAll()
                 )
                 .authenticationProvider(authenticationProvider())

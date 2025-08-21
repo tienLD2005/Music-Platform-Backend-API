@@ -36,7 +36,8 @@ public class AdminSongController {
             @PathVariable Long songId,
             @RequestBody @Valid DeleteSongRequest request
     ) {
-        songService.deleteSong(songId, request.getReason());
+        String adminName = "SystemAdmin";
+        songService.deleteSong(songId, request.getReason(), adminName);
         return ResponseEntity.ok(
                 ResponseWrapper.<String>builder()
                         .status(HttpStatus.OK)

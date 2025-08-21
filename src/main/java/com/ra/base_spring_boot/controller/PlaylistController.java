@@ -27,7 +27,7 @@ public class PlaylistController {
 
     // 1. Search playlists of user
     @GetMapping
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<ResponseWrapper<PageResponse<PlaylistResp>>> listPlaylistsOfUser(
             @PathVariable Long userId,
             @RequestParam(name = "q", required = false) String keyword,
@@ -49,7 +49,7 @@ public class PlaylistController {
 
     // 2. Create playlist
     @PostMapping
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<ResponseWrapper<PlaylistResp>> createPlaylist(
             @PathVariable Long userId,
             @RequestBody @Valid PlaylistReq request) {
@@ -66,7 +66,7 @@ public class PlaylistController {
 
     // 3. Add song
     @PostMapping("/{playlistId}/songs")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<ResponseWrapper<String>> addSongToPlaylist(
             @PathVariable Long playlistId,
             @RequestBody @Valid AddSongToPlaylistReq request) {
@@ -82,7 +82,7 @@ public class PlaylistController {
     }
 
     @DeleteMapping("/{playlistId}/songs/{songId}")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<ResponseWrapper<String>> removeSongFromPlaylist(
             @PathVariable Long playlistId,
             @PathVariable Long songId) {
@@ -99,7 +99,7 @@ public class PlaylistController {
 
     //show songs playlist
     @GetMapping("/{playlistId}/songs")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<ResponseWrapper<List<SongResponse>>> getSongsInPlaylist(
             @PathVariable Long playlistId
     ) {

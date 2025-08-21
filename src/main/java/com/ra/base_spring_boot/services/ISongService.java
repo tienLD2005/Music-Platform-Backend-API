@@ -17,7 +17,7 @@ public interface ISongService {
 
     PageResponse<SongResponse> getAllSongs(String keyword, Pageable pageable);
 
-    void deleteSong(Long songId, String reason);
+    void deleteSong(Long songId, String reason, String adminName);
 
 
 
