@@ -1,11 +1,14 @@
 package com.ra.base_spring_boot.controller;
 
 import com.ra.base_spring_boot.dto.ResponseWrapper;
+import com.ra.base_spring_boot.dto.resp.AlbumResponse;
 import com.ra.base_spring_boot.services.IAlbumService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("api/v1/guest/albums")
@@ -14,7 +17,6 @@ public class GuestAlbumController {
 
     private final IAlbumService albumService;
 
-    // List Ablums
     @GetMapping
     public ResponseEntity<?> getAlbums(@RequestParam(defaultValue = "1") int page,
                                        @RequestParam(defaultValue = "10") int size,
@@ -43,7 +45,6 @@ public class GuestAlbumController {
         );
     }
 
-
     @GetMapping("/featured")
     public ResponseEntity<?> getFeaturedAlbums() {
 
@@ -69,6 +70,18 @@ public class GuestAlbumController {
                         .status(HttpStatus.OK)
                         .code(HttpStatus.OK.value())
                         .data(albumService.getAlbumsByArtist(artistId, page, size, keyword, sortDir, isPremium))
+                        .build()
+        );
+    }
+
+    @GetMapping("/top-trending")
+    public ResponseEntity<?> getTopTrendingAlbums(@RequestParam(defaultValue = "5") int limit) {
+        List<AlbumResponse> albums = albumService.getTopTrendingAlbums(limit);
+        return ResponseEntity.ok(
+                ResponseWrapper.builder()
+                        .status(HttpStatus.OK)
+                        .code(200)
+                        .data(albums)
                         .build()
         );
     }

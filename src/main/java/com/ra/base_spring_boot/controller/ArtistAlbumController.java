@@ -102,17 +102,4 @@ public class ArtistAlbumController {
                         .build()
         );
     }
-
-
-    @GetMapping("/top-trending")
-    public ResponseEntity<?> getTopTrendingAlbums(@RequestParam(defaultValue = "5") int limit) {
-        List<AlbumResponse> albums = albumService.getTopTrendingAlbums(limit);
-        return ResponseEntity.ok(
-                ResponseWrapper.builder()
-                        .status(HttpStatus.OK)
-                        .code(200)
-                        .data(albums)
-                        .build()
-        );
-    }
 }
