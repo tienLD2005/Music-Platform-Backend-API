@@ -4,10 +4,12 @@ import com.ra.base_spring_boot.dto.resp.PaginatedResponse;
 import com.ra.base_spring_boot.dto.resp.SongResponseDTO;
 import com.ra.base_spring_boot.dto.resp.WishlistResponse;
 import com.ra.base_spring_boot.exception.HttpBadRequest;
+import com.ra.base_spring_boot.exception.HttpForbidden;
 import com.ra.base_spring_boot.exception.HttpNotFound;
 import com.ra.base_spring_boot.model.Song;
 import com.ra.base_spring_boot.model.User;
 import com.ra.base_spring_boot.model.base.Pagination;
+import com.ra.base_spring_boot.model.constants.SongStatus;
 import com.ra.base_spring_boot.repository.IRoleRepository;
 import com.ra.base_spring_boot.repository.ISongRepository;
 import com.ra.base_spring_boot.repository.IUserRepository;
@@ -37,7 +39,10 @@ public class WishlistServiceImpl implements IWishlistService {
 
         Song song = songRepository.findById(songId).orElseThrow(()-> new HttpNotFound("Song not found"));
 
-        // CHECK DUPLICATE EXIST
+        if (song.getStatus() != SongStatus.APPROVED) {
+            throw new HttpForbidden("Song status is not APPROVED");
+        }
+
         if (user.getWishlistSongs().contains(song)) {
             throw new HttpBadRequest("Song with this song already exists in the wishlist");
         }

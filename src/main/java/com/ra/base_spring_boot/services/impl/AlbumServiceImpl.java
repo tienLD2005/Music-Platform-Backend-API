@@ -73,10 +73,14 @@ public class AlbumServiceImpl implements IAlbumService {
         Album album = albumRepository.findById(albumId)
                 .orElseThrow(() -> new HttpNotFound("Album not found"));
 
+        if(album.getStatus()!=AlbumStatus.ACTIVE){
+            throw new HttpForbidden("Album status is not ACTIVE");
+
+        }
+
         User artist = userRepository.findById(album.getArtist().getId())
                 .orElseThrow(() -> new HttpNotFound("Artist not found"));
 
-        // Check duplicate title song
         if (songRepository.existsByTitleAndAlbumId(request.getTitle(), albumId)) {
             throw new HttpBadRequest("Song with this title already exists in the album");
         }
