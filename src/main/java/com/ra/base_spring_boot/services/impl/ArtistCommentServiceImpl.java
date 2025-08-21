@@ -112,7 +112,7 @@ public class ArtistCommentServiceImpl implements IArtistCommentService {
         Comment reply = Comment.builder()
                 .user(artist)
                 .song(song)
-                .content(request.getContent())
+                .content(request.getContent().trim().replaceAll("\\s+", " "))
                 .parent(parent)
                 .build();
 

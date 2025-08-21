@@ -82,6 +82,7 @@ public class SecurityConfig {
 
                         // --- Comments ---
                         .requestMatchers("/api/v1/client/comments/**").hasAnyAuthority(authorities(RoleName.ROLE_ARTIST, RoleName.ROLE_USER))
+                        .requestMatchers(HttpMethod.GET, "/api/v1/comment-reactions/*").hasAnyAuthority(authorities(RoleName.ROLE_USER, RoleName.ROLE_ARTIST))
                         .requestMatchers(HttpMethod.POST, "/api/v1/comment-reactions/*").hasAnyAuthority(authorities(RoleName.ROLE_USER, RoleName.ROLE_ARTIST))
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/comment-reactions/*").hasAnyAuthority(authorities(RoleName.ROLE_USER, RoleName.ROLE_ARTIST))
 

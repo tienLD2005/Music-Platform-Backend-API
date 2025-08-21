@@ -20,26 +20,6 @@ public class ClientArtistServiceImpl implements IClientArtistService {
     private final IUserRepository userRepository;
 
     @Override
-    public PageResponse<ArtistResponseDTO> getTrendingArtists(int page, int size) {
-        Pageable pageable = PageRequest.of(page - 1, size);
-        Page<User> artistPage = userRepository.findTrendingArtists(pageable);
-
-        List<ArtistResponseDTO> artistDTOs = artistPage
-                .getContent()
-                .stream()
-                .map(ArtistResponseDTO::fromEntity)
-                .toList();
-
-        return PageResponse.<ArtistResponseDTO>builder()
-                .content(artistDTOs)
-                .currentPage(artistPage.getNumber() + 1)
-                .size(artistPage.getSize())
-                .totalElements(artistPage.getTotalElements())
-                .totalPages(artistPage.getTotalPages())
-                .build();
-    }
-
-    @Override
     public PageResponse<ArtistResponseDTO> getAllArtists(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         Page<User> artistPage = userRepository.findAllArtists(pageable);

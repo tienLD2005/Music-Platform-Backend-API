@@ -168,7 +168,10 @@ public class AlbumServiceImpl implements IAlbumService {
     public ResponseWrapper<AlbumResponseDTO> createAlbum(AlbumRequest request) {
         Long artistId = getCurrentArtistId();
 
-        // Check duplicate title
+        if (request.getCoverImageFile() == null) {
+            throw new HttpBadRequest("Cover image is required");
+        }
+
         if (albumRepository.existsByTitleIgnoreCaseAndArtistId(request.getTitle(), artistId)) {
             throw new HttpBadRequest("Album with this title already exists");
         }
@@ -188,7 +191,7 @@ public class AlbumServiceImpl implements IAlbumService {
         }
 
         Album album = Album.builder()
-                .title(request.getTitle())
+                .title(request.getTitle().trim().replaceAll("\\s+", " "))
                 .releaseDate(request.getReleaseDate())
                 .type(request.getType())
                 .coverImage(coverUrl)
@@ -218,14 +221,8 @@ public class AlbumServiceImpl implements IAlbumService {
     public ResponseWrapper<AlbumResponseDTO> updateAlbum(Long albumId, AlbumRequest request) {
         Long artistId = getCurrentArtistId();
 
-        Album album = albumRepository.findById(albumId).orElse(null);
-        if (album == null) {
-            return ResponseWrapper.<AlbumResponseDTO>builder()
-                    .status(HttpStatus.NOT_FOUND)
-                    .code(HttpStatus.NOT_FOUND.value())
-                    .data(null)
-                    .build();
-        }
+        Album album = albumRepository.findById(albumId)
+                .orElseThrow(() -> new HttpNotFound("Album not found"));
 
         if (!album.getArtist().getId().equals(artistId)) {
             return ResponseWrapper.<AlbumResponseDTO>builder()
@@ -245,7 +242,7 @@ public class AlbumServiceImpl implements IAlbumService {
                     .build();
         }
 
-        album.setTitle(request.getTitle());
+        album.setTitle(request.getTitle().trim().replaceAll("\\s+", " "));
         album.setReleaseDate(request.getReleaseDate());
         album.setType(request.getType());
 
