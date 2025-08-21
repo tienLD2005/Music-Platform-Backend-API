@@ -36,7 +36,7 @@ public class AlbumAdminServiceImpl implements IAlbumAdminService {
     private final IAlbumAuditLogRepository auditLogRepository;
     private final IUserRepository userRepository;
     private final EmailService emailService;
-    private ValidateAlbumAdmin validateAlbumAdmin;
+    private final ValidateAlbumAdmin validateAlbumAdmin;
 
     @Override
     public PageResponse<AlbumAdminResponse> getAllAlbums(String keyword, AlbumStatus status,

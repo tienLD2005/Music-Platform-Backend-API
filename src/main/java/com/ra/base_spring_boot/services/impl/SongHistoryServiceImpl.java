@@ -2,8 +2,11 @@ package com.ra.base_spring_boot.services.impl;
 
 import com.ra.base_spring_boot.dto.resp.PageResponse;
 import com.ra.base_spring_boot.dto.resp.SongHistoryResponse;
+import com.ra.base_spring_boot.exception.HttpForbidden;
+import com.ra.base_spring_boot.exception.HttpNotFound;
 import com.ra.base_spring_boot.model.*;
 import com.ra.base_spring_boot.model.base.SongHistoryId;
+import com.ra.base_spring_boot.model.constants.SongStatus;
 import com.ra.base_spring_boot.repository.*;
 import com.ra.base_spring_boot.services.ISongHistoryService;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +42,12 @@ public class SongHistoryServiceImpl implements ISongHistoryService {
     @Override
     @Transactional
     public void addPlay(Long userId, Long songId) {
+        Song song = songRepository.findById(songId).orElseThrow(()-> new HttpNotFound("Song not found"));
+
+        if (song.getStatus() != SongStatus.APPROVED) {
+            throw new HttpForbidden("Song status is not APPROVED");
+        }
+
         SongHistoryId id = new SongHistoryId(userId, songId);
         SongHistory history = songHistoryRepository.findById(id).orElseGet(() -> {
             SongHistory sh = new SongHistory();

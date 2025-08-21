@@ -65,7 +65,7 @@ public class DownloadSongServiceImpl implements IDownloadSongService {
             String fileName = sanitizeFileName(song.getArtist().getFirstName() + "_" +
                     song.getArtist().getLastName() + "_" +
                     song.getTitle()) + ".mp3";
-            String filePath = DOWNLOAD_BASE_PATH + userId + "\\" + fileName;
+            String filePath = DOWNLOAD_BASE_PATH + "\\" + fileName;
 
             boolean downloadSuccess = downloadFile.download(song.getFileUrl(), filePath);
 

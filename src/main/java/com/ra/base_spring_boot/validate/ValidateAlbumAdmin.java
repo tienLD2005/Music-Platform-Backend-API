@@ -4,7 +4,9 @@ import com.ra.base_spring_boot.dto.req.AlbumDeleteRequest;
 import com.ra.base_spring_boot.exception.HttpBadRequest;
 import com.ra.base_spring_boot.model.Album;
 import com.ra.base_spring_boot.model.constants.AlbumStatus;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ValidateAlbumAdmin {
 
     public void validateDeleteRequest(AlbumDeleteRequest request) {
