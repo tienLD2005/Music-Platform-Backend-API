@@ -30,7 +30,6 @@ public class AdminSongController {
         return ResponseEntity.ok(songService.getAllSongs(keyword, pageable));
     }
 
-
     @DeleteMapping("/{songId}")
     public ResponseEntity<ResponseWrapper<String>> deleteSong(
             @PathVariable Long songId,

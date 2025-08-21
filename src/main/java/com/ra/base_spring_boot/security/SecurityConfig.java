@@ -28,15 +28,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 @RequiredArgsConstructor
-
-
 @OpenAPIDefinition(
         info = @Info(title = "Music API", version = "v1"),
         security = @SecurityRequirement(name = "bearerAuth")
@@ -48,143 +49,108 @@ import java.util.List;
         bearerFormat = "JWT",
         description = "Nhập token JWT"
 )
-public class SecurityConfig
-{
+public class SecurityConfig {
+
     private final MyUserDetailsService userDetailsService;
     private final JwtEntryPoint jwtEntryPoint;
     private final AccessDenied accessDenied;
     private final JwtTokenFilter jwtTokenFilter;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception
-    {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-                .cors(cf -> cf.configurationSource(request ->
-                {
-                    CorsConfiguration config = new CorsConfiguration();
-                    config.setAllowedOrigins(List.of("http://localhost:8080"));
-                    config.setAllowedMethods(List.of("*"));
-                    config.setAllowCredentials(true);
-                    config.setAllowedHeaders(List.of("*"));
-                    config.setExposedHeaders(List.of("*"));
-                    return config;
-                }))
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(
-                        url -> url
+                .authorizeHttpRequests(auth -> auth
 
-                                // API Banner
-                                .requestMatchers("POST", "/api/v1/banner/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
-                                .requestMatchers("DELETE", "/api/v1/banner/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
+                        // --- Banner ---
+                        .requestMatchers(HttpMethod.POST, "/api/v1/banner/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/banner/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
 
-                                .requestMatchers("/api/v1/admin/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
+                        // --- Admin APIs ---
+                        .requestMatchers("/api/v1/admin/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
 
-                                // API Song (Artist)
-                                .requestMatchers(HttpMethod.GET,"/api/v1/albums/*/songs").hasAnyAuthority(RoleName.ROLE_ADMIN.toString(), RoleName.ROLE_USER.toString(), RoleName.ROLE_ARTIST.toString())
-                                .requestMatchers(HttpMethod.POST,"/api/v1/albums/*/songs").hasAuthority(RoleName.ROLE_ARTIST.toString())
-                                .requestMatchers(HttpMethod.DELETE,"/api/v1/albums/*/songs/**").hasAuthority(RoleName.ROLE_ARTIST.toString())
+                        // --- Album & Songs (Artist) ---
+                        .requestMatchers(HttpMethod.POST, "/api/v1/artist/albums/*/songs")
+                        .hasAuthority(RoleName.ROLE_ARTIST.toString())
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/artist/albums/*/songs/*")
+                        .hasAuthority(RoleName.ROLE_ARTIST.toString())
 
-                                //API artist album
-                                .requestMatchers("api/v1/artist/albums/**").hasAuthority(RoleName.ROLE_ARTIST.toString())
+                        .requestMatchers("api/v1/artist/albums/**").hasAuthority(RoleName.ROLE_ARTIST.toString())
+                        .requestMatchers("api/v1/artist/comments/**").hasAuthority(RoleName.ROLE_ARTIST.toString())
+                        .requestMatchers("api/v1/artist/lyrics/**").hasAuthority(RoleName.ROLE_ARTIST.toString())
 
-                                //API Comment artist
-                                .requestMatchers("api/v1/artist/comments/**").hasAuthority(RoleName.ROLE_ARTIST.toString())
+                        // --- Comments ---
+                        .requestMatchers("/api/v1/client/comments/**").hasAnyAuthority(authorities(RoleName.ROLE_ARTIST, RoleName.ROLE_USER))
+                        .requestMatchers(HttpMethod.POST, "/api/v1/comment-reactions/*").hasAnyAuthority(authorities(RoleName.ROLE_USER, RoleName.ROLE_ARTIST))
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/comment-reactions/*").hasAnyAuthority(authorities(RoleName.ROLE_USER, RoleName.ROLE_ARTIST))
 
-                                //API Comment User
-                                .requestMatchers("api/v1/client/comments/**").hasAnyAuthority(RoleName.ROLE_ARTIST.toString(), RoleName.ROLE_USER.toString())
+                        // --- Wishlist ---
+                        .requestMatchers("/api/v1/wishlists/**").hasAnyAuthority(authorities(RoleName.ROLE_ARTIST, RoleName.ROLE_USER))
 
-                                //API Lyrics Artist
-                                .requestMatchers("api/v1/artist/lyrics/**").hasAuthority(RoleName.ROLE_ARTIST.toString())
+                        // --- Subscriptions & Payments ---
+                        .requestMatchers("api/v1/subscriptions/**").hasAnyAuthority(authorities(RoleName.ROLE_ARTIST, RoleName.ROLE_USER))
+                        .requestMatchers("api/v1/payments/**").hasAnyAuthority(authorities(RoleName.ROLE_ARTIST, RoleName.ROLE_USER))
 
-                                //API Wishlist
-                                .requestMatchers("/api/v1/wishlists/**").hasAuthority(RoleName.ROLE_USER.toString())
+                        // --- Follows ---
+                        .requestMatchers(HttpMethod.POST, "/api/v1/follows/artists/*").hasAnyAuthority(authorities(RoleName.ROLE_USER, RoleName.ROLE_ARTIST))
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/follows/artists/*").hasAnyAuthority(authorities(RoleName.ROLE_USER, RoleName.ROLE_ARTIST))
+                        .requestMatchers(HttpMethod.GET, "/api/v1/follows/me/artists").hasAnyAuthority(authorities(RoleName.ROLE_USER, RoleName.ROLE_ARTIST))
+                        .requestMatchers(HttpMethod.GET, "/api/v1/follows/artists/*/followers").hasAnyAuthority(authorities(RoleName.ROLE_ADMIN, RoleName.ROLE_ARTIST))
+                        .requestMatchers(HttpMethod.GET, "/api/v1/follows/artists/*/followers/count").hasAnyAuthority(authorities(RoleName.ROLE_ADMIN, RoleName.ROLE_ARTIST))
 
-                                //API Subscription Plan (Admin)
-                                .requestMatchers("/api/v1/admin/subscription_plan/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
+                        // --- Song history & reactions ---
+                        .requestMatchers("/api/v1/song-history/**").hasAnyAuthority(authorities(RoleName.ROLE_USER, RoleName.ROLE_ARTIST))
+                        .requestMatchers("/api/v1/song-reactions/**").hasAnyAuthority(authorities(RoleName.ROLE_USER, RoleName.ROLE_ARTIST))
 
-                                .requestMatchers("api/v1/subscriptions/**").hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ARTIST.toString())
-                                .requestMatchers("api/v1/payments/**").hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ARTIST.toString())
+                        // --- Download songs ---
+                        .requestMatchers("/api/v1/download-song/**").hasAuthority(RoleName.ROLE_USER.toString())
 
-                                .requestMatchers(HttpMethod.POST, "/api/v1/comments/*/reactions").hasAuthority(RoleName.ROLE_USER.toString())
-                                .requestMatchers(HttpMethod.DELETE, "/api/v1/comments/*/reactions").hasAuthority(RoleName.ROLE_USER.toString())
+                        // --- Profile ---
+                        .requestMatchers("/api/v1/profile/**").hasAnyAuthority(authorities(RoleName.ROLE_USER, RoleName.ROLE_ARTIST))
 
-                                .requestMatchers(HttpMethod.POST, "/api/v1/comment-reactions/*").hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ARTIST.toString())
-                                .requestMatchers(HttpMethod.DELETE, "/api/v1/comment-reactions/*").hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ARTIST.toString())
+                        // --- Playlists ---
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/*/playlists/**").hasAnyAuthority(authorities(RoleName.ROLE_USER, RoleName.ROLE_ARTIST))
+                        .requestMatchers(HttpMethod.POST, "/api/v1/users/*/playlists").hasAnyAuthority(authorities(RoleName.ROLE_USER, RoleName.ROLE_ARTIST))
+                        .requestMatchers(HttpMethod.POST, "/api/v1/users/*/playlists/*/songs").hasAnyAuthority(authorities(RoleName.ROLE_USER, RoleName.ROLE_ARTIST))
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/*/playlists/*/songs").hasAnyAuthority(authorities(RoleName.ROLE_USER, RoleName.ROLE_ARTIST))
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/users/*/playlists/*").hasAnyAuthority(authorities(RoleName.ROLE_USER, RoleName.ROLE_ARTIST))
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/users/*/playlists/*/songs/*").hasAnyAuthority(authorities(RoleName.ROLE_USER, RoleName.ROLE_ARTIST))
 
-                                .requestMatchers("/api/v1/admin/statistics/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
-
-                                .requestMatchers(HttpMethod.POST, "/api/v1/follows/artists/*")
-                                .hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ARTIST.toString())
-
-                                .requestMatchers(HttpMethod.DELETE, "/api/v1/follows/artists/*")
-                                .hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ARTIST.toString())
-
-                                .requestMatchers(HttpMethod.GET, "/api/v1/follows/me/artists")
-                                .hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ARTIST.toString())
-
-                                .requestMatchers(HttpMethod.GET, "/api/v1/follows/artists/*/followers")
-                                .hasAnyAuthority(RoleName.ROLE_ADMIN.toString(), RoleName.ROLE_ARTIST.toString())
-
-                                .requestMatchers(HttpMethod.GET, "/api/v1/follows/artists/*/followers/count")
-                                .hasAnyAuthority(RoleName.ROLE_ADMIN.toString(), RoleName.ROLE_ARTIST.toString())
-
-                                // Song history
-                                .requestMatchers("/api/v1/song-history/**").hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ARTIST.toString())
-
-                                // Song reactions
-                                .requestMatchers("/api/v1/song-reactions/**").hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ARTIST.toString())
-
-                                // download songs
-                                .requestMatchers("/api/v1/download-song/**").hasAuthority(RoleName.ROLE_USER.toString())
-
-                                // profile
-                                .requestMatchers("/api/v1/profile/**").hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ARTIST.toString())
-
-
-                                // Genres
-                                .requestMatchers(HttpMethod.GET, "/api/v1/genres/trending").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/v1/genres/**")
-                                .hasAnyAuthority(RoleName.ROLE_ADMIN.toString(), RoleName.ROLE_USER.toString(), RoleName.ROLE_ARTIST.toString())
-                                .requestMatchers(HttpMethod.POST, "/api/v1/genres/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
-                                .requestMatchers(HttpMethod.PUT, "/api/v1/genres/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
-                                .requestMatchers(HttpMethod.DELETE, "/api/v1/genres/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
-
-
-                                // Playlists
-                                .requestMatchers(HttpMethod.GET, "/api/v1/users/*/playlists/**")
-                                .hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ADMIN.toString())
-                                .requestMatchers(HttpMethod.POST, "/api/v1/users/*/playlists/**")
-                                .hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ADMIN.toString())
-                                .requestMatchers(HttpMethod.DELETE, "/api/v1/users/*/playlists/**")
-                                .hasAnyAuthority(RoleName.ROLE_USER.toString(), RoleName.ROLE_ADMIN.toString())
-
-
-                                // Song
-                                .requestMatchers(HttpMethod.GET, "/api/v1/songs/**").permitAll()
-                                .requestMatchers(HttpMethod.DELETE, "/api/v1/songs/**").hasAuthority(RoleName.ROLE_ADMIN.toString())
-
-                                .anyRequest().permitAll()
+                        // --- Default ---
+                        .anyRequest().permitAll()
                 )
                 .authenticationProvider(authenticationProvider())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(
-                        exception -> exception
-                                .authenticationEntryPoint(jwtEntryPoint)
-                                .accessDeniedHandler(accessDenied)
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(jwtEntryPoint)
+                        .accessDeniedHandler(accessDenied)
                 )
                 .addFilterAfter(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder()
-    {
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of("http://localhost:8080"));
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        config.setAllowCredentials(true);
+        config.setAllowedHeaders(List.of("*"));
+        config.setExposedHeaders(List.of("*"));
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Bean
-    public AuthenticationProvider authenticationProvider()
-    {
+    public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setPasswordEncoder(passwordEncoder());
         provider.setUserDetailsService(userDetailsService);
@@ -192,8 +158,11 @@ public class SecurityConfig
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration auth) throws Exception
-    {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration auth) throws Exception {
         return auth.getAuthenticationManager();
+    }
+
+    private String[] authorities(RoleName... roles) {
+        return Arrays.stream(roles).map(Enum::toString).toArray(String[]::new);
     }
 }

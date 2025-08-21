@@ -4,6 +4,7 @@ import com.ra.base_spring_boot.dto.resp.PageResponse;
 import com.ra.base_spring_boot.dto.resp.SongResponse;
 import com.ra.base_spring_boot.dto.resp.TopSongDTO;
 import com.ra.base_spring_boot.exception.HttpNotFound;
+import com.ra.base_spring_boot.mapper.SongMapper;
 import com.ra.base_spring_boot.model.Genre;
 import com.ra.base_spring_boot.model.Song;
 import com.ra.base_spring_boot.model.SongDeleteHistory;
@@ -27,8 +28,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SongServiceImpl implements ISongService {
     private final ISongRepository songRepository;
-    private final JavaMailSenderImpl mailSender;
-    private final SongDeleteHistoryRepo songDeleteHistory;
     private final MailService mailService;
     private final SongDeleteHistoryRepo songDeleteHistoryRepo;
 
@@ -52,8 +51,6 @@ public class SongServiceImpl implements ISongService {
         return songRepository.findTrendingSongs(sevenDaysAgo, pageable);
     }
 
-
-
     @Override
     public PageResponse<SongResponse> getAllSongs(String keyword, Pageable pageable) {
         Page<Song> page;
@@ -64,10 +61,8 @@ public class SongServiceImpl implements ISongService {
             page = songRepository.findByTitle(keyword, pageable);
         }
         List<SongResponse> responses = page.stream()
-                .map(this::mapToSongResponse)
+                .map(SongMapper::toResponse)
                 .toList();
-
-
 
         return new PageResponse<>(
                 responses,
@@ -78,90 +73,34 @@ public class SongServiceImpl implements ISongService {
         );
     }
 
-    private SongResponse mapToSongResponse(Song song) {
-        return SongResponse.builder()
-                .id(song.getId())
-                .title(song.getTitle())
-                .duration(song.getDuration())
-                .artistId(song.getArtist() != null ? song.getArtist().getId() : null)
-                .artistName(song.getArtist() != null ? song.getArtist().getFirstName() +' ' + song.getArtist().getLastName(): null)
-                .albumId(song.getAlbum() != null ? song.getAlbum().getId() : null)
-                .albumName(song.getAlbum() != null ? song.getAlbum().getTitle() : null)
-                .fileUrl(song.getFileUrl())
-                .views(song.getViews())
-                .createdAt(song.getCreatedAt())
-                .status(song.getStatus().name())
-                .genres(song.getGenres() != null
-                        ? song.getGenres().stream().map(Genre::getGenreName).toList()
-                        : null)
-                .build();
-    }
-
-
     @Override
     public void deleteSong(Long songId, String reason, String adminName) {
         Song song = songRepository.findById(songId)
-                .orElseThrow(() -> new HttpNotFound("Không tìm thấy bài hát"));
+                .orElseThrow(() -> new HttpNotFound("Song not found"));
 
         User artist = song.getArtist();
         songRepository.delete(song);
 
-        String subject = "Thông báo: Bài hát \"" + song.getTitle() + "\" đã bị xoá";
-        String body = "<p>Xin chào " + artist.getLastName() + ",</p>" +
-                "<p>Bài hát <strong>" + song.getTitle() + "</strong> của bạn đã bị xoá bởi admin <b>" + adminName + "</b>.</p>" +
-                "<p><b>Lý do:</b> " + reason + "</p>" +
-                "<p>Nếu bạn cho rằng đây là nhầm lẫn, vui lòng liên hệ để kháng nghị.</p>" +
-                "<br/>Trân trọng,<br/>Đội ngũ quản trị";
+        String subject = "Notice: The song \"" + song.getTitle() + "\" has been deleted";
+        StringBuilder body = new StringBuilder();
+        body.append("Hello ").append(artist.getLastName()).append(",\n\n");
+        body.append("Your song \"").append(song.getTitle())
+                .append("\" has been deleted by admin ").append(adminName).append(".\n\n");
+        body.append("Reason: ").append(reason).append("\n\n");
+        body.append("If you believe this is a mistake, please contact our support team to appeal.\n\n");
+        body.append("Best regards,\nThe Administration Team");
 
-        mailService.sendEmail(artist.getEmail(), subject, body);
+        mailService.sendEmail(artist.getEmail(), subject, body.toString());
 
-        // Lưu lịch sử xoá
-        SongDeleteHistory history = new SongDeleteHistory();
-        history.setSongTitle(song.getTitle());
-        history.setArtistId(artist.getId());
-        history.setReason(reason);
-        history.setDeletedBy(adminName);
-        history.setDeletedAt(LocalDateTime.now());
-
-        songDeleteHistoryRepo.save(history);
-    }
-
-
-    private void sendDeleteEmail(String to, String songTitle, String reason) {
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true);
-
-            helper.setTo(to);
-            helper.setSubject("Thông báo: Bài hát của bạn đã bị xóa");
-            helper.setText(
-                    "<p>Xin chào,</p>" +
-                            "<p>Bài hát <b>" + songTitle + "</b> đã bị xóa bởi quản trị viên.</p>" +
-                            "<p><b>Lý do:</b> " + reason + "</p>" +
-                            "<p>Nếu bạn cho rằng đây là nhầm lẫn, vui lòng liên hệ hỗ trợ để kháng nghị.</p>" +
-                            "<br><p>Trân trọng,<br>Đội ngũ quản trị</p>",
-                    true
-            );
-
-            mailSender.send(message);
-        } catch (Exception e) {
-            throw new RuntimeException("Không thể gửi email: " + e.getMessage());
-        }
-    }
-
-    private void saveDeleteHistory(Song song, String reason) {
         SongDeleteHistory history = SongDeleteHistory.builder()
                 .songId(song.getId())
                 .songTitle(song.getTitle())
-                .artistId(song.getArtist().getId())
+                .artistId(artist.getId())
                 .deletedAt(LocalDateTime.now())
-                .deletedBy("ADMIN")
+                .deletedBy(adminName)
                 .deleteReason(reason)
                 .build();
 
-        songDeleteHistory.save(history);
+        songDeleteHistoryRepo.save(history);
     }
-
-
-
 }

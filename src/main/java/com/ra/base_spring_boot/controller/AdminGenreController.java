@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/g-genres")
+@RequestMapping("/api/v1/admin/g-genres")
 @RequiredArgsConstructor
-public class GenreAdminController {
+public class AdminGenreController {
 
     private final GenreService genreService;
 
@@ -35,9 +35,7 @@ public class GenreAdminController {
         );
     }
 
-        //search,sort,show
     @GetMapping
-//    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> getGenres(
             @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "0") int page,
@@ -55,9 +53,7 @@ public class GenreAdminController {
     }
 
 
-    //CRUD
     @PostMapping
-//    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> createGenre(@RequestBody @Valid GenreRequestDTO request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 ResponseWrapper.<GenreResponseDTO>builder()
@@ -69,7 +65,6 @@ public class GenreAdminController {
     }
 
     @PutMapping("/{id}")
-//    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> updateGenre(
             @PathVariable Long id,
             @RequestBody @Valid GenreRequestDTO request
@@ -84,7 +79,6 @@ public class GenreAdminController {
     }
 
     @DeleteMapping("/{id}")
-//    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> deleteGenre(@PathVariable Long id) {
         genreService.deleteGenre(id);
         return ResponseEntity.ok(
@@ -95,5 +89,4 @@ public class GenreAdminController {
                         .build()
         );
     }
-
 }
