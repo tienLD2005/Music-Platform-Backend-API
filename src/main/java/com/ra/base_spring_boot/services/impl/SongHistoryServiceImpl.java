@@ -9,6 +9,7 @@ import com.ra.base_spring_boot.services.ISongHistoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -34,7 +35,9 @@ public class SongHistoryServiceImpl implements ISongHistoryService {
                 .build();
     }
 
+
     @Override
+    @Transactional
     public void addPlay(Long userId, Long songId) {
         SongHistoryId id = new SongHistoryId(userId, songId);
         SongHistory history = songHistoryRepository.findById(id).orElseGet(() -> {
@@ -44,7 +47,14 @@ public class SongHistoryServiceImpl implements ISongHistoryService {
             sh.setSong(songRepository.getReferenceById(songId));
             return sh;
         });
-        history.setPlayedAt(LocalDateTime.now());
+
+        LocalDateTime now = LocalDateTime.now();
+
+        if (history.getPlayedAt() == null || history.getPlayedAt().isBefore(now.minusMinutes(1))) {
+            songRepository.incrementViews(songId);
+        }
+
+        history.setPlayedAt(now);
         songHistoryRepository.save(history);
     }
 }

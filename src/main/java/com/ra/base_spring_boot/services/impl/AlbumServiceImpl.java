@@ -15,10 +15,7 @@ import com.ra.base_spring_boot.model.base.Pagination;
 import com.ra.base_spring_boot.model.constants.AlbumStatus;
 import com.ra.base_spring_boot.model.constants.AlbumType;
 import com.ra.base_spring_boot.model.constants.SongStatus;
-import com.ra.base_spring_boot.repository.IAlbumRepository;
-import com.ra.base_spring_boot.repository.IGenreRepository;
-import com.ra.base_spring_boot.repository.ISongRepository;
-import com.ra.base_spring_boot.repository.IUserRepository;
+import com.ra.base_spring_boot.repository.*;
 import com.ra.base_spring_boot.security.principle.MyUserDetails;
 import com.ra.base_spring_boot.services.cloudinary.CloudinaryService;
 import com.ra.base_spring_boot.services.IAlbumService;
@@ -43,6 +40,7 @@ public class AlbumServiceImpl implements IAlbumService {
     private final IAlbumRepository albumRepository;
     private final IGenreRepository genreRepository;
     private final IUserRepository userRepository;
+    private final ILyricsRepository lyricsRepository;
     private final CloudinaryService cloudinaryService;
 
     @Override
@@ -126,7 +124,8 @@ public class AlbumServiceImpl implements IAlbumService {
             throw new HttpBadRequest("This song does not belong to the album");
         }
 
-        songRepository.delete(song);
+        song.setStatus(SongStatus.REJECTED);
+        songRepository.save(song);
         return "Song delete from album successfully";
     }
 

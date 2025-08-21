@@ -6,6 +6,7 @@ import com.ra.base_spring_boot.dto.resp.PageResponse;
 import com.ra.base_spring_boot.dto.resp.CommentStatisticsResponseDTO;
 import com.ra.base_spring_boot.dto.resp.SongStatisticsResponseDTO;
 import com.ra.base_spring_boot.dto.resp.SubscriptionPlanStatisticDTO;
+import com.ra.base_spring_boot.services.IGenreStatisticService;
 import com.ra.base_spring_boot.services.ICommentStatisticsService;
 import com.ra.base_spring_boot.services.ISongStatisticsService;
 import com.ra.base_spring_boot.services.ISubscriptionPlanStatisticService;
@@ -32,6 +33,7 @@ public class StatisticManagementController {
     private final ArtistStatisticsServiceImpl artistStatisticsService;
     private final AlbumStatisticsServiceImpl albumStatisticsService;
     private final ISubscriptionPlanStatisticService statisticService;
+    private final IGenreStatisticService genreStatisticService;
 
     private final ICommentStatisticsService commentStatisticsService;
     @GetMapping("/user/status")
@@ -110,6 +112,17 @@ public class StatisticManagementController {
                         .build();
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/genres")
+    public  ResponseEntity<ResponseWrapper<?>> getGenreStatistics() {
+        return ResponseEntity.status(HttpStatus.OK).body(
+                ResponseWrapper.builder()
+                        .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
+                        .data(genreStatisticService.getGenreStatistics())
+                        .build()
+        );
     }
 
     @GetMapping("/comment")

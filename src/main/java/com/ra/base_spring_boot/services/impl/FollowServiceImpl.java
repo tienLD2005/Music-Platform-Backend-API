@@ -7,6 +7,7 @@ import com.ra.base_spring_boot.exception.ResourceNotFoundException;
 import com.ra.base_spring_boot.mapper.FollowMapper;
 import com.ra.base_spring_boot.model.Follow;
 import com.ra.base_spring_boot.model.User;
+import com.ra.base_spring_boot.model.constants.RoleName;
 import com.ra.base_spring_boot.repository.FollowRepository;
 import com.ra.base_spring_boot.repository.IUserRepository;
 import com.ra.base_spring_boot.services.IFollowService;
@@ -32,6 +33,20 @@ public class FollowServiceImpl implements IFollowService {
 
         User follower = getUserById(followerId, "Follower not found with id " + followerId);
         User artist = getUserById(artistId, "Artist not found with id " + artistId);
+
+        boolean isUser = follower.getRoles().stream()
+                .anyMatch(role -> role.getRoleName() == RoleName.ROLE_USER);
+
+        if (!isUser) {
+            throw new HttpBadRequest("Only USER accounts can follow artists");
+        }
+
+        boolean isArtist = artist.getRoles().stream()
+                .anyMatch(role -> role.getRoleName() == RoleName.ROLE_ARTIST);
+
+        if (!isArtist) {
+            throw new HttpBadRequest("You can only follow ARTIST accounts");
+        }
 
         boolean alreadyFollowed = followRepository.findByFollowerAndArtist(follower, artist).isPresent();
         if (alreadyFollowed) {
