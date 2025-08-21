@@ -45,4 +45,5 @@ public class Comment extends BaseObject
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
 }
