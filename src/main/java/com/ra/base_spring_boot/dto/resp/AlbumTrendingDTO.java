@@ -18,7 +18,8 @@ public class AlbumTrendingDTO {
     private Long songHistoryCount;
 
     public Long getTotalPlays() {
-        return (totalViews != null ? totalViews : 0) + (songHistoryCount != null ? songHistoryCount : 0);
+        return (totalViews != null ? totalViews : 0) +
+               (songHistoryCount != null ? songHistoryCount : 0);
     }
 }
 

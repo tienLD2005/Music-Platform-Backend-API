@@ -84,6 +84,4 @@ public class Song extends BaseObject {
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private Set<User> songReactions;
-
-
 }
