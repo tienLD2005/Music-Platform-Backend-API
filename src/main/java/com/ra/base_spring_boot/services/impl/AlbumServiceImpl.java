@@ -232,7 +232,6 @@ public class AlbumServiceImpl implements IAlbumService {
                     .build();
         }
 
-        // Check duplicate title
         if (!album.getTitle().equalsIgnoreCase(request.getTitle())
                 && albumRepository.existsByTitleIgnoreCaseAndArtistId(request.getTitle(), artistId)) {
             return ResponseWrapper.<AlbumResponseDTO>builder()
@@ -318,7 +317,6 @@ public class AlbumServiceImpl implements IAlbumService {
                 .build();
     }
 
-    // List Album
     @Override
     public PaginatedResponse<AlbumResponse> getAllAlbums(int page, int size, String sortBy, String sortDir, String keyword) {
         Sort sort = sortDir.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
@@ -432,7 +430,6 @@ public class AlbumServiceImpl implements IAlbumService {
                 pageable
         );
 
-
         Page<AlbumResponse> albums = albumPage.map(album -> {
             String access;
             if (AlbumType.FREE.equals(album.getType())) {
@@ -466,8 +463,6 @@ public class AlbumServiceImpl implements IAlbumService {
         );
     }
 
-
-
     @Override
     public List<AlbumResponse> getTopTrendingAlbums(int limit) {
         Pageable pageable = PageRequest.of(0, limit);
@@ -486,5 +481,4 @@ public class AlbumServiceImpl implements IAlbumService {
                 )
                 .toList();
     }
-
 }

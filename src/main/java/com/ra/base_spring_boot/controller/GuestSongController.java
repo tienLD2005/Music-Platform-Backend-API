@@ -43,7 +43,7 @@ public class GuestSongController {
         );
     }
 
-    @GetMapping("/trending")
+    @GetMapping("/trending-this-month")
     public ResponseEntity<?> getTrendingSongs(@RequestParam(defaultValue = "15") int limit) {
         List<TopSongDTO> trendingSongs = songService.getTrendingSongsThisMonth(limit);
         return ResponseEntity.ok(

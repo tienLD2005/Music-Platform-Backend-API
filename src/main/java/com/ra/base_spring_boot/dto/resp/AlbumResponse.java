@@ -1,6 +1,5 @@
 package com.ra.base_spring_boot.dto.resp;
 
-import com.ra.base_spring_boot.model.constants.AlbumStatus;
 import com.ra.base_spring_boot.model.constants.AlbumType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

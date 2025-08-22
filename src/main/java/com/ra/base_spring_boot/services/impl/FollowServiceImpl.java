@@ -3,7 +3,7 @@ package com.ra.base_spring_boot.services.impl;
 import com.ra.base_spring_boot.dto.resp.FollowResponseDTO;
 import com.ra.base_spring_boot.exception.HttpBadRequest;
 import com.ra.base_spring_boot.exception.HttpForbidden;
-import com.ra.base_spring_boot.exception.ResourceNotFoundException;
+import com.ra.base_spring_boot.exception.HttpNotFound;
 import com.ra.base_spring_boot.mapper.FollowMapper;
 import com.ra.base_spring_boot.model.Follow;
 import com.ra.base_spring_boot.model.User;
@@ -70,7 +70,7 @@ public class FollowServiceImpl implements IFollowService {
         User artist = getUserById(artistId, "Artist not found with id " + artistId);
 
         Follow follow = followRepository.findByFollowerAndArtist(follower, artist)
-                .orElseThrow(() -> new ResourceNotFoundException("Follow relation not found"));
+                .orElseThrow(() -> new HttpNotFound("Follow relation not found"));
 
         followRepository.delete(follow);
     }
@@ -110,6 +110,6 @@ public class FollowServiceImpl implements IFollowService {
 
     private User getUserById(Long id, String errorMessage) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(errorMessage));
+                .orElseThrow(() -> new HttpNotFound(errorMessage));
     }
 }

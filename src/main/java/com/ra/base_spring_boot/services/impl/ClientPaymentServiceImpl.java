@@ -5,6 +5,7 @@ import com.ra.base_spring_boot.dto.resp.PaymentResponseDTO;
 import com.ra.base_spring_boot.dto.resp.SubscriptionResponseDTO;
 import com.ra.base_spring_boot.exception.HttpBadRequest;
 import com.ra.base_spring_boot.exception.HttpConflict;
+import com.ra.base_spring_boot.exception.HttpConflict;
 import com.ra.base_spring_boot.model.Payment;
 import com.ra.base_spring_boot.model.Subscription;
 import com.ra.base_spring_boot.model.SubscriptionPlan;
@@ -57,7 +58,6 @@ public class ClientPaymentServiceImpl implements IClientPaymentService {
 
         SubscriptionPlan plan = subscriptionPlanRepository.findById(requestDTO.getPlanId())
                 .orElseThrow(() -> new EntityNotFoundException("Plan not found"));
-
 
         Subscription activeSub = subscriptionRepository.findByUserIdAndStatus(userId, Status.ACTIVE).orElse(null);
         if (activeSub != null && !activeSub.getPlan_id().getId().equals(plan.getId())) {

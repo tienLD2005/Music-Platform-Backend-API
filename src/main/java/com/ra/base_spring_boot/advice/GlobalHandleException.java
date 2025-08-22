@@ -5,13 +5,11 @@ import com.ra.base_spring_boot.dto.ResponseWrapper;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
-import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,30 +39,6 @@ public class GlobalHandleException
                         .data(ex.getMessage())
                         .code(HttpStatus.BAD_REQUEST.value())
                         .status(HttpStatus.BAD_REQUEST)
-                        .build()
-        );
-    }
-
-    @ExceptionHandler(NoResourceFoundException.class)
-    public ResponseEntity<?> handleNoResourceFoundException(NoResourceFoundException ex)
-    {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                ResponseWrapper.builder()
-                        .data(ex.getMessage())
-                        .code(HttpStatus.NOT_FOUND.value())
-                        .status(HttpStatus.NOT_FOUND)
-                        .build()
-        );
-    }
-
-    @ExceptionHandler(UsernameNotFoundException.class)
-    public ResponseEntity<?> handleUsernameNotFoundException(UsernameNotFoundException ex)
-    {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                ResponseWrapper.builder()
-                        .data(ex.getMessage())
-                        .code(HttpStatus.NOT_FOUND.value())
-                        .status(HttpStatus.NOT_FOUND)
                         .build()
         );
     }
@@ -129,19 +103,6 @@ public class GlobalHandleException
         );
     }
 
-
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<?> handleMessage(RuntimeException ex)
-    {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                ResponseWrapper.builder()
-                .data(ex.getMessage())
-                .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .build()
-        );
-    }
-
     @ExceptionHandler(MissingRequestHeaderException.class)
     public ResponseEntity<?> handleMissingHeader(MissingRequestHeaderException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
@@ -180,18 +141,6 @@ public class GlobalHandleException
                         .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .build()
-        );
-    }
-
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<?> handleResourceNotFoundException(ResourceNotFoundException ex)
-    {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                ResponseWrapper.builder()
-                .data(ex.getMessage())
-                .code(HttpStatus.NOT_FOUND.value())
-                .status(HttpStatus.NOT_FOUND)
-                .build()
         );
     }
 
