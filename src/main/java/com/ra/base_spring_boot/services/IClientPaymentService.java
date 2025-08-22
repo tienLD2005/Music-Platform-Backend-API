@@ -7,12 +7,7 @@ import com.ra.base_spring_boot.model.constants.PaymentMethod;
 
 public interface IClientPaymentService {
     PaymentResponseDTO getPaymentDetail(Long paymentId);
-
     String createPayment(SubscriptionRequestDTO requestDTO);
+    SubscriptionResponseDTO capturePayment(String orderId, Long paymentId, PaymentMethod method);
 
-    SubscriptionResponseDTO capturePayment(String orderId, Long subscriptionId, PaymentMethod method);
-
-    SubscriptionResponseDTO processPaypalSuccess(String token, String payerId);
-    void processPaypalCancel(String token);
-    Long getPaymentIdByToken(String token);
 }
