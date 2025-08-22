@@ -3,6 +3,7 @@ package com.ra.base_spring_boot.controller;
 import com.ra.base_spring_boot.dto.ResponseWrapper;
 import com.ra.base_spring_boot.dto.resp.PageResponse;
 import com.ra.base_spring_boot.dto.resp.SongHistoryResponse;
+import com.ra.base_spring_boot.model.SongHistory;
 import com.ra.base_spring_boot.security.principle.MyUserDetails;
 import com.ra.base_spring_boot.services.ISongHistoryService;
 import lombok.RequiredArgsConstructor;
@@ -36,18 +37,17 @@ public class SongHistoryController {
     }
 
     @PostMapping("/play/{songId}")
-    public ResponseEntity<ResponseWrapper<Void>> addPlay(
+    public ResponseEntity<ResponseWrapper<?>> addPlay(
             @PathVariable Long songId,
             @AuthenticationPrincipal MyUserDetails principal
     ) {
-        songHistoryService.addPlay(principal.getId(), songId);
-
-        ResponseWrapper<Void> body = ResponseWrapper.<Void>builder()
-                .status(HttpStatus.CREATED)
-                .code(HttpStatus.CREATED.value())
-                .data(null)
-                .build();
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(body);
+        SongHistoryResponse songHistory = songHistoryService.addPlay(principal.getId(), songId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                ResponseWrapper.builder()
+                        .status(HttpStatus.CREATED)
+                        .code(HttpStatus.CREATED.value())
+                        .data(songHistory)
+                        .build()
+        );
     }
 }

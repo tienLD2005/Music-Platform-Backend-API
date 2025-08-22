@@ -28,7 +28,5 @@ public class FormSongRequest {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
     private LocalTime duration;
     private MultipartFile fileUrl;
-    @Min(value = 0, message = "View must not be less than 0")
-    private Integer views;
     private Set<Long> genreIds;
 }

@@ -5,6 +5,7 @@ import com.ra.base_spring_boot.dto.resp.SongResponse;
 import com.ra.base_spring_boot.dto.resp.SongStatisticsResponseDTO;
 import com.ra.base_spring_boot.dto.resp.TopSongDTO;
 import com.ra.base_spring_boot.model.Song;
+import com.ra.base_spring_boot.model.constants.SongStatus;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,7 +21,7 @@ import java.util.List;
 
 
 public interface ISongRepository extends JpaRepository<Song, Long> {
-    Page<Song> findByAlbumId(Long albumId, Pageable pageable);
+    Page<Song> findByAlbumIdAndStatus(Long albumId, Pageable pageable, SongStatus status);
 
     @Query("SELECT s FROM Song s JOIN s.genres g WHERE g.id = :genreId")
     Page<Song> findByGenreId(@Param("genreId") Long genreId, Pageable pageable);

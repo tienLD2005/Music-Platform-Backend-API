@@ -11,9 +11,7 @@ import com.ra.base_spring_boot.model.Album;
 import com.ra.base_spring_boot.model.Genre;
 import com.ra.base_spring_boot.model.Song;
 import com.ra.base_spring_boot.model.User;
-import com.ra.base_spring_boot.model.base.Pagination;
 import com.ra.base_spring_boot.model.constants.AlbumStatus;
-import com.ra.base_spring_boot.model.constants.AlbumType;
 import com.ra.base_spring_boot.model.constants.SongStatus;
 import com.ra.base_spring_boot.repository.*;
 import com.ra.base_spring_boot.security.principle.MyUserDetails;
@@ -40,41 +38,47 @@ public class AlbumServiceImpl implements IAlbumService {
     private final IAlbumRepository albumRepository;
     private final IGenreRepository genreRepository;
     private final IUserRepository userRepository;
-    private final ILyricsRepository lyricsRepository;
     private final CloudinaryService cloudinaryService;
 
     @Override
-    public PaginatedResponse<ResponseSong> getSongsByAlbum(Long albumId, int page, int size, String sortBy, String direction) {
+    public PageResponse<ResponseSong> getSongsByAlbum(Long albumId, int page, int size, String sortBy, String direction) {
         Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
         Pageable pageable = PageRequest.of(page - 1, size, sort);
 
-        Page<Song> songsPage = songRepository.findByAlbumId(albumId, pageable);
+        Page<Song> songsPage = songRepository.findByAlbumIdAndStatus(albumId, pageable, SongStatus.APPROVED);
 
         Page<ResponseSong> songs = songsPage.map(song -> ResponseSong.builder()
+                .id(song.getId())
+                .artistName(song.getArtist() != null
+                        ? song.getArtist().getFirstName() + " " + song.getArtist().getLastName()
+                        : null)
                 .title(song.getTitle())
                 .duration(song.getDuration())
                 .views(song.getViews())
                 .fileUrl(song.getFileUrl())
                 .build());
 
-        return new PaginatedResponse<>(
-                songs.getContent(),
-                new Pagination(
-                        songs.getNumber() + 1,
-                        songs.getSize(),
-                        songs.getTotalPages(),
-                        songs.getTotalElements()
-                )
-        );
+        return PageResponse.<ResponseSong>builder()
+                .content(songs.getContent())
+                .currentPage(songs.getNumber() + 1)
+                .totalPages(songs.getTotalPages())
+                .totalElements(songs.getTotalElements())
+                .size(songs.getSize())
+                .build();
     }
 
     @Override
-    public ResponseSong addSongToAlbum(Long albumId, FormSongRequest request, String username) {
+    public ResponseSong addSongToAlbum(Long albumId, FormSongRequest request) {
         Album album = albumRepository.findById(albumId)
                 .orElseThrow(() -> new HttpNotFound("Album not found"));
 
         User artist = userRepository.findById(album.getArtist().getId())
                 .orElseThrow(() -> new HttpNotFound("Artist not found"));
+
+        if(album.getStatus()!=AlbumStatus.ACTIVE){
+            throw new HttpForbidden("Album status is not ACTIVE");
+
+        }
 
         // Check duplicate title song
         if (songRepository.existsByTitleAndAlbumId(request.getTitle(), albumId)) {
@@ -93,7 +97,7 @@ public class AlbumServiceImpl implements IAlbumService {
         String fileUrl = cloudinaryService.uploadAudio(request.getFileUrl());
 
         Song song = Song.builder()
-                .title(request.getTitle())
+                .title(request.getTitle().trim().replaceAll("\\s+", " "))
                 .duration(request.getDuration())
                 .fileUrl(fileUrl)
                 .album(album)
@@ -103,15 +107,24 @@ public class AlbumServiceImpl implements IAlbumService {
                 .views(0)
                 .build();
         songRepository.save(song);
-        return new ResponseSong(song.getTitle(), song.getDuration(), song.getViews(), song.getFileUrl());
+        return ResponseSong.builder()
+                .id(song.getId())
+                .artistName(song.getArtist() != null
+                        ? song.getArtist().getFirstName() + " " + song.getArtist().getLastName()
+                        : null)
+                .title(song.getTitle())
+                .views(song.getViews())
+                .duration(song.getDuration())
+                .fileUrl(song.getFileUrl())
+                .build();
     }
 
     @Override
-    public String deleteSongFromAlbum(Long albumId, Long songId, String name) {
+    public String deleteSongFromAlbum(Long albumId, Long songId, MyUserDetails principal) {
         Song song = songRepository.findById(songId)
                 .orElseThrow(()-> new HttpNotFound("Song not found"));
 
-        if (!song.getArtist().getEmail().equals(name)) {
+        if (!song.getArtist().getId().equals(principal.getId())) {
             throw new HttpForbidden("You do not have permission to delete this song");
         }
 
@@ -319,7 +332,7 @@ public class AlbumServiceImpl implements IAlbumService {
 
     // List Album
     @Override
-    public PaginatedResponse<AlbumResponse> getAllAlbums(int page, int size, String sortBy, String sortDir, String keyword) {
+    public PageResponse<AlbumResponse> getAllAlbums(int page, int size, String sortBy, String sortDir, String keyword) {
         Sort sort = sortDir.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page - 1, size, sort);
 
@@ -327,9 +340,9 @@ public class AlbumServiceImpl implements IAlbumService {
         Page<Album> albumPage;
 
         if (keyword != null && !keyword.isEmpty()) {
-            albumPage = albumRepository.findByTitleContainingIgnoreCaseOrArtist_LastNameContainingIgnoreCase(keyword, keyword, pageable);
+            albumPage = albumRepository.searchActiveAlbums(AlbumStatus.ACTIVE, keyword, pageable);
         }else {
-            albumPage = albumRepository.findAll(pageable);
+            albumPage = albumRepository.findByStatus(AlbumStatus.ACTIVE, pageable);
         }
 
         Page<AlbumResponse> albums = albumPage.map(album -> AlbumResponse.builder()
@@ -344,19 +357,17 @@ public class AlbumServiceImpl implements IAlbumService {
                 .songCount(albumRepository.countSongsInAlbum(album.getId()))
                 .build());
 
-        return new PaginatedResponse<>(
-                albums.getContent(),
-                new Pagination(
-                        albums.getNumber() + 1,
-                        albums.getSize(),
-                        albums.getTotalPages(),
-                        albums.getTotalElements()
-                )
-        );
+        return PageResponse.<AlbumResponse>builder()
+                .content(albums.getContent())
+                .currentPage(albums.getNumber() + 1)
+                .totalPages(albums.getTotalPages())
+                .totalElements(albums.getTotalElements())
+                .size(albums.getSize())
+                .build();
     }
 
     @Override
-    public PaginatedResponse<AlbumResponse> getTopAlbums(String period) {
+    public PageResponse<AlbumResponse> getTopAlbums(String period) {
 
         LocalDateTime fromDate = switch (period.toLowerCase()) {
             case "week" -> LocalDateTime.now().minusWeeks(1);
@@ -380,21 +391,19 @@ public class AlbumServiceImpl implements IAlbumService {
                 .songCount(albumRepository.countSongsInAlbum(album.getId()))
                 .build());
 
-        return new PaginatedResponse<>(
-                albums.getContent(),
-                new Pagination(
-                        albums.getNumber() + 1,
-                        albums.getSize(),
-                        albums.getTotalPages(),
-                        albums.getTotalElements()
-                )
-        );
+        return PageResponse.<AlbumResponse>builder()
+                .content(albums.getContent())
+                .currentPage(albums.getNumber() + 1)
+                .totalPages(albums.getTotalPages())
+                .totalElements(albums.getTotalElements())
+                .size(albums.getSize())
+                .build();
     }
 
     @Override
-    public PaginatedResponse<AlbumResponse> findFeaturedAlbums() {
+    public PageResponse<AlbumResponse> findFeaturedAlbums() {
         Pageable pageable = PageRequest.of(0, 5);
-        Page<Album> albumPage = albumRepository.findFeaturedAlbums(pageable);
+        Page<Album> albumPage = albumRepository.findFeaturedAlbums(AlbumStatus.ACTIVE, pageable);
 
         Page<AlbumResponse> albums = albumPage.map(album -> AlbumResponse.builder()
                 .id(album.getId())
@@ -408,39 +417,31 @@ public class AlbumServiceImpl implements IAlbumService {
                 .songCount(albumRepository.countSongsInAlbum(album.getId()))
                 .build());
 
-        return new PaginatedResponse<>(
-                albums.getContent(),
-                new Pagination(
-                        albums.getNumber() + 1,
-                        albums.getSize(),
-                        albums.getTotalPages(),
-                        albums.getTotalElements()
-                )
-        );
+        return PageResponse.<AlbumResponse>builder()
+                .content(albums.getContent())
+                .currentPage(albums.getNumber() + 1)
+                .totalPages(albums.getTotalPages())
+                .totalElements(albums.getTotalElements())
+                .size(albums.getSize())
+                .build();
     }
 
     @Override
-    public PaginatedResponse<AlbumResponse> getAlbumsByArtist(Long artistId, int page, int size, String keyword, String sortDir, boolean isPremium) {
+    public PageResponse<AlbumResponse> getAlbumsByArtist(Long artistId, int page, int size, String keyword, String sortDir, boolean isPremium) {
+        User user = userRepository.findById(artistId).orElseThrow(() -> new HttpNotFound("Artist not found"));
+
         Sort sort = sortDir.equalsIgnoreCase("asc") ? Sort.by("releaseDate").ascending() : Sort.by("releaseDate").descending();
         Pageable pageable = PageRequest.of(page - 1, size, sort);
 
         Page<Album> albumPage = albumRepository.findAlbumsByArtist(
-                artistId,
+                user.getId(),
                 keyword,
-                isPremium,
+                AlbumStatus.ACTIVE,
                 pageable
         );
 
 
-        Page<AlbumResponse> albums = albumPage.map(album -> {
-            String access;
-            if (AlbumType.FREE.equals(album.getType())) {
-                access = "Stream + Download";
-            } else {
-                access = isPremium ? "Stream + Download" : "Stream Only";
-            }
-
-            return AlbumResponse.builder()
+        Page<AlbumResponse> albums = albumPage.map(album -> AlbumResponse.builder()
                     .id(album.getId())
                     .title(album.getTitle())
                     .coverImage(album.getCoverImage())
@@ -450,19 +451,19 @@ public class AlbumServiceImpl implements IAlbumService {
                             ? album.getArtist().getFirstName() + " " + album.getArtist().getLastName()
                             : null)
                     .songCount(albumRepository.countSongsInAlbum(album.getId()))
-                    .access(access)
-                    .build();
-        });
-
-        return new PaginatedResponse<>(
-                albums.getContent(),
-                new Pagination(
-                        albums.getNumber() + 1,
-                        albums.getSize(),
-                        albums.getTotalPages(),
-                        albums.getTotalElements()
-                )
+                    .streamUrls(album.getSongs().get(0).getFileUrl())
+                    .downloadUrl(isPremium ? (album.getSongs()
+                            .stream().map(Song::getFileUrl).toList()) : null)
+                        .build()
         );
+
+        return PageResponse.<AlbumResponse>builder()
+                .content(albums.getContent())
+                .currentPage(albums.getNumber() + 1)
+                .totalPages(albums.getTotalPages())
+                .totalElements(albums.getTotalElements())
+                .size(albums.getSize())
+                .build();
     }
 
 

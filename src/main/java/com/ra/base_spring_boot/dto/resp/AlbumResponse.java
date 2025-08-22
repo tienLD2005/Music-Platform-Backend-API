@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -22,5 +23,6 @@ public class AlbumResponse {
     private Long songCount;
     private  Long totalPlays;
     private AlbumType type;
-    private String access;
+    private String streamUrls;
+    private List<String> downloadUrl;
 }

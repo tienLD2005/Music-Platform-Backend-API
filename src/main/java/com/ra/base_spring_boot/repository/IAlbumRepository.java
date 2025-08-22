@@ -45,7 +45,16 @@ public interface IAlbumRepository extends JpaRepository<Album, Long> {
 
 
     //List Album
-    Page<Album> findByTitleContainingIgnoreCaseOrArtist_LastNameContainingIgnoreCase(String title, String artistName, Pageable pageable);
+    @Query("SELECT a FROM Album a WHERE a.status = :status AND " +
+            "(LOWER(a.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(a.artist.firstName) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(a.artist.lastName) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<Album> searchActiveAlbums(@Param("status") AlbumStatus status,
+                                   @Param("keyword") String keyword,
+                                   Pageable pageable);
+
+    Page<Album> findByStatus(AlbumStatus status, Pageable pageable);
+
 
     @Query("""
         SELECT s.album 
@@ -63,20 +72,24 @@ public interface IAlbumRepository extends JpaRepository<Album, Long> {
     // GET ALBUM TRENDING
     @Query("SELECT a FROM Album a " +
             "JOIN a.artist u " +
-            "JOIN Song s ON s.album = a " +
-            "GROUP BY a.id " +
-            "ORDER BY SUM(s.views) DESC")
-    Page<Album> findFeaturedAlbums(Pageable pageable);
+            "LEFT JOIN Song s ON s.album = a " +
+            "WHERE a.status = :status " +
+            "GROUP BY a.id, u.id " +
+            "ORDER BY COALESCE(SUM(s.views), 0) DESC")
+    Page<Album> findFeaturedAlbums(@Param("status") AlbumStatus status, Pageable pageable);
+
 
     //GET ALBUM BY ARTIST
     @Query("SELECT a FROM Album a " +
+            "LEFT JOIN FETCH a.songs s " +
             "WHERE a.artist.id = :artistId " +
-            "AND (:keyword IS NULL OR LOWER(a.title) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
-            "AND (:isPremium = false OR a.type = com.ra.base_spring_boot.model.constants.AlbumType.PREMIUM)")
+            "AND a.status = :status " +
+            "AND (:keyword IS NULL OR LOWER(a.title) LIKE LOWER(CONCAT('%', :keyword, '%'))) ")
     Page<Album> findAlbumsByArtist(@Param("artistId") Long artistId,
                                    @Param("keyword") String keyword,
-                                   @Param("isPremium") boolean isPremium,
+                                   @Param("status") AlbumStatus status,
                                    Pageable pageable);
+
 
 
     @Query("SELECT COUNT(a) FROM Album a")

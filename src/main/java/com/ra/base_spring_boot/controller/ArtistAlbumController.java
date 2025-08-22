@@ -4,6 +4,7 @@ import com.ra.base_spring_boot.dto.ResponseWrapper;
 import com.ra.base_spring_boot.dto.req.AlbumRequest;
 import com.ra.base_spring_boot.dto.resp.*;
 import com.ra.base_spring_boot.dto.req.FormSongRequest;
+import com.ra.base_spring_boot.security.principle.MyUserDetails;
 import com.ra.base_spring_boot.services.IAlbumService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
@@ -76,14 +78,12 @@ public class ArtistAlbumController {
 
     @PostMapping( value = "/{albumId}/songs", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> addSongToAlbum(@PathVariable Long albumId,
-                                            @ModelAttribute @Valid FormSongRequest request,
-                                            Authentication authentication) {
-        UserDetails user = (UserDetails) authentication.getPrincipal();
+                                            @ModelAttribute @Valid FormSongRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 ResponseWrapper.builder()
                         .status(HttpStatus.CREATED)
                         .code(HttpStatus.CREATED.value())
-                        .data(albumService.addSongToAlbum(albumId, request, user.getUsername()))
+                        .data(albumService.addSongToAlbum(albumId, request))
                         .build()
         );
     }
@@ -91,9 +91,8 @@ public class ArtistAlbumController {
     @DeleteMapping("/{albumId}/songs/{songId}")
     public ResponseEntity<?> deleteSongFromAlbum(@PathVariable Long albumId,
                                                  @PathVariable Long songId,
-                                                 Authentication authentication) {
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String message = albumService.deleteSongFromAlbum(albumId, songId, userDetails.getUsername());
+                                                 @AuthenticationPrincipal MyUserDetails principal) {
+        String message = albumService.deleteSongFromAlbum(albumId, songId, principal);
         return ResponseEntity.status(HttpStatus.OK).body(
                 ResponseWrapper.builder()
                         .status(HttpStatus.OK)
