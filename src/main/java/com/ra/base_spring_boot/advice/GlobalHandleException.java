@@ -113,16 +113,6 @@ public class GlobalHandleException
                         .build()
         );
     }
-    @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<?> handleEntityNotFound(EntityNotFoundException ex)
-    {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                ResponseWrapper.builder()
-                        .data(ex.getMessage())
-                        .code(HttpStatus.NOT_FOUND.value())
-                        .status(HttpStatus.NOT_FOUND)
-        .build());
-    }
 
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<?> handleNullPointerException(NullPointerException ex) {
@@ -140,6 +130,17 @@ public class GlobalHandleException
                         .data(ex.getMessage())
                         .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .build()
+        );
+    }
+
+    @ExceptionHandler(UnsupportedOperationException.class)
+    public ResponseEntity<?> handleUnsupportedOperation(UnsupportedOperationException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                ResponseWrapper.builder()
+                        .data(ex.getMessage())
+                        .code(HttpStatus.NOT_IMPLEMENTED.value())
+                        .status(HttpStatus.NOT_IMPLEMENTED)
                         .build()
         );
     }

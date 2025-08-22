@@ -70,5 +70,25 @@ public interface IUserRepository extends JpaRepository<User, Long>
     List<User> findByStatusAndAccountExpirationBefore(
             UStatus status, LocalDateTime time);
 
+    @Query("""
+    SELECT new com.ra.base_spring_boot.dto.resp.TrendingArtistResponseDTO(
+        u.id,
+        CONCAT(u.firstName, ' ', u.lastName),
+        u.profileImage,
+        u.bio,
+        COUNT(DISTINCT sh),
+        COUNT(DISTINCT sr),
+        COUNT(DISTINCT d)
+    )
+    FROM User u
+    JOIN u.roles r
+    LEFT JOIN u.songs s
+    LEFT JOIN s.songHistories sh
+    LEFT JOIN s.songReactions sr
+    LEFT JOIN s.downloads d
+    WHERE r.roleName = com.ra.base_spring_boot.model.constants.RoleName.ROLE_ARTIST
+    GROUP BY u.id, u.firstName, u.lastName, u.profileImage, u.bio
+""")
+    Page<TrendingArtistResponseDTO> findAllArtistsAsDTO(Pageable pageable);
 
 }

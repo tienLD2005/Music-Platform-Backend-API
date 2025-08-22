@@ -4,6 +4,7 @@ import com.ra.base_spring_boot.dto.req.PlaylistReq;
 import com.ra.base_spring_boot.dto.resp.PageResponse;
 import com.ra.base_spring_boot.dto.resp.PlaylistResp;
 import com.ra.base_spring_boot.dto.resp.SongResponse;
+import com.ra.base_spring_boot.exception.HttpConflict;
 import com.ra.base_spring_boot.exception.HttpNotFound;
 import com.ra.base_spring_boot.model.*;
 import com.ra.base_spring_boot.model.base.PlaylistSongId;
@@ -117,7 +118,7 @@ public class PlaylistServiceImpl implements IPlaylistService {
         PlaylistSongId id = new PlaylistSongId(playlistId, songId);
 
         if (playlistSongRepository.existsById(id)) {
-            throw new HttpNotFound("Song already in playlist");
+            throw new HttpConflict("Song already in playlist");
         }
 
         PlaylistSong playlistSong = new PlaylistSong();

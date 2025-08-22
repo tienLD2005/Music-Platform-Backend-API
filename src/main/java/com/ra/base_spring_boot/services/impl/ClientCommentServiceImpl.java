@@ -44,7 +44,7 @@ public class ClientCommentServiceImpl implements IClientCommentService {
 
     private void validateCommentContent(String content) {
         if (content.matches(BAD_WORDS_PATTERN)) {
-            throw new HttpBadRequest("Bình luận chứa từ ngữ không phù hợp");
+            throw new HttpBadRequest("Comment contains bad words");
         }
     }
 
@@ -145,7 +145,6 @@ public class ClientCommentServiceImpl implements IClientCommentService {
             throw new HttpBadRequest("You can only delete your own comments");
         }
 
-        // Xoá lịch sử trước
         commentEditHistoryRepository.deleteAllByCommentId(commentId);
 
         commentRepository.delete(comment);

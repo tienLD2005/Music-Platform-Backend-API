@@ -14,6 +14,7 @@ public class SubscriptionRequestDTO {
     @NotNull(message = "Plan id can't be null")
     private Long planId;
 
+    @NotBlank(message = "Payment method can't be blank")
     @Pattern(
             regexp = "^(PAYPAL|CREDIT_CARD|MOMO|ZALO_PAY)$",
             message = "Payment method must be one of: PAYPAL, CREDIT_CARD, MOMO, ZALO_PAY"

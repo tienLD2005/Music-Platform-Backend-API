@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface SongDeleteHistoryRepo extends JpaRepository<SongDeleteHistory, Long> {
+public interface ISongDeleteHistoryRepo extends JpaRepository<SongDeleteHistory, Long> {
 }

@@ -2,6 +2,7 @@ package com.ra.base_spring_boot.services.impl;
 
 import com.ra.base_spring_boot.dto.req.LyricsRequest;
 import com.ra.base_spring_boot.dto.resp.LyricsResponseDTO;
+import com.ra.base_spring_boot.exception.HttpBadRequest;
 import com.ra.base_spring_boot.exception.HttpNotFound;
 import com.ra.base_spring_boot.mapper.LyricsMapper;
 import com.ra.base_spring_boot.model.Lyrics;
@@ -26,14 +27,14 @@ public class LyricsServiceImpl implements ILyricsService {
     @Override
     public LyricsResponseDTO createLyrics(Long songId) {
         if (songId == null || songId <= 0) {
-            throw new IllegalArgumentException("songId illegal");
+            throw new HttpBadRequest("songId illegal");
         }
 
         Song song = songRepository.findById(songId)
                 .orElseThrow(() -> new HttpNotFound("Song not found"));
 
         if (song.getFileUrl() == null || song.getFileUrl().isBlank()) {
-            throw new IllegalArgumentException("Song doesn't have file url");
+            throw new HttpBadRequest("Song doesn't have file url");
         }
 
         String content = speechToTextService.convertAudioToText(song.getFileUrl());

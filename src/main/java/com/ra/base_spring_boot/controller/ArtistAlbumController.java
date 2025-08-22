@@ -50,8 +50,8 @@ public class ArtistAlbumController {
 
     @PutMapping(value = "/{albumId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResponseWrapper<AlbumResponseDTO>> updateAlbum(
-            @Valid
             @PathVariable Long albumId,
+            @Valid
             @ModelAttribute AlbumRequest request) {
         return ResponseEntity.ok(albumService.updateAlbum(albumId, request));
     }

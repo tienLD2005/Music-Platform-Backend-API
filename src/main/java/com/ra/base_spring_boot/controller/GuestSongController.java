@@ -3,12 +3,14 @@ package com.ra.base_spring_boot.controller;
 import com.ra.base_spring_boot.dto.ResponseWrapper;
 import com.ra.base_spring_boot.dto.resp.TopSongDTO;
 import com.ra.base_spring_boot.dto.resp.TopSongOfWeek;
+import com.ra.base_spring_boot.dto.resp.TrendingSongResponseDTO;
 import com.ra.base_spring_boot.services.ISongService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -41,9 +43,9 @@ public class GuestSongController {
         );
     }
 
-    @GetMapping("/trending")
+    @GetMapping("/trending-this-month")
     public ResponseEntity<?> getTrendingSongs(@RequestParam(defaultValue = "15") int limit) {
-        List<TopSongDTO> trendingSongs = songService.getTrendingSongs(limit);
+        List<TopSongDTO> trendingSongs = songService.getTrendingSongsThisMonth(limit);
         return ResponseEntity.ok(
                 ResponseWrapper.builder()
                         .status(HttpStatus.OK)

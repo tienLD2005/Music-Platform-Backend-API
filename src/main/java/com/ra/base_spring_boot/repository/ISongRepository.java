@@ -97,26 +97,6 @@ public interface ISongRepository extends JpaRepository<Song, Long> {
 """)
     List<TopSongDTO> findTopSongsAllTime(Pageable pageable);
 
-    @Query("""
-    SELECT new com.ra.base_spring_boot.dto.resp.TopSongDTO(
-        s.id,
-        s.title,
-        s.duration,
-        s.fileUrl,
-        s.views,
-        COUNT(DISTINCT d)
-    )
-    FROM SongHistory sh
-    JOIN sh.song s
-    LEFT JOIN Download d ON s.id = d.song.id
-    WHERE sh.playedAt >= :startDate
-    GROUP BY s.id, s.title, s.duration, s.fileUrl, s.views
-    ORDER BY COUNT(sh) DESC
-""")
-    List<TopSongDTO> findTrendingSongs(@Param("startDate") LocalDateTime startDate, Pageable pageable);
-
-
-
     Page<Song> findByTitle(String keyword, Pageable pageable);
 
     @Query("SELECT g.genreName FROM Song s JOIN s.genres g WHERE s.id = :songId")
@@ -142,4 +122,20 @@ public interface ISongRepository extends JpaRepository<Song, Long> {
             "ORDER BY COUNT(sh) DESC")
     List<Object[]> countPlaysByGenre();
 
+    @Query("""
+        SELECT new com.ra.base_spring_boot.dto.resp.TopSongDTO(
+            s.id, s.title, s.duration, s.fileUrl, s.views,
+            COUNT(DISTINCT d)
+        )
+        FROM Song s
+        LEFT JOIN s.downloads d
+        JOIN s.songHistories sh
+        WHERE sh.playedAt BETWEEN :startDate AND :endDate
+        GROUP BY s.id, s.title, s.duration, s.fileUrl, s.views
+        ORDER BY COUNT(sh) DESC
+        """)
+    List<TopSongDTO> findTrendingSongs(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
 }
