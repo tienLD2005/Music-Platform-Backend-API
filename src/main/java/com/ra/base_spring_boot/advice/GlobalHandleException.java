@@ -113,16 +113,6 @@ public class GlobalHandleException
                         .build()
         );
     }
-    @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<?> handleEntityNotFound(EntityNotFoundException ex)
-    {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                ResponseWrapper.builder()
-                        .data(ex.getMessage())
-                        .code(HttpStatus.NOT_FOUND.value())
-                        .status(HttpStatus.NOT_FOUND)
-        .build());
-    }
 
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<?> handleNullPointerException(NullPointerException ex) {

@@ -1,12 +1,12 @@
 package com.ra.base_spring_boot.services.impl;
 
 import com.ra.base_spring_boot.dto.resp.SubscriptionResponseDTO;
+import com.ra.base_spring_boot.exception.HttpNotFound;
 import com.ra.base_spring_boot.mapper.SubscriptionPaymentMapper;
 import com.ra.base_spring_boot.model.Subscription;
 import com.ra.base_spring_boot.model.constants.Status;
 import com.ra.base_spring_boot.repository.ISubscriptionRepository;
 import com.ra.base_spring_boot.utils.SecurityUtil;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
@@ -29,7 +29,7 @@ public class ClientSubscriptionServiceImpl implements IClientSubscriptionService
         Long userId = SecurityUtil.getCurrentUserId();
         Subscription subscription = subscriptionRepository
                 .findByUserIdAndStatus(userId, Status.ACTIVE)
-                .orElseThrow(() -> new EntityNotFoundException("No active subscription found"));
+                .orElseThrow(() -> new HttpNotFound("No active subscription found"));
 
         return SubscriptionPaymentMapper.mapToResponseDTO(subscription);
     }
@@ -48,7 +48,7 @@ public class ClientSubscriptionServiceImpl implements IClientSubscriptionService
     public SubscriptionResponseDTO cancelSubscription(Long subscriptionId) {
         Long userId = SecurityUtil.getCurrentUserId();
         Subscription subscription = subscriptionRepository.findById(subscriptionId)
-                .orElseThrow(() -> new EntityNotFoundException("Subscription not found"));
+                .orElseThrow(() -> new HttpNotFound("Subscription not found"));
 
         if (!subscription.getUser().getId().equals(userId)) {
             throw new AccessDeniedException("You are not allowed to cancel this subscription");

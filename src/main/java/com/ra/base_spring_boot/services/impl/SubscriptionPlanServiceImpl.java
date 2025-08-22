@@ -4,6 +4,7 @@ import com.ra.base_spring_boot.dto.req.SubscriptionPlanRequestDTO;
 import com.ra.base_spring_boot.dto.resp.PaginatedResponse;
 import com.ra.base_spring_boot.dto.resp.SubscriptionPlanResponseDTO;
 import com.ra.base_spring_boot.exception.HttpBadRequest;
+import com.ra.base_spring_boot.exception.HttpConflict;
 import com.ra.base_spring_boot.exception.HttpNotFound;
 import com.ra.base_spring_boot.model.SubscriptionPlan;
 import com.ra.base_spring_boot.model.base.Pagination;
@@ -60,7 +61,7 @@ public class SubscriptionPlanServiceImpl implements ISubscriptionPlanService {
     @Override
     public SubscriptionPlanResponseDTO save(SubscriptionPlanRequestDTO request) {
         if (subscriptionPlanRepository.existsByPlanName(request.getPlanName())) {
-            throw new HttpBadRequest("PlanName already exists");
+            throw new HttpConflict("PlanName already exists");
         }
 
         SubscriptionPlan subscriptionPlan = SubscriptionPlan.builder()

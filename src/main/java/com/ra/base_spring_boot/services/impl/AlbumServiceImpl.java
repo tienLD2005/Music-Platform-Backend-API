@@ -172,6 +172,11 @@ public class AlbumServiceImpl implements IAlbumService {
             throw new HttpBadRequest("Cover image is required");
         }
 
+        if (request.getReleaseDate().isBefore(LocalDateTime.now())) {
+            throw new HttpBadRequest("Release date must be in the present or future");
+        }
+
+        // Check duplicate title
         if (albumRepository.existsByTitleIgnoreCaseAndArtistId(request.getTitle(), artistId)) {
             throw new HttpBadRequest("Album with this title already exists");
         }
@@ -225,20 +230,15 @@ public class AlbumServiceImpl implements IAlbumService {
                 .orElseThrow(() -> new HttpNotFound("Album not found"));
 
         if (!album.getArtist().getId().equals(artistId)) {
-            return ResponseWrapper.<AlbumResponseDTO>builder()
-                    .status(HttpStatus.FORBIDDEN)
-                    .code(HttpStatus.FORBIDDEN.value())
-                    .data(null)
-                    .build();
+            throw new HttpForbidden("You do not have permission to update this album");
+        }
+
+        if (request.getReleaseDate().isBefore(LocalDateTime.now())) {
+            throw new HttpBadRequest("Release date must be in the present or future");
         }
 
         if (!album.getTitle().equalsIgnoreCase(request.getTitle())
-                && albumRepository.existsByTitleIgnoreCaseAndArtistId(request.getTitle(), artistId)) {
-            return ResponseWrapper.<AlbumResponseDTO>builder()
-                    .status(HttpStatus.BAD_REQUEST)
-                    .code(HttpStatus.BAD_REQUEST.value())
-                    .data(null)
-                    .build();
+                && albumRepository.existsByTitleIgnoreCaseAndArtistId(request.getTitle(), artistId)) {throw new HttpBadRequest("Album with this title already exists");
         }
 
         album.setTitle(request.getTitle().trim().replaceAll("\\s+", " "));
@@ -251,11 +251,7 @@ public class AlbumServiceImpl implements IAlbumService {
                 String coverUrl = cloudinaryService.uploadImage(file);
                 album.setCoverImage(coverUrl);
             } catch (IOException e) {
-                return ResponseWrapper.<AlbumResponseDTO>builder()
-                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                        .data(null)
-                        .build();
+                throw new RuntimeException("Failed to upload cover image", e);
             }
         }
 
@@ -281,14 +277,8 @@ public class AlbumServiceImpl implements IAlbumService {
     public ResponseWrapper<String> deleteAlbum(Long albumId) {
         Long artistId = getCurrentArtistId();
 
-        Album album = albumRepository.findById(albumId).orElse(null);
-        if (album == null) {
-            return ResponseWrapper.<String>builder()
-                    .status(HttpStatus.NOT_FOUND)
-                    .code(HttpStatus.NOT_FOUND.value())
-                    .data("Album not found")
-                    .build();
-        }
+        Album album = albumRepository.findById(albumId)
+                .orElseThrow(() -> new HttpNotFound("Album not found"));
 
         if (!album.getArtist().getId().equals(artistId)) {
             return ResponseWrapper.<String>builder()
@@ -311,8 +301,8 @@ public class AlbumServiceImpl implements IAlbumService {
 
         albumRepository.delete(album);
         return ResponseWrapper.<String>builder()
-                .status(HttpStatus.OK)
-                .code(HttpStatus.OK.value())
+                .status(HttpStatus.NO_CONTENT)
+                .code(HttpStatus.NO_CONTENT.value())
                 .data("Album deleted successfully")
                 .build();
     }

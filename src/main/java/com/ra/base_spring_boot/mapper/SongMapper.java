@@ -1,6 +1,7 @@
 package com.ra.base_spring_boot.mapper;
 
 import com.ra.base_spring_boot.dto.resp.SongResponse;
+import com.ra.base_spring_boot.dto.resp.SongResponseDTO;
 import com.ra.base_spring_boot.model.Genre;
 import com.ra.base_spring_boot.model.Song;
 
@@ -24,6 +25,18 @@ public class SongMapper {
                 .genres(song.getGenres() != null
                         ? song.getGenres().stream().map(Genre::getGenreName).collect(Collectors.toList())
                         : null)
+                .build();
+    }
+
+    public static SongResponseDTO mapToDTO(Song song) {
+        return SongResponseDTO.builder()
+                .id(song.getId())
+                .title(song.getTitle())
+                .duration(song.getDuration())
+                .artistName(song.getArtist() != null ? song.getArtist().getFirstName() + " " + song.getArtist().getLastName() : null)
+                .albumName(song.getAlbum() != null ? song.getAlbum().getTitle() : null)
+                .fileUrl(song.getFileUrl())
+                .views(song.getViews())
                 .build();
     }
 }

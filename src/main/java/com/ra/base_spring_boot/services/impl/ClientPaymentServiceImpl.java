@@ -6,6 +6,7 @@ import com.ra.base_spring_boot.dto.resp.SubscriptionResponseDTO;
 import com.ra.base_spring_boot.exception.HttpBadRequest;
 import com.ra.base_spring_boot.exception.HttpConflict;
 import com.ra.base_spring_boot.exception.HttpConflict;
+import com.ra.base_spring_boot.exception.HttpNotFound;
 import com.ra.base_spring_boot.model.Payment;
 import com.ra.base_spring_boot.model.Subscription;
 import com.ra.base_spring_boot.model.SubscriptionPlan;
@@ -20,7 +21,6 @@ import com.ra.base_spring_boot.repository.IUserRepository;
 import com.ra.base_spring_boot.services.IClientPaymentService;
 import com.ra.base_spring_boot.services.paypal.PaypalService;
 import com.ra.base_spring_boot.utils.SecurityUtil;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +45,7 @@ public class ClientPaymentServiceImpl implements IClientPaymentService {
     @Override
     public PaymentResponseDTO getPaymentDetail(Long paymentId) {
         Payment payment = paymentRepository.findById(paymentId)
-                .orElseThrow(() -> new EntityNotFoundException("Payment not found"));
+                .orElseThrow(() -> new HttpNotFound("Payment not found"));
         return mapToResponseDTO(payment);
     }
 
@@ -54,10 +54,10 @@ public class ClientPaymentServiceImpl implements IClientPaymentService {
     public String createPayment(SubscriptionRequestDTO requestDTO) {
         Long userId = SecurityUtil.getCurrentUserId();
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new HttpNotFound("User not found"));
 
         SubscriptionPlan plan = subscriptionPlanRepository.findById(requestDTO.getPlanId())
-                .orElseThrow(() -> new EntityNotFoundException("Plan not found"));
+                .orElseThrow(() -> new HttpNotFound("Plan not found"));
 
         Subscription activeSub = subscriptionRepository.findByUserIdAndStatus(userId, Status.ACTIVE).orElse(null);
         if (activeSub != null && !activeSub.getPlan_id().getId().equals(plan.getId())) {
@@ -109,7 +109,7 @@ public class ClientPaymentServiceImpl implements IClientPaymentService {
     @Transactional
     public SubscriptionResponseDTO capturePayment(String orderId, Long paymentId, PaymentMethod method) {
         Payment payment = paymentRepository.findById(paymentId)
-                .orElseThrow(() -> new EntityNotFoundException("Payment not found"));
+                .orElseThrow(() -> new HttpNotFound("Payment not found"));
 
         Map<String, Object> captureResult;
         switch (method) {
@@ -164,7 +164,7 @@ public class ClientPaymentServiceImpl implements IClientPaymentService {
     @Transactional
     public SubscriptionResponseDTO processPaypalSuccess(String orderId, String payerId) {
         Payment payment = paymentRepository.findByTransactionId(orderId)
-                .orElseThrow(() -> new EntityNotFoundException("Payment not found"));
+                .orElseThrow(() -> new HttpNotFound("Payment not found"));
 
         try {
             Map<String, Object> captureResponse = paypalService.captureOrder(orderId);
@@ -209,7 +209,7 @@ public class ClientPaymentServiceImpl implements IClientPaymentService {
             payment.setTransactionId(token);
             payment.setPaymentStatus(PaymentStatus.FAILED);
             paymentRepository.save(payment);
-        } catch (EntityNotFoundException e) {
+        } catch (HttpNotFound e) {
             log.warn("No pending payment found for token: {}", token);
         }
     }
@@ -223,7 +223,7 @@ public class ClientPaymentServiceImpl implements IClientPaymentService {
     private Payment findPaymentByToken(String token) {
         Long userId = SecurityUtil.getCurrentUserId();
         return paymentRepository.findPendingPaymentByUser(userId, PaymentStatus.PENDING)
-                .orElseThrow(() -> new EntityNotFoundException("No pending payment found"));
+                .orElseThrow(() -> new HttpNotFound("No pending payment found"));
     }
 
     private SubscriptionResponseDTO completePaymentAndCreateSubscription(

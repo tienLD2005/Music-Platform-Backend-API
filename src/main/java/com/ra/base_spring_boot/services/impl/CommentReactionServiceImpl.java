@@ -1,5 +1,6 @@
 package com.ra.base_spring_boot.services.impl;
 
+import com.ra.base_spring_boot.exception.HttpNotFound;
 import com.ra.base_spring_boot.model.Comment;
 import com.ra.base_spring_boot.model.CommentReaction;
 import com.ra.base_spring_boot.model.User;
@@ -9,7 +10,6 @@ import com.ra.base_spring_boot.repository.ICommentRepository;
 import com.ra.base_spring_boot.repository.IUserRepository;
 import com.ra.base_spring_boot.services.ICommentReactionService;
 import com.ra.base_spring_boot.utils.SecurityUtil;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +29,7 @@ public class CommentReactionServiceImpl implements ICommentReactionService {
     public CommentReaction reactToComment(Long commentId, ReactionEnum reactionEnum) {
         Long userId = SecurityUtil.getCurrentUserId();
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new HttpNotFound("User not found"));
 
         Comment comment = getCommentById(commentId);
 
@@ -52,7 +52,7 @@ public class CommentReactionServiceImpl implements ICommentReactionService {
     public void removeReaction(Long commentId) {
         Long userId = SecurityUtil.getCurrentUserId();
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new HttpNotFound("User not found"));
 
         Comment comment = getCommentById(commentId);
         reactionRepository.findByUserAndComment(user, comment)
@@ -74,6 +74,6 @@ public class CommentReactionServiceImpl implements ICommentReactionService {
     @Override
     public Comment getCommentById(Long commentId) {
         return commentRepository.findById(commentId)
-                .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
+                .orElseThrow(() -> new HttpNotFound("Comment not found"));
     }
 }
