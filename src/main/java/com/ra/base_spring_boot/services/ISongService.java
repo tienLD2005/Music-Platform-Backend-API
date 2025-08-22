@@ -12,7 +12,7 @@ import java.util.List;
 public interface ISongService {
     List<TopSongOfWeek> getTop15SongsOfWeek();
     List<TopSongDTO> getTopSongsAllTime(int limit);
-    List<TrendingSongResponseDTO> getTrendingSongs(LocalDateTime fromTime, int limit);
+    List<TopSongDTO> getTrendingSongsThisMonth(int limit);
 
     PageResponse<SongResponse> getAllSongs(String keyword, Pageable pageable);
 

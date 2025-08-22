@@ -95,33 +95,6 @@ public interface ISongRepository extends JpaRepository<Song, Long> {
 """)
     List<TopSongDTO> findTopSongsAllTime(Pageable pageable);
 
-    @Query(value = """
-        SELECT 
-            s.id AS songId,
-            s.title AS title,
-            u.id AS artistName,
-            COUNT(DISTINCT CONCAT(sh.user_id, '_', sh.song_id)) AS playCount,
-            COUNT(DISTINCT sh.user_id) AS uniqueListeners,
-            SUM(CASE WHEN sr.reaction IN ('LIKE','LOVE','CLAP') THEN 1 ELSE 0 END) AS positiveReactions,
-            SUM(CASE WHEN sr.reaction IN ('SAD','ANGRY','REPORT') THEN 1 ELSE 0 END) AS negativeReactions,
-            COUNT(DISTINCT d.user_id) AS downloadCount,
-            COUNT(DISTINCT ps.playlist_id) AS playlistAddCount,
-            COUNT(DISTINCT c.id) AS commentCount
-        FROM songs s
-        JOIN users u ON u.id = s.artist_id
-        LEFT JOIN song_histories sh ON sh.song_id = s.id AND sh.played_at >= :fromTime
-        LEFT JOIN song_reactions sr ON sr.song_id = s.id
-        LEFT JOIN downloads d ON d.song_id = s.id
-        LEFT JOIN playlist_song ps ON ps.song_id = s.id
-        LEFT JOIN comments c ON c.song_id = s.id
-        GROUP BY s.id, s.title, u.id
-        ORDER BY playCount DESC
-        LIMIT :limit
-    """, nativeQuery = true)
-    List<Object[]> findTrendingSongs(@Param("fromTime") LocalDateTime fromTime, @Param("limit") int limit);
-
-
-
     Page<Song> findByTitle(String keyword, Pageable pageable);
 
     @Query("SELECT g.genreName FROM Song s JOIN s.genres g WHERE s.id = :songId")
@@ -144,4 +117,20 @@ public interface ISongRepository extends JpaRepository<Song, Long> {
             "ORDER BY COUNT(sh) DESC")
     List<Object[]> countPlaysByGenre();
 
+    @Query("""
+        SELECT new com.ra.base_spring_boot.dto.resp.TopSongDTO(
+            s.id, s.title, s.duration, s.fileUrl, s.views,
+            COUNT(DISTINCT d)
+        )
+        FROM Song s
+        LEFT JOIN s.downloads d
+        JOIN s.songHistories sh
+        WHERE sh.playedAt BETWEEN :startDate AND :endDate
+        GROUP BY s.id, s.title, s.duration, s.fileUrl, s.views
+        ORDER BY COUNT(sh) DESC
+        """)
+    List<TopSongDTO> findTrendingSongs(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
 }
