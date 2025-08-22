@@ -5,10 +5,12 @@ import com.ra.base_spring_boot.dto.resp.TrendingArtistResponseDTO;
 import com.ra.base_spring_boot.repository.IUserRepository;
 import com.ra.base_spring_boot.services.ArtistService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -18,10 +20,9 @@ public class ArtistServiceImpl implements ArtistService {
 
     @Override
     public List<TrendingArtistResponseDTO> getTrendingArtists(int limit) {
-        return userRepository.findTrendingArtists()
-                .stream()
-                .limit(limit)
-                .collect(Collectors.toList());
+        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
+        Pageable pageable = PageRequest.of(0, limit);
+        return userRepository.findTrendingArtists(sevenDaysAgo, pageable);
     }
 
 }

@@ -2,12 +2,8 @@ package com.ra.base_spring_boot.controller;
 
 import com.ra.base_spring_boot.dto.ResponseWrapper;
 import com.ra.base_spring_boot.dto.req.*;
-import com.ra.base_spring_boot.exception.HttpBadRequest;
 import com.ra.base_spring_boot.model.User;
-import com.ra.base_spring_boot.model.constants.UStatus;
-import com.ra.base_spring_boot.repository.IUserRepository;
 import com.ra.base_spring_boot.services.IAuthService;
-import com.ra.base_spring_boot.services.email.EmailService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.UUID;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -23,8 +19,6 @@ import java.util.UUID;
 public class AuthController {
 
     private final IAuthService authService;
-    private final IUserRepository userRepository;
-    private final EmailService emailService;
 
     @PostMapping("/login")
     public ResponseEntity<?> handleLogin(@Valid @RequestBody FormLoginRequest formLogin) {

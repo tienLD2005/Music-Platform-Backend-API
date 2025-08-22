@@ -18,6 +18,8 @@ import java.util.Set;
 @Setter
 @Builder
 public class User extends BaseObject {
+    private String provider;
+    private String providerId;
 
     @Column(name = "first_name", length = 100, nullable = false)
     private String firstName;

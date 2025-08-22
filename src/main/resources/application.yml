@@ -34,6 +34,17 @@ spring:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
 
+  security:
+      oauth2:
+        client:
+          registration:
+            github:
+              client-id: Ov23libK5WdgqdDSXBy5
+              client-secret: c79c81645c4afdf66034848b437eb754809df169
+              scope:
+                - user:email
+              redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+
 paypal:
   client-id: AS00QCzm53q8t3-Rgod_RR-3RAsAMky4RKOWKdyCEpAtfzStExX483Ypy7LYQgwkXhDfb43KyLtx3BNe
   client-secret: EKfoA6t0ZhDpTLGdUbYnMO3hs87YL0dvppn1vyRZRBP6xIEmSFB3tvrxQICUiZF-tAXckfyOs0-TjFFi
