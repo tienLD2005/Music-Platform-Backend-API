@@ -18,16 +18,10 @@ public class ArtistServiceImpl implements ArtistService {
 
     @Override
     public List<TrendingArtistResponseDTO> getTrendingArtists(int limit) {
-        return userRepository.findTrendingArtists().stream()
+        return userRepository.findTrendingArtists()
+                .stream()
                 .limit(limit)
-                .map(obj -> TrendingArtistResponseDTO.builder()
-                        .id((Long) obj[0])
-                        .fullName(obj[1] + " " + obj[2])
-                        .profileImage((String) obj[3])
-                        .bio((String) obj[4])
-                        .totalListens((Long) obj[5])
-                        .totalDownloads((Long) obj[6])
-                        .build()
-                ).collect(Collectors.toList());
+                .collect(Collectors.toList());
     }
+
 }

@@ -8,6 +8,7 @@ import com.ra.base_spring_boot.model.Genre;
 import com.ra.base_spring_boot.repository.IGenreRepository;
 import com.ra.base_spring_boot.services.GenreService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -31,9 +32,12 @@ public class GenreServiceImpl implements GenreService {
             default -> throw new IllegalArgumentException("Invalid period: " + period);
         };
 
-        return genreRepository.findTopGenres(startDate, endDate, PageRequest.of(0, limit));
-    }
+        Pageable pageable = PageRequest.of(0, limit);
 
+        Page<GenreTrendingDTO> pageResult = genreRepository.findTopGenres(startDate, endDate, pageable);
+
+        return pageResult.getContent();
+    }
 
 
     //sort

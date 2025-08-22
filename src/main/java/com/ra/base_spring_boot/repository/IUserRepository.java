@@ -1,5 +1,6 @@
 package com.ra.base_spring_boot.repository;
 
+import com.ra.base_spring_boot.dto.resp.TrendingArtistResponseDTO;
 import com.ra.base_spring_boot.model.User;
 import com.ra.base_spring_boot.model.constants.UStatus;
 import org.springframework.data.domain.Page;
@@ -47,19 +48,26 @@ public interface IUserRepository extends JpaRepository<User, Long>
     List<User> findAllArtists();
 
     @Query("""
-        SELECT u.id AS id, u.firstName AS firstName, u.lastName AS lastName, u.profileImage AS profileImage, u.bio AS bio,
-               COUNT(DISTINCT sh.id) AS listens,
-               COUNT(DISTINCT d.user.id) AS downloads
-        FROM User u
-        JOIN u.roles r
-        LEFT JOIN u.songs s
-        LEFT JOIN s.songHistories sh
-        LEFT JOIN s.downloads d
-        WHERE r.roleName = 'ROLE_ARTIST'
-        GROUP BY u.id, u.firstName, u.lastName, u.profileImage, u.bio
-        ORDER BY (COUNT(DISTINCT sh.id) + COUNT(DISTINCT d.user.id)) DESC
-        """)
-    List<Object[]> findTrendingArtists();
+    SELECT new com.ra.base_spring_boot.dto.resp.TrendingArtistResponseDTO(
+        u.id,
+        CONCAT(u.firstName, ' ', u.lastName),
+        u.profileImage,
+        u.bio,
+        COUNT(DISTINCT sh),
+        COUNT(DISTINCT sr),
+        COUNT(DISTINCT d)
+    )
+    FROM User u
+    JOIN u.roles r
+    LEFT JOIN u.songs s
+    LEFT JOIN s.songHistories sh
+    LEFT JOIN s.songReactions sr
+    LEFT JOIN s.downloads d
+    WHERE r.roleName = 'ROLE_ARTIST'
+    GROUP BY u.id, u.firstName, u.lastName, u.profileImage, u.bio
+    ORDER BY COUNT(DISTINCT sh) DESC
+""")
+    List<TrendingArtistResponseDTO> findTrendingArtists();
 
     @Query("SELECT u.status, COUNT(u) FROM User u GROUP BY u.status")
     List<Object[]> countUsersByStatus();

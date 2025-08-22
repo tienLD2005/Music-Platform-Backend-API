@@ -2,6 +2,7 @@ package com.ra.base_spring_boot.controller;
 
 import com.ra.base_spring_boot.dto.ResponseWrapper;
 import com.ra.base_spring_boot.dto.resp.TopSongDTO;
+import com.ra.base_spring_boot.dto.resp.TopSongOfWeek;
 import com.ra.base_spring_boot.services.ISongService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,7 +19,7 @@ public class GuestSongController {
 
     @GetMapping("/top-week")
     public ResponseEntity<?> getTop15SongsOfWeek() {
-        List<TopSongDTO> topSongs = songService.getTop15SongsOfWeek();
+        List<TopSongOfWeek> topSongs = songService.getTop15SongsOfWeek();
         return ResponseEntity.ok(
                 ResponseWrapper.builder()
                         .status(HttpStatus.OK)
