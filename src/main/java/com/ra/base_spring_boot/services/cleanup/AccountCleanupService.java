@@ -4,6 +4,7 @@ import com.ra.base_spring_boot.model.User;
 import com.ra.base_spring_boot.model.constants.UStatus;
 import com.ra.base_spring_boot.repository.IUserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +13,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AccountCleanupService {
 
     private final IUserRepository userRepository;
@@ -24,7 +26,7 @@ public class AccountCleanupService {
 
         if (!expiredUsers.isEmpty()) {
             userRepository.deleteAll(expiredUsers);
-            System.out.println("Deleted " + expiredUsers.size() + " expired unverified accounts");
+            log.info("Deleted {} expired unverified accounts", expiredUsers.size());
         }
     }
 }

@@ -17,16 +17,16 @@ import java.time.LocalDateTime;
 @Repository
 public interface IAlbumRepository extends JpaRepository<Album, Long> {
     @Query("""
-        SELECT a 
-        FROM Album a 
+        SELECT a
+        FROM Album a
         WHERE a.artist.id = :artistId
         AND (:title IS NULL OR LOWER(a.title) LIKE LOWER(CONCAT('%', :title, '%')))
         """)
     Page<Album> findByArtistAndTitle(Long artistId, String title, Pageable pageable);
 
     @Query("""
-        SELECT COUNT(s) 
-        FROM Song s 
+        SELECT COUNT(s)
+        FROM Song s
         WHERE s.album.id = :albumId
         """)
     Long countSongsInAlbum(Long albumId);

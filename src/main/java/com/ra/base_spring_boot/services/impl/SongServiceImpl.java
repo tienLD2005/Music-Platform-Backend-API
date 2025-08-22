@@ -6,21 +6,17 @@ import com.ra.base_spring_boot.dto.resp.TopSongDTO;
 import com.ra.base_spring_boot.dto.resp.TopSongOfWeek;
 import com.ra.base_spring_boot.exception.HttpNotFound;
 import com.ra.base_spring_boot.mapper.SongMapper;
-import com.ra.base_spring_boot.model.Genre;
 import com.ra.base_spring_boot.model.Song;
 import com.ra.base_spring_boot.model.SongDeleteHistory;
 import com.ra.base_spring_boot.model.User;
 import com.ra.base_spring_boot.repository.ISongRepository;
 import com.ra.base_spring_boot.repository.SongDeleteHistoryRepo;
 import com.ra.base_spring_boot.services.ISongService;
-import com.ra.base_spring_boot.services.MailService;
-import jakarta.mail.internet.MimeMessage;
+import com.ra.base_spring_boot.services.email.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -29,7 +25,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SongServiceImpl implements ISongService {
     private final ISongRepository songRepository;
-    private final MailService mailService;
+    private final EmailService mailService;
     private final SongDeleteHistoryRepo songDeleteHistoryRepo;
 
     @Override
