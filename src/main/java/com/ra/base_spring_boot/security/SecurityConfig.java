@@ -3,6 +3,8 @@ package com.ra.base_spring_boot.security;
 import com.ra.base_spring_boot.model.constants.RoleName;
 import com.ra.base_spring_boot.security.exception.AccessDenied;
 import com.ra.base_spring_boot.security.exception.JwtEntryPoint;
+import com.ra.base_spring_boot.security.github.CustomOAuth2UserService;
+import com.ra.base_spring_boot.security.github.OAuth2LoginSuccessHandler;
 import com.ra.base_spring_boot.security.jwt.JwtTokenFilter;
 import com.ra.base_spring_boot.security.principle.MyUserDetailsService;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
@@ -55,6 +57,8 @@ public class SecurityConfig {
     private final JwtEntryPoint jwtEntryPoint;
     private final AccessDenied accessDenied;
     private final JwtTokenFilter jwtTokenFilter;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -126,6 +130,12 @@ public class SecurityConfig {
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(jwtEntryPoint)
                         .accessDeniedHandler(accessDenied)
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService)
+                        )
+                        .successHandler(oAuth2LoginSuccessHandler)
                 )
                 .addFilterAfter(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

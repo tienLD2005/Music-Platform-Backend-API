@@ -2,6 +2,7 @@ package com.ra.base_spring_boot.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ra.base_spring_boot.model.base.BaseObject;
+import com.ra.base_spring_boot.model.constants.AuthProvider;
 import com.ra.base_spring_boot.model.constants.UStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -19,17 +20,17 @@ import java.util.Set;
 @Builder
 public class User extends BaseObject {
 
-    @Column(name = "first_name", length = 100, nullable = false)
+    @Column(name = "first_name", length = 100)
     private String firstName;
 
-    @Column(name = "last_name", length = 100, nullable = false)
+    @Column(name = "last_name", length = 100)
     private String lastName;
 
     @Column(name = "email", length = 255, nullable = false, unique = true)
     private String email;
 
     @JsonIgnore
-    @Column(name = "password", length = 255, nullable = false)
+    @Column(name = "password", length = 255)
     private String password;
 
     @Column(name = "profile_image", length = 255)
@@ -64,6 +65,12 @@ public class User extends BaseObject {
     @Column(name = "account_expiration")
     private LocalDateTime accountExpiration;
 
+    @Column(name = "provider", length = 20)
+    @Enumerated(EnumType.STRING)
+    private AuthProvider provider;
+
+    @Column(name = "provider_id", length = 100)
+    private String providerId;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

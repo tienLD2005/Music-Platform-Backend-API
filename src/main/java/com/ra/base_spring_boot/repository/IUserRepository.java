@@ -2,6 +2,7 @@ package com.ra.base_spring_boot.repository;
 
 import com.ra.base_spring_boot.dto.resp.TrendingArtistResponseDTO;
 import com.ra.base_spring_boot.model.User;
+import com.ra.base_spring_boot.model.constants.AuthProvider;
 import com.ra.base_spring_boot.model.constants.UStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +16,7 @@ import java.util.Optional;
 
 public interface IUserRepository extends JpaRepository<User, Long>
 {
+    Optional<User> findByProviderAndProviderId(AuthProvider provider, String providerId);
     Optional<User> findByEmail(String email);
     Optional<User> findByVerificationCode(String code);
     Optional<User> findByResetPasswordCode(String code);
