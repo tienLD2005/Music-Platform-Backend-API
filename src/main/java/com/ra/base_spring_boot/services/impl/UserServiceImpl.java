@@ -4,7 +4,6 @@ import com.ra.base_spring_boot.dto.resp.PageResponse;
 import com.ra.base_spring_boot.dto.resp.UserListItemResponse;
 import com.ra.base_spring_boot.exception.HttpConflict;
 import com.ra.base_spring_boot.exception.HttpNotFound;
-import com.ra.base_spring_boot.exception.ResourceNotFoundException;
 import com.ra.base_spring_boot.model.User;
 import com.ra.base_spring_boot.model.constants.RoleName;
 import com.ra.base_spring_boot.model.constants.UStatus;
@@ -15,7 +14,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -45,7 +43,7 @@ public class UserServiceImpl implements IUserService {
         }
 
         if (userPage.isEmpty()) {
-            throw new ResourceNotFoundException("No users found with search: " + search);
+            throw new HttpNotFound("No users found with search: " + search);
         }
 
         List<UserListItemResponse> content = userPage.stream()

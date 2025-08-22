@@ -1,4 +1,3 @@
-// Thêm vào AlbumAdminResponse.java
 package com.ra.base_spring_boot.dto.resp;
 
 import com.fasterxml.jackson.annotation.JsonFormat;

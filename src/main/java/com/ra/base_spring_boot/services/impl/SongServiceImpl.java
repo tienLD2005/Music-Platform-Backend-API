@@ -14,6 +14,7 @@ import com.ra.base_spring_boot.repository.ISongRepository;
 import com.ra.base_spring_boot.repository.SongDeleteHistoryRepo;
 import com.ra.base_spring_boot.services.ISongService;
 import com.ra.base_spring_boot.services.MailService;
+import com.ra.base_spring_boot.services.email.EmailService;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,7 +30,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SongServiceImpl implements ISongService {
     private final ISongRepository songRepository;
-    private final MailService mailService;
+    private final EmailService mailService;
     private final SongDeleteHistoryRepo songDeleteHistoryRepo;
 
     @Override
