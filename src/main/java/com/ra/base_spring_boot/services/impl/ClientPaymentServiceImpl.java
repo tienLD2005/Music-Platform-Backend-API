@@ -3,6 +3,7 @@ package com.ra.base_spring_boot.services.impl;
 import com.ra.base_spring_boot.dto.req.SubscriptionRequestDTO;
 import com.ra.base_spring_boot.dto.resp.PaymentResponseDTO;
 import com.ra.base_spring_boot.dto.resp.SubscriptionResponseDTO;
+import com.ra.base_spring_boot.exception.HttpConflict;
 import com.ra.base_spring_boot.model.Payment;
 import com.ra.base_spring_boot.model.Subscription;
 import com.ra.base_spring_boot.model.SubscriptionPlan;
@@ -17,7 +18,6 @@ import com.ra.base_spring_boot.repository.IUserRepository;
 import com.ra.base_spring_boot.services.IClientPaymentService;
 import com.ra.base_spring_boot.services.paypal.PaypalService;
 import com.ra.base_spring_boot.utils.SecurityUtil;
-import com.ra.base_spring_boot.exception.AlreadyPurchasedException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -58,7 +58,7 @@ public class ClientPaymentServiceImpl implements IClientPaymentService {
                 .orElseThrow(() -> new EntityNotFoundException("Plan not found"));
 
         if (subscriptionRepository.existsByUserIdAndStatus(userId, Status.ACTIVE)) {
-            throw new AlreadyPurchasedException("You already have an active subscription");
+            throw new HttpConflict("You already have an active subscription");
         }
 
         Map<String, String> orderResponse = paypalService.createOrder(
@@ -209,7 +209,7 @@ public class ClientPaymentServiceImpl implements IClientPaymentService {
 
     private Subscription createSubscription(Payment payment) {
         if (subscriptionRepository.existsByUserIdAndStatus(payment.getUser().getId(), Status.ACTIVE)) {
-            throw new AlreadyPurchasedException("User already has an active subscription");
+            throw new HttpConflict("User already has an active subscription");
         }
 
         Subscription subscription = Subscription.builder()

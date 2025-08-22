@@ -1,10 +1,12 @@
 spring:
   application:
     name: base_spring_boot
+
   datasource:
     url: jdbc:mysql://localhost:3306/base_core?createDatabaseIfNotExist=true
     username: root
     password: 123456
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -16,33 +18,46 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
         show_sql: true
+
   servlet:
     multipart:
       enabled: true
       max-file-size: 20MB
       max-request-size: 20MB
+
   mail:
     host: smtp.gmail.com
     port: 587
     username: haducluongdz@gmail.com
     password: aume ivhz yfee mnnp
     properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
+  security:
+      oauth2:
+        client:
+          registration:
+            github:
+              client-id: Ov23libK5WdgqdDSXBy5
+              client-secret: c79c81645c4afdf66034848b437eb754809df169
+              scope:
+                - user:email
+              redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+
 paypal:
   client-id: AS00QCzm53q8t3-Rgod_RR-3RAsAMky4RKOWKdyCEpAtfzStExX483Ypy7LYQgwkXhDfb43KyLtx3BNe
   client-secret: EKfoA6t0ZhDpTLGdUbYnMO3hs87YL0dvppn1vyRZRBP6xIEmSFB3tvrxQICUiZF-tAXckfyOs0-TjFFi
   base-url: https://api-m.sandbox.paypal.com
   return-url: http://localhost:8080/api/paypal/success
   cancel-url: http://localhost:8080/api/paypal/cancel
+
 jwt:
   secret:
     key: Ascmkkqdnmsdfrtgsyuhidj21ue120938219321ndsad
   expired:
     access: 86400
+
 deepgram:
   api:
     key: c489005c4baff2715ef14cba1f15f6a4323f3eae

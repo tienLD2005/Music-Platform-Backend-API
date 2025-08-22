@@ -29,9 +29,6 @@ public interface IGenreRepository extends JpaRepository<Genre, Long>{
     """)
     Page<GenreTrendingDTO> findTopGenres(LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 
-
-    // search,sort number songs
-
     @Query("""
         SELECT g
         FROM Genre g

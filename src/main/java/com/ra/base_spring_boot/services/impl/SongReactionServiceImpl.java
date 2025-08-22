@@ -35,18 +35,18 @@ public class SongReactionServiceImpl implements ISongReactionService {
 
         Optional<SongReaction> existing = songReactionRepository.findByUserAndSong(user, song);
 
+        SongReaction sr;
         if (existing.isPresent()) {
-            SongReaction sr = existing.get();
+            sr = existing.get();
             sr.setReaction(reaction);
-            return songReactionRepository.save(sr);
         } else {
-            SongReaction sr = SongReaction.builder()
+            sr = SongReaction.builder()
                     .song(song)
                     .user(user)
                     .reaction(reaction)
                     .build();
-            return songReactionRepository.save(sr);
         }
+        return songReactionRepository.save(sr);
     }
 
     @Override
