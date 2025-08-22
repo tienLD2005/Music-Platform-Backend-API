@@ -30,4 +30,6 @@ public interface ISubscriptionRepository extends JpaRepository<Subscription, Lon
 
     @Query("SELECT s FROM Subscription s WHERE s.plan_id.id = :planId")
     List<Subscription> findByPlanIdId(@Param("planId") Long planId);
+
+
 }

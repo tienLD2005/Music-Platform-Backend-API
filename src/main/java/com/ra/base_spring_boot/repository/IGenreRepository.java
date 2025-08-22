@@ -20,14 +20,14 @@ public interface IGenreRepository extends JpaRepository<Genre, Long>{
         g.genreName,
         COUNT(sh.id)
     )
-    FROM Song s
-    JOIN s.genres g
-    JOIN s.songHistories sh
-    WHERE sh.playedAt BETWEEN :startDate AND :endDate
+    FROM Genre g
+    LEFT JOIN g.songs s
+    LEFT JOIN s.songHistories sh
+    WHERE sh.playedAt BETWEEN :startDate AND :endDate OR sh.id IS NULL
     GROUP BY g.id, g.genreName
     ORDER BY COUNT(sh.id) DESC
-""")
-    List<GenreTrendingDTO> findTopGenres(LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+    """)
+    Page<GenreTrendingDTO> findTopGenres(LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 
 
     // search,sort number songs

@@ -12,6 +12,14 @@ public class TrendingArtistResponseDTO {
     private String fullName;
     private String profileImage;
     private String bio;
-    private long totalListens;
-    private long totalDownloads;
+    private Long totalInteractions;
+
+    public TrendingArtistResponseDTO(Long id, String fullName, String profileImage, String bio,
+                                     Long songHistoryCount, Long songReactionCount, Long downloadCount) {
+        this.id = id;
+        this.fullName = fullName;
+        this.profileImage = profileImage;
+        this.bio = bio;
+        this.totalInteractions = songHistoryCount + songReactionCount + downloadCount;
+    }
 }
