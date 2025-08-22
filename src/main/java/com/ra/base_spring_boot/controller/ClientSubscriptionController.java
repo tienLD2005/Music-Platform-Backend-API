@@ -3,6 +3,7 @@ package com.ra.base_spring_boot.controller;
 import com.ra.base_spring_boot.dto.ResponseWrapper;
 import com.ra.base_spring_boot.dto.resp.SubscriptionResponseDTO;
 import com.ra.base_spring_boot.services.IClientSubscriptionService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/subscriptions")
 @RequiredArgsConstructor
+@Tag(name = "Users Subscriptions")
 public class ClientSubscriptionController {
 
     private final IClientSubscriptionService subscriptionService;
@@ -34,7 +36,7 @@ public class ClientSubscriptionController {
                 .build();
     }
 
-    @PatchMapping("/{subscriptionId}/cancel")
+    @DeleteMapping("/cancel/{subscriptionId}")
     public ResponseWrapper<SubscriptionResponseDTO> cancelSubscription(
             @PathVariable Long subscriptionId) {
         return ResponseWrapper.<SubscriptionResponseDTO>builder()

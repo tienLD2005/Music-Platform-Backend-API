@@ -4,6 +4,7 @@ import com.ra.base_spring_boot.dto.ResponseWrapper;
 import com.ra.base_spring_boot.dto.resp.PageResponse;
 import com.ra.base_spring_boot.dto.resp.TrendingArtistResponseDTO;
 import com.ra.base_spring_boot.services.IArtistService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;

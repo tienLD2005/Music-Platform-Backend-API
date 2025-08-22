@@ -14,9 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
-import java.util.Map;
-
 @RestController
 @RequestMapping("/api/paypal")
 @RequiredArgsConstructor
@@ -43,7 +40,6 @@ public class PaypalController {
 
     @GetMapping("/cancel")
     public ResponseEntity<ResponseWrapper<String>> cancel() {
-
         ResponseWrapper<String> response = ResponseWrapper.<String>builder()
                 .status(HttpStatus.OK)
                 .code(HttpStatus.OK.value())

@@ -8,6 +8,7 @@ import com.ra.base_spring_boot.model.constants.UStatus;
 import com.ra.base_spring_boot.repository.IUserRepository;
 import com.ra.base_spring_boot.services.IAuthService;
 import com.ra.base_spring_boot.services.email.EmailService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
+@Tag(name = "Auth")
 public class AuthController {
 
     private final IAuthService authService;
