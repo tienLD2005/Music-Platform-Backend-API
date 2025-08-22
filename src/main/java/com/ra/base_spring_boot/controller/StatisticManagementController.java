@@ -116,7 +116,7 @@ public class StatisticManagementController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/genres")
+    @GetMapping("/genre")
     public  ResponseEntity<ResponseWrapper<?>> getGenreStatistics() {
         return ResponseEntity.status(HttpStatus.OK).body(
                 ResponseWrapper.builder()

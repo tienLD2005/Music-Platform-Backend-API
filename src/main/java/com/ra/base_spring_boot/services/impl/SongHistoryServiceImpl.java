@@ -41,7 +41,7 @@ public class SongHistoryServiceImpl implements ISongHistoryService {
 
     @Override
     @Transactional
-    public void addPlay(Long userId, Long songId) {
+    public SongHistoryResponse addPlay(Long userId, Long songId) {
         Song song = songRepository.findById(songId).orElseThrow(()-> new HttpNotFound("Song not found"));
 
         if (song.getStatus() != SongStatus.APPROVED) {
@@ -65,5 +65,16 @@ public class SongHistoryServiceImpl implements ISongHistoryService {
 
         history.setPlayedAt(now);
         songHistoryRepository.save(history);
+
+        return SongHistoryResponse.builder()
+                .songId(song.getId())
+                .title(song.getTitle())
+                .coverImage(song.getAlbum().getCoverImage())
+                .fileUrl(song.getFileUrl())
+                .artistName(song.getArtist() != null
+                ? song.getArtist().getFirstName() + " " + song.getArtist().getLastName()
+                : null)
+                .playedAt(history.getPlayedAt())
+                .build();
     }
 }

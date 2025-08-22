@@ -1,13 +1,12 @@
 package com.ra.base_spring_boot.services.impl;
 
 import com.ra.base_spring_boot.dto.req.SubscriptionPlanRequestDTO;
-import com.ra.base_spring_boot.dto.resp.PaginatedResponse;
+import com.ra.base_spring_boot.dto.resp.PageResponse;
 import com.ra.base_spring_boot.dto.resp.SubscriptionPlanResponseDTO;
 import com.ra.base_spring_boot.exception.HttpBadRequest;
 import com.ra.base_spring_boot.exception.HttpConflict;
 import com.ra.base_spring_boot.exception.HttpNotFound;
 import com.ra.base_spring_boot.model.SubscriptionPlan;
-import com.ra.base_spring_boot.model.base.Pagination;
 import com.ra.base_spring_boot.repository.ISubscriptionPlanRepository;
 import com.ra.base_spring_boot.repository.ISubscriptionRepository;
 import com.ra.base_spring_boot.services.ISubscriptionPlanService;
@@ -16,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -25,7 +25,7 @@ public class SubscriptionPlanServiceImpl implements ISubscriptionPlanService {
     private final ISubscriptionRepository subscriptionRepository;
 
     @Override
-    public PaginatedResponse<SubscriptionPlanResponseDTO> getAll(String keyword, int page, int size, String sortBy, String sortDir) {
+    public PageResponse<SubscriptionPlanResponseDTO> getAll(String keyword, int page, int size, String sortBy, String sortDir) {
         Sort sort = sortDir.equalsIgnoreCase("asc")
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
@@ -47,15 +47,13 @@ public class SubscriptionPlanServiceImpl implements ISubscriptionPlanService {
                 subPlan.getDescription()
         ));
 
-        return new PaginatedResponse<>(
-                plans.getContent(),
-                new Pagination(
-                        plans.getNumber() + 1,
-                        plans.getSize(),
-                        plans.getTotalPages(),
-                        plans.getTotalElements()
-                )
-        );
+        return PageResponse.<SubscriptionPlanResponseDTO>builder()
+                .content(plans.getContent())
+                .currentPage(plans.getNumber() + 1)
+                .totalPages(plans.getTotalPages())
+                .totalElements(plans.getTotalElements())
+                .size(plans.getSize())
+                .build();
     }
 
     @Override
