@@ -15,18 +15,6 @@ public class ClientArtistController{
 
     private final IClientArtistService artistService;
 
-    @GetMapping("/trending")
-    public ResponseWrapper<PageResponse<ArtistResponseDTO>> getTrendingArtists(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
-        return ResponseWrapper.<PageResponse<ArtistResponseDTO>>builder()
-                .status(HttpStatus.OK)
-                .code(HttpStatus.OK.value())
-                .data(artistService.getTrendingArtists(page, size))
-                .build();
-    }
-
     @GetMapping
     public ResponseWrapper<PageResponse<ArtistResponseDTO>> getAllArtists(
             @RequestParam(defaultValue = "1") int page,

@@ -3,6 +3,7 @@ package com.ra.base_spring_boot.services.impl;
 import com.ra.base_spring_boot.dto.resp.PageResponse;
 import com.ra.base_spring_boot.dto.resp.SongResponse;
 import com.ra.base_spring_boot.dto.resp.TopSongDTO;
+import com.ra.base_spring_boot.dto.resp.TopSongOfWeek;
 import com.ra.base_spring_boot.exception.HttpNotFound;
 import com.ra.base_spring_boot.mapper.SongMapper;
 import com.ra.base_spring_boot.model.Genre;
@@ -32,7 +33,7 @@ public class SongServiceImpl implements ISongService {
     private final SongDeleteHistoryRepo songDeleteHistoryRepo;
 
     @Override
-    public List<TopSongDTO> getTop15SongsOfWeek() {
+    public List<TopSongOfWeek> getTop15SongsOfWeek() {
         LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
         Pageable top15 = PageRequest.of(0, 15);
         return songRepository.findTopSongsOfWeek(sevenDaysAgo, top15);

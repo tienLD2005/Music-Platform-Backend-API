@@ -1,5 +1,6 @@
 package com.ra.base_spring_boot.repository;
 
+import com.ra.base_spring_boot.dto.resp.AlbumTrendingDTO;
 import com.ra.base_spring_boot.model.Album;
 import com.ra.base_spring_boot.model.constants.AlbumStatus;
 import org.springframework.data.domain.Page;
@@ -33,16 +34,23 @@ public interface IAlbumRepository extends JpaRepository<Album, Long> {
     boolean existsByTitleIgnoreCaseAndArtistId(String title, Long artistId);
 
     @Query("""
-    SELECT a,\s
-           SUM(COALESCE(s.views, 0)) + COUNT(sh)
+    SELECT new com.ra.base_spring_boot.dto.resp.AlbumTrendingDTO(
+        a.id,
+        a.title,
+        a.coverImage,
+        a.artist.firstName,
+        a.artist.lastName,
+        COUNT(s.id),
+        SUM(COALESCE(s.views, 0)),
+        COUNT(sh)
+    )
     FROM Album a
     LEFT JOIN a.songs s
     LEFT JOIN s.songHistories sh
-    GROUP BY a.id
-    ORDER BY SUM(COALESCE(s.views, 0)) + COUNT(sh) DESC
+    GROUP BY a.id, a.title, a.coverImage, a.artist.firstName, a.artist.lastName
+    ORDER BY SUM(COALESCE(s.views, 0)) DESC
 """)
-    List<Object[]> findTopTrendingAlbumsWithViews(Pageable pageable);
-
+    Page<AlbumTrendingDTO> findTopTrendingAlbumsWithViews(Pageable pageable);
 
     //List Album
     @Query("SELECT a FROM Album a WHERE a.status = :status AND " +

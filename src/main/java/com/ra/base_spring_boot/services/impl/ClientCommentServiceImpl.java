@@ -98,7 +98,7 @@ public class ClientCommentServiceImpl implements IClientCommentService {
         Comment comment = Comment.builder()
                 .user(user)
                 .song(song)
-                .content(request.getContent())
+                .content(request.getContent().trim().replaceAll("\\s+", " "))
                 .build();
 
         if (request.getParentId() != null) {
@@ -129,7 +129,7 @@ public class ClientCommentServiceImpl implements IClientCommentService {
                 .build();
         commentEditHistoryRepository.save(history);
 
-        comment.setContent(newContent);
+        comment.setContent(newContent.trim().replaceAll("\\s+", " "));
         Comment updated = commentRepository.save(comment);
         return CommentMapper.toDto(updated);
     }

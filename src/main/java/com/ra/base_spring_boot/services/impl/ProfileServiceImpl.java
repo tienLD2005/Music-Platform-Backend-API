@@ -47,10 +47,10 @@ public class ProfileServiceImpl implements IProfileService {
                 .orElseThrow(() -> new HttpNotFound("User not found"));
 
         if (StringUtils.hasText(request.getFirstName())) {
-            user.setFirstName(request.getFirstName().trim());
+            user.setFirstName(request.getFirstName().trim().replaceAll("\\s+", " "));
         }
         if (StringUtils.hasText(request.getLastName())) {
-            user.setLastName(request.getLastName().trim());
+            user.setLastName(request.getLastName().trim().replaceAll("\\s+", " "));
         }
         if (request.getProfileImage() != null && !request.getProfileImage().isEmpty()) {
             try {
@@ -61,7 +61,7 @@ public class ProfileServiceImpl implements IProfileService {
             }
         }
         if (StringUtils.hasText(request.getBio())) {
-            user.setBio(request.getBio().trim());
+            user.setBio(request.getBio().trim().replaceAll("\\s+", " "));
         }
 
         userRepository.save(user);
@@ -73,6 +73,13 @@ public class ProfileServiceImpl implements IProfileService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new HttpNotFound("User not found"));
 
+        validatePasswordRequest(request, user);
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+    }
+
+    private void validatePasswordRequest(ChangePasswordRequest request, User user) {
         if (!StringUtils.hasText(request.getOldPassword())) {
             throw new HttpBadRequest("Old password must not be empty");
         }
@@ -86,20 +93,15 @@ public class ProfileServiceImpl implements IProfileService {
         if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
             throw new HttpBadRequest("Old password is incorrect");
         }
-
         if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
             throw new HttpBadRequest("New password must be different from old password");
         }
-
         if (!request.getNewPassword().equals(request.getConfirmPassword())) {
             throw new HttpBadRequest("Password confirmation does not match");
         }
-
         if (request.getNewPassword().length() < 8) {
             throw new HttpBadRequest("Password must be at least 8 characters long");
         }
-
-        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
-        userRepository.save(user);
     }
+
 }

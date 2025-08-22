@@ -21,20 +21,6 @@ public class AdminGenreController {
 
     private final GenreService genreService;
 
-    @GetMapping("/trending")
-    public ResponseEntity<?> getTrendingGenres(
-            @RequestParam(defaultValue = "week") String period,
-            @RequestParam(defaultValue = "10") int limit
-    ) {
-        return ResponseEntity.ok(
-                ResponseWrapper.<List<GenreTrendingDTO>>builder()
-                        .status(HttpStatus.OK)
-                        .code(200)
-                        .data(genreService.getTrendingGenres(period, limit))
-                        .build()
-        );
-    }
-
     @GetMapping
     public ResponseEntity<?> getGenres(
             @RequestParam(required = false) String keyword,
