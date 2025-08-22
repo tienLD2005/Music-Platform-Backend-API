@@ -12,6 +12,8 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @Builder
 public class ResponseSong {
+    private Long id;
+    private String artistName;
     private String title;
     private LocalTime duration;
     private Integer views;

@@ -3,6 +3,7 @@ package com.ra.base_spring_boot.repository;
 import com.ra.base_spring_boot.dto.resp.TopSongDTO;
 import com.ra.base_spring_boot.dto.resp.TopSongOfWeek;
 import com.ra.base_spring_boot.model.Song;
+import com.ra.base_spring_boot.model.constants.SongStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,11 +16,12 @@ import java.util.List;
 
 
 public interface ISongRepository extends JpaRepository<Song, Long> {
-    Page<Song> findByAlbumId(Long albumId, Pageable pageable);
+    Page<Song> findByAlbumIdAndStatus(Long albumId, Pageable pageable, SongStatus status);
 
     @Query("SELECT s FROM Song s JOIN s.genres g WHERE g.id = :genreId")
     Page<Song> findByGenreId(@Param("genreId") Long genreId, Pageable pageable);
 
+    // CHECK DUPLICATE SONG TITLE
     boolean existsByTitleAndAlbumId(String title, Long albumId);
 
     @Query("""
@@ -120,10 +122,13 @@ public interface ISongRepository extends JpaRepository<Song, Long> {
     @Query("SELECT g.genreName FROM Song s JOIN s.genres g WHERE s.id = :songId")
     List<String> findGenresBySongId(@Param("songId") Long songId);
 
+    // Increase View in Song
     @Modifying
     @Query("UPDATE Song s SET s.views = s.views + 1 WHERE s.id = :songId")
     void incrementViews(@Param("songId") Long songId);
 
+
+    // Statistic Genre
     @Query("SELECT g.genreName, COUNT(s) " +
             "FROM Song s JOIN s.genres g " +
             "GROUP BY g.genreName")
