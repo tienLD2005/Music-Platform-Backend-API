@@ -6,6 +6,7 @@ import com.ra.base_spring_boot.dto.resp.UserProfileResponseDTO;
 import com.ra.base_spring_boot.exception.HttpBadRequest;
 import com.ra.base_spring_boot.exception.HttpNotFound;
 import com.ra.base_spring_boot.model.User;
+import com.ra.base_spring_boot.model.constants.AuthProvider;
 import com.ra.base_spring_boot.repository.IUserRepository;
 import com.ra.base_spring_boot.services.IProfileService;
 import com.ra.base_spring_boot.services.cloudinary.CloudinaryService;
@@ -32,6 +33,7 @@ public class ProfileServiceImpl implements IProfileService {
 
         return new UserProfileResponseDTO(
                 user.getId(),
+                user.getFullName(),
                 user.getFirstName(),
                 user.getLastName(),
                 user.getEmail(),
@@ -57,7 +59,7 @@ public class ProfileServiceImpl implements IProfileService {
                 String imageUrl = cloudinaryService.uploadImage(request.getProfileImage());
                 user.setProfileImage(imageUrl);
             } catch (IOException e) {
-                throw new RuntimeException("Upload ảnh thất bại", e);
+                throw new HttpBadRequest("Upload ảnh thất bại");
             }
         }
         if (StringUtils.hasText(request.getBio())) {
@@ -73,11 +75,16 @@ public class ProfileServiceImpl implements IProfileService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new HttpNotFound("User not found"));
 
-        validatePasswordRequest(request, user);
+        if (user.getProvider() == AuthProvider.LOCAL) {
+            validatePasswordRequest(request, user);
+        } else {
+            validateNewPasswordOnly(request);
+        }
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
     }
+
 
     private void validatePasswordRequest(ChangePasswordRequest request, User user) {
         if (!StringUtils.hasText(request.getOldPassword())) {
@@ -95,6 +102,20 @@ public class ProfileServiceImpl implements IProfileService {
         }
         if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
             throw new HttpBadRequest("New password must be different from old password");
+        }
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new HttpBadRequest("Password confirmation does not match");
+        }
+        if (request.getNewPassword().length() < 8) {
+            throw new HttpBadRequest("Password must be at least 8 characters long");
+        }
+    }
+    private void validateNewPasswordOnly(ChangePasswordRequest request) {
+        if (!StringUtils.hasText(request.getNewPassword())) {
+            throw new HttpBadRequest("New password must not be empty");
+        }
+        if (!StringUtils.hasText(request.getConfirmPassword())) {
+            throw new HttpBadRequest("Password confirmation must not be empty");
         }
         if (!request.getNewPassword().equals(request.getConfirmPassword())) {
             throw new HttpBadRequest("Password confirmation does not match");

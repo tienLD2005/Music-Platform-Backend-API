@@ -7,6 +7,7 @@ import com.ra.base_spring_boot.dto.req.ResetPasswordRequest;
 import com.ra.base_spring_boot.dto.resp.JwtResponse;
 import com.ra.base_spring_boot.dto.resp.UserResponseDTO;
 import com.ra.base_spring_boot.exception.HttpBadRequest;
+import com.ra.base_spring_boot.exception.HttpConflict;
 import com.ra.base_spring_boot.exception.HttpNotFound;
 import com.ra.base_spring_boot.model.BlacklistedToken;
 import com.ra.base_spring_boot.model.Role;
@@ -49,7 +50,7 @@ public class AuthServiceImpl implements IAuthService {
     @Override
     public void register(FormRegisterRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new HttpBadRequest("Email already exists");
+            throw new HttpConflict("Email already exists");
         }
 
         if (!request.getPassword().equals(request.getConfirmPassword())) {
@@ -111,6 +112,7 @@ public class AuthServiceImpl implements IAuthService {
                 .id(user.getId())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
+                .fullName(user.getFullName())
                 .email(user.getEmail())
                 .profileImage(user.getProfileImage())
                 .bio(user.getBio())

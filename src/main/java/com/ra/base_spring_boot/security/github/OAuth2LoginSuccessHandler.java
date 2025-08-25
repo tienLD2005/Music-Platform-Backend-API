@@ -32,8 +32,6 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
         Map<String, Object> resp = new HashMap<>();
         resp.put("token", token);
-        resp.put("email", oAuth2User.getUsername());
-        resp.put("name", oAuth2User.getUsername());
 
         new ObjectMapper().writeValue(response.getWriter(), resp);
     }
