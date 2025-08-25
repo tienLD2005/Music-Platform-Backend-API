@@ -1,9 +1,12 @@
 package com.ra.base_spring_boot.controller;
 
 import com.ra.base_spring_boot.dto.ResponseWrapper;
+import com.ra.base_spring_boot.dto.resp.PageResponse;
 import com.ra.base_spring_boot.dto.resp.TrendingArtistResponseDTO;
-import com.ra.base_spring_boot.services.ArtistService;
+import com.ra.base_spring_boot.services.IArtistService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GuestArtistController {
 
-    private final ArtistService artistService;
+    private final IArtistService artistService;
 
     @GetMapping("/trending")
     public ResponseEntity<?> getTrendingArtists(@RequestParam(defaultValue = "5") int limit) {
@@ -31,4 +34,19 @@ public class GuestArtistController {
                         .build()
         );
     }
+
+    @GetMapping
+    public ResponseEntity<?> getAllArtists(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(
+                ResponseWrapper.builder()
+                        .status(HttpStatus.OK)
+                    .code(200)
+                    .data(artistService.getAllArtists(PageRequest.of(page, size)))
+                    .build()
+        );
+    }
+
 }

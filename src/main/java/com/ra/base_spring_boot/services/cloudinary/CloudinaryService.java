@@ -26,18 +26,18 @@ public class CloudinaryService {
     public String uploadAudio(MultipartFile file) {
         try {
             if (file == null || file.isEmpty()) {
-                throw new IllegalArgumentException("File không được để trống");
+                throw new IllegalArgumentException("File must not be empty");
             }
             if (file.getSize() > MAX_AUDIO_SIZE) {
-                throw new IllegalArgumentException("Kích thước file tối đa 20MB");
+                throw new IllegalArgumentException("Maximum file size is 20MB");
             }
 
-            // Chỉ hỗ trợ MP3 hoặc WAV
+            // Support MP3 or WAV
             String contentType = file.getContentType();
             if (contentType == null ||
                     (!contentType.equalsIgnoreCase("audio/mpeg") && // MP3
                             !contentType.equalsIgnoreCase("audio/wav"))) { // WAV
-                throw new IllegalArgumentException("Chỉ hỗ trợ file nhạc định dạng MP3 hoặc WAV");
+                throw new IllegalArgumentException("Only MP3 or WAV files are supported");
             }
 
             Map<?, ?> result = cloudinary.uploader().upload(
@@ -50,12 +50,12 @@ public class CloudinaryService {
             return result.get("secure_url").toString();
 
         } catch (IOException e) {
-            throw new RuntimeException("Lỗi khi upload file lên Cloudinary", e);
+            throw new RuntimeException("Error uploading file to Cloudinary", e);
         }
     }
     public String uploadImage(MultipartFile file) throws IOException {
-        if (file == null || file.isEmpty()) throw new IllegalArgumentException("File không được để trống");
-        if (file.getSize() > MAX_IMAGE_SIZE) throw new IllegalArgumentException("Kích thước ảnh tối đa 10MB");
+        if (file == null || file.isEmpty()) throw new IllegalArgumentException("File must not be empty");
+        if (file.getSize() > MAX_IMAGE_SIZE) throw new IllegalArgumentException("Maximum image size is 10MB");
 
         Map<?,?> result = cloudinary.uploader().upload(
                 file.getBytes(),

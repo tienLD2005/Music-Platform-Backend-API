@@ -1,12 +1,12 @@
 package com.ra.base_spring_boot.services.impl;
 
 import com.ra.base_spring_boot.dto.req.SubscriptionPlanRequestDTO;
-import com.ra.base_spring_boot.dto.resp.PaginatedResponse;
+import com.ra.base_spring_boot.dto.resp.PageResponse;
 import com.ra.base_spring_boot.dto.resp.SubscriptionPlanResponseDTO;
 import com.ra.base_spring_boot.exception.HttpBadRequest;
+import com.ra.base_spring_boot.exception.HttpConflict;
 import com.ra.base_spring_boot.exception.HttpNotFound;
 import com.ra.base_spring_boot.model.SubscriptionPlan;
-import com.ra.base_spring_boot.model.base.Pagination;
 import com.ra.base_spring_boot.repository.ISubscriptionPlanRepository;
 import com.ra.base_spring_boot.repository.ISubscriptionRepository;
 import com.ra.base_spring_boot.services.ISubscriptionPlanService;
@@ -15,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -24,12 +25,15 @@ public class SubscriptionPlanServiceImpl implements ISubscriptionPlanService {
     private final ISubscriptionRepository subscriptionRepository;
 
     @Override
-    public PaginatedResponse<SubscriptionPlanResponseDTO> getAll(String keyword, int page, int size, String sortBy, String sortDir) {
+    public PageResponse<SubscriptionPlanResponseDTO> getAll(String keyword, int page, int size, String sortBy, String sortDir) {
+        if (page < 0) throw new HttpBadRequest("Page must be >= 0");
+        if (size <= 0) throw new HttpBadRequest("Size must be > 0");
+
         Sort sort = sortDir.equalsIgnoreCase("asc")
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
 
-        Pageable pageable = PageRequest.of(page - 1, size, sort);
+        Pageable pageable = PageRequest.of(page, size, sort);
 
         Page<SubscriptionPlan> planPage;
         if (keyword == null || keyword.isBlank()) {
@@ -46,21 +50,25 @@ public class SubscriptionPlanServiceImpl implements ISubscriptionPlanService {
                 subPlan.getDescription()
         ));
 
-        return new PaginatedResponse<>(
-                plans.getContent(),
-                new Pagination(
-                        plans.getNumber() + 1,
-                        plans.getSize(),
-                        plans.getTotalPages(),
-                        plans.getTotalElements()
-                )
-        );
+        int totalPages = plans.getTotalPages();
+
+        if ((totalPages == 0 && page > 0) || (totalPages > 0 && page >= totalPages)) {
+            throw new HttpBadRequest("Page index out of range. totalPages=" + totalPages);
+        }
+
+        return PageResponse.<SubscriptionPlanResponseDTO>builder()
+                .content(plans.getContent())
+                .currentPage(plans.getNumber())
+                .totalPages(plans.getTotalPages())
+                .totalElements(plans.getTotalElements())
+                .size(plans.getSize())
+                .build();
     }
 
     @Override
     public SubscriptionPlanResponseDTO save(SubscriptionPlanRequestDTO request) {
         if (subscriptionPlanRepository.existsByPlanName(request.getPlanName())) {
-            throw new HttpBadRequest("PlanName already exists");
+            throw new HttpConflict("PlanName already exists");
         }
 
         SubscriptionPlan subscriptionPlan = SubscriptionPlan.builder()

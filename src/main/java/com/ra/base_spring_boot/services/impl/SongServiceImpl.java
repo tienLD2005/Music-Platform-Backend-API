@@ -1,38 +1,35 @@
 package com.ra.base_spring_boot.services.impl;
 
-import com.ra.base_spring_boot.dto.resp.PageResponse;
-import com.ra.base_spring_boot.dto.resp.SongResponse;
-import com.ra.base_spring_boot.dto.resp.TopSongDTO;
+import com.ra.base_spring_boot.dto.resp.*;
 import com.ra.base_spring_boot.exception.HttpNotFound;
 import com.ra.base_spring_boot.mapper.SongMapper;
-import com.ra.base_spring_boot.model.Genre;
 import com.ra.base_spring_boot.model.Song;
 import com.ra.base_spring_boot.model.SongDeleteHistory;
 import com.ra.base_spring_boot.model.User;
+import com.ra.base_spring_boot.repository.ISongDeleteHistoryRepo;
 import com.ra.base_spring_boot.repository.ISongRepository;
-import com.ra.base_spring_boot.repository.SongDeleteHistoryRepo;
+import com.ra.base_spring_boot.repository.IUserRepository;
 import com.ra.base_spring_boot.services.ISongService;
-import com.ra.base_spring_boot.services.MailService;
-import jakarta.mail.internet.MimeMessage;
+import com.ra.base_spring_boot.services.email.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class SongServiceImpl implements ISongService {
     private final ISongRepository songRepository;
-    private final MailService mailService;
-    private final SongDeleteHistoryRepo songDeleteHistoryRepo;
+    private final EmailService mailService;
+    private final ISongDeleteHistoryRepo songDeleteHistoryRepo;
 
     @Override
-    public List<TopSongDTO> getTop15SongsOfWeek() {
+    public List<TopSongOfWeek> getTop15SongsOfWeek() {
         LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
         Pageable top15 = PageRequest.of(0, 15);
         return songRepository.findTopSongsOfWeek(sevenDaysAgo, top15);
@@ -44,11 +41,13 @@ public class SongServiceImpl implements ISongService {
         return songRepository.findTopSongsAllTime(pageable);
     }
 
-    @Override
-    public List<TopSongDTO> getTrendingSongs(int limit) {
-        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
-        Pageable pageable = PageRequest.of(0, limit);
-        return songRepository.findTrendingSongs(sevenDaysAgo, pageable);
+    public List<TopSongDTO> getTrendingSongsThisMonth(int limit) {
+        LocalDateTime start = LocalDate.now().withDayOfMonth(1).atStartOfDay();
+        LocalDateTime end = start.plusMonths(1);
+        return songRepository.findTrendingSongs(start, end)
+                .stream()
+                .limit(limit)
+                .toList();
     }
 
     @Override

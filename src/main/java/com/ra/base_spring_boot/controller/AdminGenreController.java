@@ -3,7 +3,6 @@ package com.ra.base_spring_boot.controller;
 import com.ra.base_spring_boot.dto.ResponseWrapper;
 import com.ra.base_spring_boot.dto.resp.GenreRequestDTO;
 import com.ra.base_spring_boot.dto.resp.GenreResponseDTO;
-import com.ra.base_spring_boot.dto.resp.GenreTrendingDTO;
 import com.ra.base_spring_boot.dto.resp.PageResponse;
 import com.ra.base_spring_boot.services.GenreService;
 import jakarta.validation.Valid;
@@ -12,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/admin/g-genres")
@@ -20,20 +18,6 @@ import java.util.List;
 public class AdminGenreController {
 
     private final GenreService genreService;
-
-    @GetMapping("/trending")
-    public ResponseEntity<?> getTrendingGenres(
-            @RequestParam(defaultValue = "week") String period,
-            @RequestParam(defaultValue = "10") int limit
-    ) {
-        return ResponseEntity.ok(
-                ResponseWrapper.<List<GenreTrendingDTO>>builder()
-                        .status(HttpStatus.OK)
-                        .code(200)
-                        .data(genreService.getTrendingGenres(period, limit))
-                        .build()
-        );
-    }
 
     @GetMapping
     public ResponseEntity<?> getGenres(

@@ -4,6 +4,7 @@ import com.ra.base_spring_boot.dto.ResponseWrapper;
 import com.ra.base_spring_boot.dto.req.SubscriptionPlanRequestDTO;
 import com.ra.base_spring_boot.dto.resp.SubscriptionPlanResponseDTO;
 import com.ra.base_spring_boot.services.ISubscriptionPlanService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,7 +18,7 @@ public class AdminSubscriptionPlanController {
     private final ISubscriptionPlanService subscriptionPlanService;
 
     @GetMapping
-    public ResponseEntity<ResponseWrapper<?>> getAllSubscriptionPlans(@RequestParam(defaultValue = "1") int page,
+    public ResponseEntity<ResponseWrapper<?>> getAllSubscriptionPlans(@RequestParam(defaultValue = "0") int page,
                                                                       @RequestParam(defaultValue = "10") int size,
                                                                       @RequestParam(defaultValue = "") String keyword,
                                                                       @RequestParam(defaultValue = "planName") String sortBy,

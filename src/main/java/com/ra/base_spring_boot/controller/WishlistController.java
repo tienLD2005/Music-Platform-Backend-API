@@ -28,7 +28,7 @@ public class WishlistController {
     }
 
     @GetMapping
-    public  ResponseEntity<?> getWishlist(@RequestParam(defaultValue = "1") int page,
+    public  ResponseEntity<?> getWishlist(@RequestParam(defaultValue = "0") int page,
                                           @RequestParam(defaultValue = "10") int size,
                                           @RequestParam(defaultValue = "createdAt") String sortBy,
                                           @RequestParam(defaultValue = "desc") String sortDir,

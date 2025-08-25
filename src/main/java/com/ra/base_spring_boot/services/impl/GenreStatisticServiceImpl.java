@@ -18,13 +18,11 @@ public class GenreStatisticServiceImpl implements IGenreStatisticService {
     public Map<String, Object> getGenreStatistics() {
         Map<String, Object> result = new HashMap<>();
 
-        // Count song by genre
         List<Object[]> songCounts = songRepository.countSongsByGenre();
         Map<String, Long> songCountMap = new HashMap<>();
         for (Object[] row : songCounts) {
             songCountMap.put((String) row[0], (Long) row[1]);
         }
-        // the most genre
         List<Object[]> playCounts = songRepository.countPlaysByGenre();
         String mostPlayedGenre = playCounts.isEmpty() ? null : (String) playCounts.get(0)[0];
 

@@ -22,4 +22,7 @@ public interface IPaymentRepository extends JpaRepository<Payment, Long>{
 
     @Query("SELECT p FROM Payment p WHERE p.subscriptionPlan.id = :planId AND p.paymentStatus = :status")
     List<Payment> findBySubscriptionPlan_IdAndPaymentStatus(Long planId, PaymentStatus status);
+
+    Optional<Payment> findByUserIdAndSubscriptionPlanIdAndPaymentStatus(
+            Long userId, Long planId, PaymentStatus paymentStatus);
 }

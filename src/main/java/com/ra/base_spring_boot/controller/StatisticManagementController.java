@@ -13,6 +13,7 @@ import com.ra.base_spring_boot.services.ISubscriptionPlanStatisticService;
 import com.ra.base_spring_boot.services.impl.AlbumStatisticsServiceImpl;
 import com.ra.base_spring_boot.services.impl.ArtistStatisticsServiceImpl;
 import com.ra.base_spring_boot.services.impl.UserStatisticsService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +27,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/admin/statistics")
 @RequiredArgsConstructor
+@Tag(name = "Statistics Management")
 public class StatisticManagementController {
 
     private final UserStatisticsService statisticsService;
@@ -114,7 +116,7 @@ public class StatisticManagementController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/genres")
+    @GetMapping("/genre")
     public  ResponseEntity<ResponseWrapper<?>> getGenreStatistics() {
         return ResponseEntity.status(HttpStatus.OK).body(
                 ResponseWrapper.builder()

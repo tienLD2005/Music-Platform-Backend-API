@@ -5,7 +5,6 @@ import com.ra.base_spring_boot.dto.req.BannerUpdateReq;
 import com.ra.base_spring_boot.dto.req.SearchBannerRequest;
 import com.ra.base_spring_boot.dto.resp.BannerResponse;
 import com.ra.base_spring_boot.dto.resp.BannerResponseDTO;
-import com.ra.base_spring_boot.exception.ResourceNotFoundException;
 import com.ra.base_spring_boot.mapper.BannerMapper;
 import com.ra.base_spring_boot.model.Banner;
 import com.ra.base_spring_boot.model.constants.BannerStatus;
@@ -116,7 +115,6 @@ public class BannerServiceImpl implements IBannerService {
                 .map(BannerMapper::toBannerResponse)
                 .toList();
     }
-
 
     private BannerResponseDTO toRes(Banner banner) {
         return BannerResponseDTO.builder()

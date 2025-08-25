@@ -1,14 +1,14 @@
 package com.ra.base_spring_boot.services.impl;
 
-import com.ra.base_spring_boot.dto.resp.PaginatedResponse;
-import com.ra.base_spring_boot.dto.resp.SongResponseDTO;
+import com.ra.base_spring_boot.dto.resp.PageResponse;
 import com.ra.base_spring_boot.dto.resp.WishlistResponse;
 import com.ra.base_spring_boot.exception.HttpBadRequest;
+import com.ra.base_spring_boot.exception.HttpConflict;
+import com.ra.base_spring_boot.exception.HttpForbidden;
 import com.ra.base_spring_boot.exception.HttpNotFound;
 import com.ra.base_spring_boot.model.Song;
 import com.ra.base_spring_boot.model.User;
-import com.ra.base_spring_boot.model.base.Pagination;
-import com.ra.base_spring_boot.repository.IRoleRepository;
+import com.ra.base_spring_boot.model.constants.SongStatus;
 import com.ra.base_spring_boot.repository.ISongRepository;
 import com.ra.base_spring_boot.repository.IUserRepository;
 import com.ra.base_spring_boot.repository.IWishlistRepository;
@@ -17,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -37,9 +36,13 @@ public class WishlistServiceImpl implements IWishlistService {
 
         Song song = songRepository.findById(songId).orElseThrow(()-> new HttpNotFound("Song not found"));
 
+        if (song.getStatus() != SongStatus.APPROVED) {
+            throw new HttpForbidden("Song status is not APPROVED");
+        }
+
         // CHECK DUPLICATE EXIST
         if (user.getWishlistSongs().contains(song)) {
-            throw new HttpBadRequest("Song with this song already exists in the wishlist");
+            throw new HttpConflict("Song with this song already exists in the wishlist");
         }
 
         user.getWishlistSongs().add(song);
@@ -49,9 +52,12 @@ public class WishlistServiceImpl implements IWishlistService {
     }
 
     @Override
-    public PaginatedResponse<WishlistResponse> getWishlist(int page, int size, String sortBy, String sortDir, Authentication authentication) {
+    public PageResponse<WishlistResponse> getWishlist(int page, int size, String sortBy, String sortDir, Authentication authentication) {
+        if (page < 0) throw new HttpBadRequest("Page must be >= 0");
+        if (size <= 0) throw new HttpBadRequest("Size must be > 0");
+
         String email = authentication.getName();
-        Pageable pageable = PageRequest.of(page - 1, size);
+        Pageable pageable = PageRequest.of(page, size);
 
         Page<Song> songs;
         if ("popular".equalsIgnoreCase(sortBy)) {
@@ -75,15 +81,19 @@ public class WishlistServiceImpl implements IWishlistService {
                 .build()
         );
 
-        return new PaginatedResponse<>(
-                wishlists.getContent(),
-                new Pagination(
-                        wishlists.getNumber() + 1,
-                        wishlists.getSize(),
-                        wishlists.getTotalPages(),
-                        wishlists.getTotalElements()
-                )
-        );
+        int totalPages = wishlists.getTotalPages();
+
+        if ((totalPages == 0 && page > 0) || (totalPages > 0 && page >= totalPages)) {
+            throw new HttpBadRequest("Page index out of range. totalPages=" + totalPages);
+        }
+
+        return PageResponse.<WishlistResponse>builder()
+                .content(wishlists.getContent())
+                .currentPage(wishlists.getNumber())
+                .totalPages(wishlists.getTotalPages())
+                .totalElements(wishlists.getTotalElements())
+                .size(wishlists.getSize())
+                .build();
     }
 
 
