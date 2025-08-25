@@ -49,7 +49,11 @@ public class AlbumServiceImpl implements IAlbumService {
         Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<Song> songsPage = songRepository.findByAlbumIdAndStatus(albumId, pageable, SongStatus.APPROVED);
+        Album album = albumRepository.findById(albumId)
+                .orElseThrow(() -> new HttpNotFound("Album not found"));
+
+
+        Page<Song> songsPage = songRepository.findByAlbumIdAndStatus(album.getId(), pageable, SongStatus.APPROVED);
 
         Page<ResponseSong> songs = songsPage.map(song -> ResponseSong.builder()
                 .id(song.getId())
