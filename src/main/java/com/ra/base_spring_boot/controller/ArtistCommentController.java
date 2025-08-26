@@ -56,8 +56,8 @@ public class ArtistCommentController {
         artistCommentService.deleteCommentAsArtist(commentId, confirm);
         return ResponseEntity.ok(
                 ResponseWrapper.<String>builder()
-                        .status(HttpStatus.OK)
-                        .code(HttpStatus.OK.value())
+                        .status(HttpStatus.NO_CONTENT)
+                        .code(HttpStatus.NO_CONTENT.value())
                         .data("Comment deleted successfully")
                         .build()
         );

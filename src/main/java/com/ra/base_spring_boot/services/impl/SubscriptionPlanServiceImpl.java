@@ -26,11 +26,14 @@ public class SubscriptionPlanServiceImpl implements ISubscriptionPlanService {
 
     @Override
     public PageResponse<SubscriptionPlanResponseDTO> getAll(String keyword, int page, int size, String sortBy, String sortDir) {
+        if (page < 0) throw new HttpBadRequest("Page must be >= 0");
+        if (size <= 0) throw new HttpBadRequest("Size must be > 0");
+
         Sort sort = sortDir.equalsIgnoreCase("asc")
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
 
-        Pageable pageable = PageRequest.of(page - 1, size, sort);
+        Pageable pageable = PageRequest.of(page, size, sort);
 
         Page<SubscriptionPlan> planPage;
         if (keyword == null || keyword.isBlank()) {
@@ -47,9 +50,15 @@ public class SubscriptionPlanServiceImpl implements ISubscriptionPlanService {
                 subPlan.getDescription()
         ));
 
+        int totalPages = plans.getTotalPages();
+
+        if ((totalPages == 0 && page > 0) || (totalPages > 0 && page >= totalPages)) {
+            throw new HttpBadRequest("Page index out of range. totalPages=" + totalPages);
+        }
+
         return PageResponse.<SubscriptionPlanResponseDTO>builder()
                 .content(plans.getContent())
-                .currentPage(plans.getNumber() + 1)
+                .currentPage(plans.getNumber())
                 .totalPages(plans.getTotalPages())
                 .totalElements(plans.getTotalElements())
                 .size(plans.getSize())

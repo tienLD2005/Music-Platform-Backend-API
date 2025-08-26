@@ -6,8 +6,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -18,15 +20,18 @@ public class GenreStatisticServiceImpl implements IGenreStatisticService {
     public Map<String, Object> getGenreStatistics() {
         Map<String, Object> result = new HashMap<>();
 
-        List<Object[]> songCounts = songRepository.countSongsByGenre();
-        Map<String, Long> songCountMap = new HashMap<>();
-        for (Object[] row : songCounts) {
-            songCountMap.put((String) row[0], (Long) row[1]);
-        }
+        Map<String, Long> songCountByGenre = songRepository.countSongsByGenre().stream()
+                .collect(Collectors.toMap(
+                        row -> (String) row[0],
+                        row -> (Long) row[1],
+                        (v1, v2) -> v1,
+                        LinkedHashMap::new
+                ));
+
         List<Object[]> playCounts = songRepository.countPlaysByGenre();
         String mostPlayedGenre = playCounts.isEmpty() ? null : (String) playCounts.get(0)[0];
 
-        result.put("songCountByGenre", songCountMap);
+        result.put("songCountByGenre", songCountByGenre);
         result.put("mostPlayedGenre", mostPlayedGenre);
 
         return result;
