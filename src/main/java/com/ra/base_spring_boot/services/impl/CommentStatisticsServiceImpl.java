@@ -27,15 +27,15 @@ public class CommentStatisticsServiceImpl implements ICommentStatisticsService {
     public CommentStatisticsResponseDTO getCommentsStatistics() {
         Long totalComments = commentRepository.countAllComments();
 
-        Map<String, Long> commentsBySong = commentRepository.findCommentsCountBySong().stream()
-                .collect(Collectors.toMap(
-                        row -> (String) row[0],
-                        row -> (Long) row[1]
-                ));
+        List<ICommentRepository.SongCommentStats> stats = commentRepository.findCommentsCountBySong();
 
-        Map<String, Long> topSong = commentsBySong.entrySet().stream()
-                .limit(1)
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        Map<String, Long> commentsBySong = stats.stream()
+                .collect(Collectors.toMap(
+                        s ->  s.getSongId() + " - " + s.getTitle(),
+                        ICommentRepository.SongCommentStats::getTotal,
+                        (u,v) -> u,
+                        LinkedHashMap::new
+                ));
 
         List<ReportedCommentDTO> reportedComments = reactionRepository.findReportedComments(ReactionEnum.REPORT)
                 .stream()
@@ -50,7 +50,7 @@ public class CommentStatisticsServiceImpl implements ICommentStatisticsService {
                 ));
 
         List<PopularCommentDTO> popularComments = reactionRepository.findMostReactedComments(ReactionEnum.LIKE).stream()
-                .limit(5)
+                .limit(3)
                 .map(row -> {
                     Comment c = (Comment) row[0];
                     Long likes = (Long) row[1];
@@ -60,7 +60,7 @@ public class CommentStatisticsServiceImpl implements ICommentStatisticsService {
 
         return CommentStatisticsResponseDTO.builder()
                 .totalComments(totalComments)
-                .commentsBySong(topSong)
+                .commentsBySong(commentsBySong)
                 .reportedComments(reportedComments)
                 .commentsOverTime(commentsOverTime)
                 .popularComments(popularComments)

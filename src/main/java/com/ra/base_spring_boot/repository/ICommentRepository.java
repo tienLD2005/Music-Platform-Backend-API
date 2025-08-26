@@ -16,7 +16,15 @@ public interface ICommentRepository extends JpaRepository<Comment, Long> {
     @Query("SELECT COUNT(c) FROM Comment c")
     Long countAllComments();
 
-    @Query("SELECT c.song.title, COUNT(c.id) as total " +
-            "FROM Comment c GROUP BY c.song.title ORDER BY total DESC")
-    List<Object[]> findCommentsCountBySong();
+
+    public interface SongCommentStats {
+        Long getSongId();
+        String getTitle();
+        Long getTotal();
+    }
+
+    @Query("SELECT c.song.id as songId, c.song.title as title, COUNT(c.id) as total " +
+            "FROM Comment c GROUP BY c.song.id, c.song.title ORDER BY total DESC LIMIT 3")
+    List<SongCommentStats> findCommentsCountBySong();
+
 }

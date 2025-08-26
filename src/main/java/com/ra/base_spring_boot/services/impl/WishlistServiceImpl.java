@@ -108,7 +108,7 @@ public class WishlistServiceImpl implements IWishlistService {
         if (user.getWishlistSongs().remove(song)) {
             userRepository.save(user);
         } else {
-            throw  new HttpBadRequest("Song with this song already exists in the wishlist");
+            throw  new HttpBadRequest("This song is not in your wishlist");
         }
         return "Successfully removed the song from the favorites list!!";
     }

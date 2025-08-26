@@ -70,8 +70,9 @@ public class ClientCommentServiceImpl implements IClientCommentService {
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<Comment> commentPage = commentRepository.findBySong_IdAndParentIsNull(songId, pageable);
 
-        if (page >= commentPage.getTotalPages() && commentPage.getTotalPages() > 0) {
-            throw new HttpBadRequest("Page must be less than total pages: " + commentPage.getTotalPages());
+        int totalPages = commentPage.getTotalPages();
+        if ((totalPages == 0 && page > 0) || (totalPages > 0 && page >= totalPages)) {
+            throw new HttpBadRequest("Page index out of range. totalPages=" + totalPages);
         }
 
         return PageResponse.<CommentResponseDTO>builder()

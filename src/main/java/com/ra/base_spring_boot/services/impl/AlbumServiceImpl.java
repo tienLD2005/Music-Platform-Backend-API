@@ -210,7 +210,6 @@ public class AlbumServiceImpl implements IAlbumService {
             throw new HttpBadRequest("Cover image is required");
         }
 
-        // Check duplicate title
         if (request.getReleaseDate().isBefore(LocalDateTime.now())) {
             throw new HttpBadRequest("Release date must be in the present or future");
         }
@@ -226,11 +225,9 @@ public class AlbumServiceImpl implements IAlbumService {
             try {
                 coverUrl = cloudinaryService.uploadImage(file);
             } catch (IOException e) {
-                return ResponseWrapper.<AlbumResponseDTO>builder()
-                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                        .data(null)
-                        .build();
+                throw new HttpBadRequest("Invalid image file (IOE)");
+            }catch (RuntimeException e){
+                throw new HttpBadRequest("Invalid image file");
             }
         }
 
@@ -292,7 +289,9 @@ public class AlbumServiceImpl implements IAlbumService {
                 String coverUrl = cloudinaryService.uploadImage(file);
                 album.setCoverImage(coverUrl);
             } catch (IOException e) {
-                throw new RuntimeException("Failed to upload cover image", e);
+                throw new HttpBadRequest("Failed to upload cover image");
+            } catch (RuntimeException e){
+                throw new HttpBadRequest("Invalid image file");
             }
         }
 
