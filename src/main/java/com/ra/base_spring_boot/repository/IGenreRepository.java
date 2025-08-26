@@ -1,6 +1,5 @@
 package com.ra.base_spring_boot.repository;
 
-import com.ra.base_spring_boot.dto.resp.GenreResponseDTO;
 import com.ra.base_spring_boot.dto.resp.GenreTrendingDTO;
 import com.ra.base_spring_boot.model.Genre;
 import org.springframework.data.domain.Page;

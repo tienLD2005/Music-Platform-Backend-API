@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ArtistRepository extends JpaRepository<User, Long> {
+public interface IArtistRepository extends JpaRepository<User, Long> {
 
     @Query("""
         SELECT COUNT(DISTINCT u)

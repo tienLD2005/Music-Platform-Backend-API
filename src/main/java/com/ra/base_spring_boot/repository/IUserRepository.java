@@ -24,14 +24,6 @@ public interface IUserRepository extends JpaRepository<User, Long>
             String firstName, String lastName, String email, Pageable pageable);
 
     @Query("""
-    SELECT DISTINCT u
-    FROM User u
-    JOIN u.roles r
-    WHERE r.roleName = com.ra.base_spring_boot.model.constants.RoleName.ROLE_ARTIST
-    """)
-    Page<User> findAllArtists(Pageable pageable);
-
-    @Query("""
     SELECT new com.ra.base_spring_boot.dto.resp.TrendingArtistResponseDTO(
         u.id,
         CONCAT(u.firstName, ' ', u.lastName),

@@ -1,6 +1,6 @@
 package com.ra.base_spring_boot.model.constants;
 
 public enum AuthProvider {
-    LOCAL, GITHUB, GOOGLE, FACEBOOK
+    LOCAL, GITHUB
 }
 

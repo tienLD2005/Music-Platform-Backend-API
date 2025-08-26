@@ -93,9 +93,15 @@ public class AuthController {
     }
 
     @PostMapping("/resend-verification")
-    public ResponseEntity<String> resendVerification(@RequestParam String email) {
+    public ResponseEntity<?> resendVerification(@RequestParam String email) {
         authService.resendVerification(email);
-        return ResponseEntity.ok("Verification email resent successfully");
+        return ResponseEntity.ok(
+                ResponseWrapper.builder()
+                        .status(HttpStatus.OK)
+                        .code(200)
+                        .data("Verification email resent successfully.")
+                        .build()
+        );
     }
 
 }
