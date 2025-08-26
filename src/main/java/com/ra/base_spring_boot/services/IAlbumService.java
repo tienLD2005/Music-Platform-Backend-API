@@ -21,7 +21,6 @@ public interface IAlbumService {
     ResponseWrapper<AlbumResponseDTO> updateAlbum(Long albumId, AlbumRequest request);
     ResponseWrapper<String> deleteAlbum(Long albumId);
 
-    // List Ablum
     PageResponse<AlbumResponse> getAllAlbums(int page, int size, String sortBy, String sortDir, String keyword);
     PageResponse<AlbumResponse> getTopAlbums(String period);
     PageResponse<AlbumResponse> findFeaturedAlbums();

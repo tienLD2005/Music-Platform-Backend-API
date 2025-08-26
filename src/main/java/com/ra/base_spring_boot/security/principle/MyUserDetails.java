@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -57,6 +58,10 @@ public class MyUserDetails implements UserDetails {
 
     public Long getId() {
         return user.getId();
+    }
+
+    public LocalDateTime getLastPasswordChangeAt() {
+        return user.getLastPasswordChangeAt();
     }
 
 }
