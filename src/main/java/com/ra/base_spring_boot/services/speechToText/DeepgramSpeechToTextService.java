@@ -30,7 +30,7 @@ public class DeepgramSpeechToTextService implements SpeechToTextService {
             final String url = "https://api.deepgram.com/v1/listen"
                     + "?model=2-general"
                     + "&tier=nova"
-                    + "&language=vi"
+                    + "&language=en"
                     + "&smart_format=true";
 
             HttpHeaders headers = new HttpHeaders();

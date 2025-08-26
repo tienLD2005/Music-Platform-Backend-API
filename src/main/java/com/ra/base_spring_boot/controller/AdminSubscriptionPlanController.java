@@ -18,7 +18,7 @@ public class AdminSubscriptionPlanController {
     private final ISubscriptionPlanService subscriptionPlanService;
 
     @GetMapping
-    public ResponseEntity<ResponseWrapper<?>> getAllSubscriptionPlans(@RequestParam(defaultValue = "1") int page,
+    public ResponseEntity<ResponseWrapper<?>> getAllSubscriptionPlans(@RequestParam(defaultValue = "0") int page,
                                                                       @RequestParam(defaultValue = "10") int size,
                                                                       @RequestParam(defaultValue = "") String keyword,
                                                                       @RequestParam(defaultValue = "planName") String sortBy,

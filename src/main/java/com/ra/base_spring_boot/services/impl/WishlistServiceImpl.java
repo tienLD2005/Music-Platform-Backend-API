@@ -3,6 +3,7 @@ package com.ra.base_spring_boot.services.impl;
 import com.ra.base_spring_boot.dto.resp.PageResponse;
 import com.ra.base_spring_boot.dto.resp.WishlistResponse;
 import com.ra.base_spring_boot.exception.HttpBadRequest;
+import com.ra.base_spring_boot.exception.HttpConflict;
 import com.ra.base_spring_boot.exception.HttpForbidden;
 import com.ra.base_spring_boot.exception.HttpNotFound;
 import com.ra.base_spring_boot.model.Song;
@@ -41,7 +42,7 @@ public class WishlistServiceImpl implements IWishlistService {
 
         // CHECK DUPLICATE EXIST
         if (user.getWishlistSongs().contains(song)) {
-            throw new HttpBadRequest("Song with this song already exists in the wishlist");
+            throw new HttpConflict("Song with this song already exists in the wishlist");
         }
 
         user.getWishlistSongs().add(song);
@@ -52,8 +53,11 @@ public class WishlistServiceImpl implements IWishlistService {
 
     @Override
     public PageResponse<WishlistResponse> getWishlist(int page, int size, String sortBy, String sortDir, Authentication authentication) {
+        if (page < 0) throw new HttpBadRequest("Page must be >= 0");
+        if (size <= 0) throw new HttpBadRequest("Size must be > 0");
+
         String email = authentication.getName();
-        Pageable pageable = PageRequest.of(page - 1, size);
+        Pageable pageable = PageRequest.of(page, size);
 
         Page<Song> songs;
         if ("popular".equalsIgnoreCase(sortBy)) {
@@ -77,9 +81,15 @@ public class WishlistServiceImpl implements IWishlistService {
                 .build()
         );
 
+        int totalPages = wishlists.getTotalPages();
+
+        if ((totalPages == 0 && page > 0) || (totalPages > 0 && page >= totalPages)) {
+            throw new HttpBadRequest("Page index out of range. totalPages=" + totalPages);
+        }
+
         return PageResponse.<WishlistResponse>builder()
                 .content(wishlists.getContent())
-                .currentPage(wishlists.getNumber() + 1)
+                .currentPage(wishlists.getNumber())
                 .totalPages(wishlists.getTotalPages())
                 .totalElements(wishlists.getTotalElements())
                 .size(wishlists.getSize())
@@ -98,7 +108,7 @@ public class WishlistServiceImpl implements IWishlistService {
         if (user.getWishlistSongs().remove(song)) {
             userRepository.save(user);
         } else {
-            throw  new HttpBadRequest("Song with this song already exists in the wishlist");
+            throw  new HttpBadRequest("This song is not in your wishlist");
         }
         return "Successfully removed the song from the favorites list!!";
     }

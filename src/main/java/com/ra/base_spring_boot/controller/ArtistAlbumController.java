@@ -63,7 +63,7 @@ public class ArtistAlbumController {
 
     @GetMapping("/{albumId}/songs")
     public ResponseEntity<?> getSongsByAlbum(@PathVariable Long albumId,
-                                             @RequestParam(defaultValue = "1") int page,
+                                             @RequestParam(defaultValue = "0") int page,
                                              @RequestParam(defaultValue = "10") int size,
                                              @RequestParam(defaultValue = "createdAt") String sortBy,
                                              @RequestParam(defaultValue = "DESC") String direction) {

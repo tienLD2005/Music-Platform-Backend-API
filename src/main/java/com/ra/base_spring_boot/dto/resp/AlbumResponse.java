@@ -22,6 +22,6 @@ public class AlbumResponse {
     private Long songCount;
     private  Long totalPlays;
     private AlbumType type;
-    private String streamUrls;
+    private List<String> streamUrls;
     private List<String> downloadUrl;
 }

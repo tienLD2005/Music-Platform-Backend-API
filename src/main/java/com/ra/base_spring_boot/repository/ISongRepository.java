@@ -111,7 +111,8 @@ public interface ISongRepository extends JpaRepository<Song, Long> {
     // Statistic Genre
     @Query("SELECT g.genreName, COUNT(s) " +
             "FROM Song s JOIN s.genres g " +
-            "GROUP BY g.genreName")
+            "GROUP BY g.genreName" +
+            " ORDER BY COUNT(s) ASC")
     List<Object[]> countSongsByGenre();
 
     @Query("SELECT g.genreName, COUNT(sh) " +
