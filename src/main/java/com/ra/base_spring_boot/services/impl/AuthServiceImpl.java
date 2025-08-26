@@ -136,6 +136,10 @@ public class AuthServiceImpl implements IAuthService {
         User user = userRepository.findByVerificationCode(code)
                 .orElseThrow(() -> new HttpBadRequest("Invalid verification code"));
 
+        if (user.getStatus() != UStatus.VERIFY) {
+            throw new HttpBadRequest("Account already verified or not eligible for verification");
+        }
+
         if (user.getVerificationExpiration().isBefore(LocalDateTime.now())) {
             throw new HttpBadRequest("Verification code has expired");
         }
@@ -158,6 +162,8 @@ public class AuthServiceImpl implements IAuthService {
 
         if (user.getStatus() == UStatus.ACTIVE) {
             throw new HttpBadRequest("Account already verified");
+        }else if (user.getStatus() == UStatus.BLOCKED) {
+            throw new HttpBadRequest("Account is blocked");
         }
 
         String newCode = UUID.randomUUID().toString();
@@ -206,6 +212,7 @@ public class AuthServiceImpl implements IAuthService {
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         user.setResetPasswordCode(null);
         user.setResetPasswordExpiration(null);
+        user.setLastPasswordChangeAt(LocalDateTime.now());
         userRepository.save(user);
     }
 

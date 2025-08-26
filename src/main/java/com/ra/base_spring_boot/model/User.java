@@ -75,6 +75,10 @@ public class User extends BaseObject {
     @Column(name = "provider_id", length = 100)
     private String providerId;
 
+    @Column(name = "last_password_change_at")
+    private LocalDateTime lastPasswordChangeAt;
+
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_role",

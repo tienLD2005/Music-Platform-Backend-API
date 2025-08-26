@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
 @Service
@@ -82,9 +83,9 @@ public class ProfileServiceImpl implements IProfileService {
         }
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setLastPasswordChangeAt(LocalDateTime.now());
         userRepository.save(user);
     }
-
 
     private void validatePasswordRequest(ChangePasswordRequest request, User user) {
         if (!StringUtils.hasText(request.getOldPassword())) {
