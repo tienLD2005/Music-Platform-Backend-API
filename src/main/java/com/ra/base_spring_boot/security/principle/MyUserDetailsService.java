@@ -1,5 +1,7 @@
 package com.ra.base_spring_boot.security.principle;
 
+import com.ra.base_spring_boot.exception.HttpConflict;
+import com.ra.base_spring_boot.exception.HttpNotFound;
 import com.ra.base_spring_boot.model.User;
 import com.ra.base_spring_boot.model.constants.UStatus;
 import com.ra.base_spring_boot.repository.IUserRepository;
@@ -21,12 +23,12 @@ public class MyUserDetailsService implements UserDetailsService
     private final IUserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException
+    public UserDetails loadUserByUsername(String email)
     {
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not found with : " + email));
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new HttpNotFound("User not found with : " + email));
 
         if (user.getStatus() == UStatus.BLOCKED ){
-            throw new RuntimeException("User account is blocked");
+            throw new HttpConflict("User account is blocked");
         }
 
         return MyUserDetails.builder()

@@ -9,7 +9,7 @@ import com.ra.base_spring_boot.model.constants.UStatus;
 import com.ra.base_spring_boot.repository.IRoleRepository;
 import com.ra.base_spring_boot.repository.IUserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -32,13 +32,15 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         AuthProvider provider = AuthProvider.GITHUB;
         String providerId = Objects.requireNonNull(oAuth2User.getAttribute("id")).toString();
 
+
+        String login = oAuth2User.getAttribute("login");
+        String fullName = oAuth2User.getAttribute("name");
+        String bio  = oAuth2User.getAttribute("bio");
+        String avatarUrl = oAuth2User.getAttribute("avatar_url");
         String email = oAuth2User.getAttribute("email");
         if (email == null || email.isEmpty()) {
-            email = "github_" + providerId + "@no-email.com";
+            email = login + "@gmail.com";
         }
-
-        String avatarUrl = oAuth2User.getAttribute("avatar_url");
-
         String finalEmail = email;
         User user = userRepository.findByProviderAndProviderId(provider, providerId)
                 .orElseGet(() -> {
@@ -51,12 +53,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     }
 
                     User newUser = User.builder()
-                            .lastName("GIT")
-                            .firstName("HUB")
+                            .fullName(fullName)
+                            .bio(bio)
                             .email(finalEmail)
                             .provider(provider)
                             .providerId(providerId)
-                            .password("{noop}" + UUID.randomUUID())
                             .profileImage(avatarUrl)
                             .status(UStatus.ACTIVE)
                             .build();

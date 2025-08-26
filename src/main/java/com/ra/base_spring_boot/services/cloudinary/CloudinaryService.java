@@ -32,11 +32,10 @@ public class CloudinaryService {
                 throw new IllegalArgumentException("Maximum file size is 20MB");
             }
 
-            // Support MP3 or WAV
             String contentType = file.getContentType();
             if (contentType == null ||
-                    (!contentType.equalsIgnoreCase("audio/mpeg") && // MP3
-                            !contentType.equalsIgnoreCase("audio/wav"))) { // WAV
+                    (!contentType.equalsIgnoreCase("audio/mpeg") &&
+                            !contentType.equalsIgnoreCase("audio/wav"))) {
                 throw new IllegalArgumentException("Only MP3 or WAV files are supported");
             }
 

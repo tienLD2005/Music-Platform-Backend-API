@@ -7,6 +7,8 @@ import com.ra.base_spring_boot.dto.req.ResetPasswordRequest;
 import com.ra.base_spring_boot.dto.resp.JwtResponse;
 import com.ra.base_spring_boot.dto.resp.UserResponseDTO;
 import com.ra.base_spring_boot.exception.HttpBadRequest;
+import com.ra.base_spring_boot.exception.HttpConflict;
+import com.ra.base_spring_boot.exception.HttpForbidden;
 import com.ra.base_spring_boot.exception.HttpNotFound;
 import com.ra.base_spring_boot.model.BlacklistedToken;
 import com.ra.base_spring_boot.model.Role;
@@ -49,7 +51,7 @@ public class AuthServiceImpl implements IAuthService {
     @Override
     public void register(FormRegisterRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new HttpBadRequest("Email already exists");
+            throw new HttpConflict("Email already exists");
         }
 
         if (!request.getPassword().equals(request.getConfirmPassword())) {
@@ -90,10 +92,10 @@ public class AuthServiceImpl implements IAuthService {
         User user = optionalUser.get();
 
         switch (user.getStatus()) {
-            case VERIFY -> throw new HttpBadRequest("Account is not activated");
-            case BLOCKED -> throw new HttpBadRequest("Account is blocked");
+            case VERIFY -> throw new HttpForbidden("Account is not activated");
+            case BLOCKED -> throw new HttpForbidden("Account is blocked");
             case ACTIVE -> {}
-            default -> throw new HttpBadRequest("Invalid account status");
+            default -> throw new HttpForbidden("Invalid account status");
         }
 
         Authentication authentication;
@@ -111,6 +113,7 @@ public class AuthServiceImpl implements IAuthService {
                 .id(user.getId())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
+                .fullName(user.getFullName())
                 .email(user.getEmail())
                 .profileImage(user.getProfileImage())
                 .bio(user.getBio())
@@ -132,6 +135,10 @@ public class AuthServiceImpl implements IAuthService {
     public void verifyEmail(String code) {
         User user = userRepository.findByVerificationCode(code)
                 .orElseThrow(() -> new HttpBadRequest("Invalid verification code"));
+
+        if (user.getStatus() != UStatus.VERIFY) {
+            throw new HttpBadRequest("Account already verified or not eligible for verification");
+        }
 
         if (user.getVerificationExpiration().isBefore(LocalDateTime.now())) {
             throw new HttpBadRequest("Verification code has expired");
@@ -155,6 +162,8 @@ public class AuthServiceImpl implements IAuthService {
 
         if (user.getStatus() == UStatus.ACTIVE) {
             throw new HttpBadRequest("Account already verified");
+        }else if (user.getStatus() == UStatus.BLOCKED) {
+            throw new HttpBadRequest("Account is blocked");
         }
 
         String newCode = UUID.randomUUID().toString();
@@ -171,7 +180,11 @@ public class AuthServiceImpl implements IAuthService {
     @Override
     public void forgotPassword(ForgotPasswordRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new HttpNotFound("Email does not exist"));
+                .orElseThrow(() -> new HttpBadRequest("Email does not exist"));
+
+        if (user.getStatus() != UStatus.ACTIVE) {
+            throw new HttpBadRequest("Account is not active");
+        }
 
         String code = String.format("%06d", new Random().nextInt(999999));
 
@@ -181,6 +194,7 @@ public class AuthServiceImpl implements IAuthService {
 
         emailService.sendEmail(user.getEmail(), "Password Reset Code", "Your OTP code is: " + code);
     }
+
 
     @Override
     public void resetPassword(ResetPasswordRequest request) {
@@ -198,6 +212,7 @@ public class AuthServiceImpl implements IAuthService {
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         user.setResetPasswordCode(null);
         user.setResetPasswordExpiration(null);
+        user.setLastPasswordChangeAt(LocalDateTime.now());
         userRepository.save(user);
     }
 

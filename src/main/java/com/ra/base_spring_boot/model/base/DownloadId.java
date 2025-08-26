@@ -10,8 +10,7 @@ public class DownloadId implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof DownloadId)) return false;
-        DownloadId that = (DownloadId) o;
+        if (!(o instanceof DownloadId that)) return false;
         return Objects.equals(user, that.user) && Objects.equals(song, that.song);
     }
 

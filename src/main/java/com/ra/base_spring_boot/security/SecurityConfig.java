@@ -122,6 +122,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/users/*/playlists/*").hasAnyAuthority(authorities(RoleName.ROLE_USER, RoleName.ROLE_ARTIST))
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/users/*/playlists/*/songs/*").hasAnyAuthority(authorities(RoleName.ROLE_USER, RoleName.ROLE_ARTIST))
 
+                        // recommendation
+                        .requestMatchers("/api/v1/recommendations/*").hasAnyAuthority(authorities(RoleName.ROLE_USER, RoleName.ROLE_ARTIST))
+
                         // --- Default ---
                         .anyRequest().permitAll()
                 )
