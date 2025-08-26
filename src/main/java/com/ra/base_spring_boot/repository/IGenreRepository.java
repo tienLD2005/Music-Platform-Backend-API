@@ -1,8 +1,8 @@
 package com.ra.base_spring_boot.repository;
 
-import com.ra.base_spring_boot.dto.resp.GenreResponseDTO;
 import com.ra.base_spring_boot.dto.resp.GenreTrendingDTO;
 import com.ra.base_spring_boot.model.Genre;
+import lombok.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,7 +12,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface IGenreRepository extends JpaRepository<Genre, Long>{
-    Page<Genre> findAll(Pageable pageable);
+    @Override
+    @NonNull
+    Page<Genre> findAll(@NonNull Pageable pageable);
 
     @Query("""
     SELECT new com.ra.base_spring_boot.dto.resp.GenreTrendingDTO(
