@@ -7,5 +7,6 @@ import com.ra.base_spring_boot.dto.resp.SubscriptionPlanResponseDTO;
 public interface ISubscriptionPlanService {
     PageResponse<SubscriptionPlanResponseDTO> getAll(String keyword, int page, int size, String sortBy, String sortDir);
     SubscriptionPlanResponseDTO save(SubscriptionPlanRequestDTO request);
-    String delete(Long planId);
+    SubscriptionPlanResponseDTO update(Long planId, SubscriptionPlanRequestDTO request);
+    String delete(Long planId, boolean confirm);
 }

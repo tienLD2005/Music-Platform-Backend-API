@@ -18,7 +18,7 @@ import java.util.List;
 
 
 public interface ISongRepository extends JpaRepository<Song, Long> {
-    Page<Song> findByAlbumIdAndStatus(Long albumId, Pageable pageable, SongStatus status);
+    Page<Song> findByAlbumId(Long albumId, Pageable pageable);
 
     @Query("SELECT s FROM Song s JOIN s.genres g WHERE g.id = :genreId")
     Page<Song> findByGenreId(@Param("genreId") Long genreId, Pageable pageable);
@@ -178,4 +178,25 @@ public interface ISongRepository extends JpaRepository<Song, Long> {
             @Param("listenedSongIds") List<Long> listenedSongIds,
             Pageable pageable
     );
+
+    // Relationship Song
+
+    @Query("SELECT COUNT(ps) FROM PlaylistSong ps WHERE ps.song.id = :songId")
+    Long countPlaylistSongs(@Param("songId") Long songId);
+
+    @Query("SELECT COUNT(r) FROM SongReaction r WHERE r.song.id = :songId")
+    Long countReactions(@Param("songId") Long songId);
+
+    @Query("SELECT COUNT(u) FROM User u JOIN u.wishlistSongs ws WHERE ws.id = :songId")
+    Long countUsersWishlist(@Param("songId") Long songId);
+
+    @Query("SELECT COUNT(sr) FROM Song s JOIN s.songReactions sr WHERE s.id = :songId")
+    Long countSongReactions(@Param("songId") Long songId);
+
+    @Query("SELECT COUNT(d) FROM Download d WHERE d.song.id = :songId")
+    Long countDownloads(@Param("songId") Long songId);
+
+    @Query("SELECT COUNT(l) FROM Lyrics l WHERE l.song.id = :songId")
+    Long countLyrics(@Param("songId") Long songId);
+
 }

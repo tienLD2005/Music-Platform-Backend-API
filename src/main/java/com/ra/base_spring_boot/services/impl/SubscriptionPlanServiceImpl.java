@@ -67,7 +67,7 @@ public class SubscriptionPlanServiceImpl implements ISubscriptionPlanService {
 
     @Override
     public SubscriptionPlanResponseDTO save(SubscriptionPlanRequestDTO request) {
-        if (subscriptionPlanRepository.existsByPlanName(request.getPlanName())) {
+        if (subscriptionPlanRepository.existsByPlanName(request.getPlanName().trim().replaceAll("\\s+", " "))) {
             throw new HttpConflict("PlanName already exists");
         }
 
@@ -91,11 +91,41 @@ public class SubscriptionPlanServiceImpl implements ISubscriptionPlanService {
     }
 
     @Override
-    public String delete(Long planId) {
+    public SubscriptionPlanResponseDTO update(Long planId, SubscriptionPlanRequestDTO request) {
+        SubscriptionPlan plan = subscriptionPlanRepository.findById(planId).orElseThrow(() -> new HttpNotFound("Plan not found"));
+
+        String normalizedName = request.getPlanName().trim().replaceAll("\\s+", " ");
+
+        SubscriptionPlan existing = subscriptionPlanRepository.findByPlanName(normalizedName).orElse(null);
+        if (existing != null && !existing.getId().equals(planId)) {
+            throw new HttpConflict("PlanName already exists");
+        }
+
+        plan.setPlanName(request.getPlanName());
+        plan.setPrice(request.getPrice());
+        plan.setDurationDay(request.getDurationDay());
+        plan.setDescription(request.getDescription());
+
+        SubscriptionPlan updatedPlan = subscriptionPlanRepository.save(plan);
+        return SubscriptionPlanResponseDTO.builder()
+                .id(updatedPlan.getId())
+                .planName(updatedPlan.getPlanName())
+                .price(updatedPlan.getPrice())
+                .durationDay(updatedPlan.getDurationDay())
+                .description(updatedPlan.getDescription())
+                .build();
+    }
+
+    @Override
+    public String delete(Long planId, boolean confirm) {
+        if (!confirm) {
+            throw new HttpBadRequest("Deletion not confirmed. Pass confirm=true to proceed");
+        }
+
         SubscriptionPlan plan = subscriptionPlanRepository.findById(planId)
                 .orElseThrow(() -> new HttpNotFound("Plan not found"));
 
-        if (subscriptionRepository.existsByPlanId( planId)) {
+        if (subscriptionRepository.existsByPlanId(planId)) {
             throw new HttpBadRequest("Cannot delete the upgrade package. There is a user already registered!");
         }
 

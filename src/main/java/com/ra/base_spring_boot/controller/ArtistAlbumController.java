@@ -66,12 +66,12 @@ public class ArtistAlbumController {
                                              @RequestParam(defaultValue = "0") int page,
                                              @RequestParam(defaultValue = "10") int size,
                                              @RequestParam(defaultValue = "createdAt") String sortBy,
-                                             @RequestParam(defaultValue = "DESC") String direction) {
+                                             @RequestParam(defaultValue = "asc") String sortDir) {
         return ResponseEntity.ok().body(
                 ResponseWrapper.builder()
                         .status(HttpStatus.OK)
                         .code(HttpStatus.OK.value())
-                        .data(albumService.getSongsByAlbum(albumId, page, size, sortBy, direction))
+                        .data(albumService.getSongsByAlbum(albumId, page, size, sortBy, sortDir))
                         .build()
         );
     }

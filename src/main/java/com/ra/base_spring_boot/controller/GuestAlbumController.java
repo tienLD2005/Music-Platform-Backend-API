@@ -46,13 +46,14 @@ public class GuestAlbumController {
     }
 
     @GetMapping("/featured")
-    public ResponseEntity<?> getFeaturedAlbums() {
+    public ResponseEntity<?> getFeaturedAlbums( @RequestParam(defaultValue = "0") int page,
+                                                @RequestParam(defaultValue = "5") int limit) {
 
         return ResponseEntity.ok().body(
                 ResponseWrapper.builder()
                         .status(HttpStatus.OK)
                         .code(HttpStatus.OK.value())
-                        .data(albumService.findFeaturedAlbums())
+                        .data(albumService.findFeaturedAlbums(page, limit))
                         .build()
         );
     }
@@ -75,8 +76,11 @@ public class GuestAlbumController {
     }
 
     @GetMapping("/top-trending")
-    public ResponseEntity<?> getTopTrendingAlbums(@RequestParam(defaultValue = "5") int limit) {
-        List<AlbumResponse> albums = albumService.getTopTrendingAlbums(limit);
+    public ResponseEntity<?> getTopTrendingAlbums(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int limit
+    ) {
+        List<AlbumResponse> albums = albumService.getTopTrendingAlbums(page, limit);
         return ResponseEntity.ok(
                 ResponseWrapper.builder()
                         .status(HttpStatus.OK)

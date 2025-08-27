@@ -44,14 +44,27 @@ public class AdminSubscriptionPlanController {
         );
     }
 
-    @DeleteMapping("/{planId}")
-    public ResponseEntity<ResponseWrapper<?>> deleteSubscriptionPlan(@PathVariable Long planId) {
-
+    @PutMapping("/{planId}")
+    public ResponseEntity<ResponseWrapper<SubscriptionPlanResponseDTO>> updateSubscriptionPlan(@PathVariable Long planId,
+                                                                                               @RequestBody @Valid SubscriptionPlanRequestDTO request) {
         return ResponseEntity.status(HttpStatus.OK).body(
-                ResponseWrapper.builder()
+                ResponseWrapper.<SubscriptionPlanResponseDTO>builder()
                         .status(HttpStatus.OK)
                         .code(HttpStatus.OK.value())
-                        .data(subscriptionPlanService.delete(planId))
+                        .data(subscriptionPlanService.update(planId, request))
+                        .build()
+        );
+    }
+
+    @DeleteMapping("/{planId}")
+    public ResponseEntity<ResponseWrapper<?>> deleteSubscriptionPlan(@PathVariable Long planId,
+                                                                     @RequestParam(defaultValue = "false") boolean confirm) {
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
+                ResponseWrapper.builder()
+                        .status(HttpStatus.NO_CONTENT)
+                        .code(HttpStatus.NO_CONTENT.value())
+                        .data(subscriptionPlanService.delete(planId, confirm))
                         .build()
         );
     }
