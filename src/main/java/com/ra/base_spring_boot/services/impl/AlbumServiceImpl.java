@@ -494,11 +494,17 @@ public class AlbumServiceImpl implements IAlbumService {
                 .build();
     }
 
-
-
     @Override
-    public List<AlbumResponse> getTopTrendingAlbums(int limit) {
-        Pageable pageable = PageRequest.of(0, limit);
+    public List<AlbumResponse> getTopTrendingAlbums(int page, int limit) {
+        if (page < 0) {
+            throw new HttpBadRequest("Page index must not be less than zero");
+        }
+        if (limit <= 0) {
+            throw new HttpBadRequest("Page size must be greater than zero");
+        }
+
+        Pageable pageable = PageRequest.of(page, limit);
+
         return albumRepository.findTopTrendingAlbumsWithViews(pageable)
                 .stream()
                 .map(dto -> AlbumResponse.builder()
@@ -514,4 +520,6 @@ public class AlbumServiceImpl implements IAlbumService {
                 )
                 .toList();
     }
+
+
 }

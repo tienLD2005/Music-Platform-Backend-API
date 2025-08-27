@@ -1,6 +1,7 @@
 package com.ra.base_spring_boot.security.principle;
 
 import com.ra.base_spring_boot.model.User;
+import com.ra.base_spring_boot.model.constants.AuthProvider;
 import com.ra.base_spring_boot.model.constants.UStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -63,6 +64,11 @@ public class MyUserDetails implements UserDetails {
     public LocalDateTime getLastPasswordChangeAt() {
         return user.getLastPasswordChangeAt();
     }
+
+    public AuthProvider getProvider() {
+        return user.getProvider();
+    }
+
 
 }
 
