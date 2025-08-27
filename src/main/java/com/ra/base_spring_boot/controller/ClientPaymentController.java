@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/payments")
 @RequiredArgsConstructor
@@ -20,17 +22,17 @@ public class ClientPaymentController {
 
     private final IClientPaymentService paymentService;
 
-    @GetMapping("/{paymentId}")
-    public ResponseWrapper<PaymentResponseDTO> getPaymentDetail(@PathVariable Long paymentId) {
-        return ResponseWrapper.<PaymentResponseDTO>builder()
+    @GetMapping("/current")
+    public ResponseWrapper<?> getPaymentDetail() {
+        return ResponseWrapper.<List<PaymentResponseDTO>>builder()
                 .status(HttpStatus.OK)
                 .code(HttpStatus.OK.value())
-                .data(paymentService.getPaymentDetail(paymentId))
+                .data(paymentService.getPaymentsHistory())
                 .build();
     }
 
     @PostMapping("/create")
-    public ResponseWrapper<String> createPayment(@Valid @RequestBody SubscriptionRequestDTO requestDTO) {
+    public ResponseWrapper<?> createPayment(@Valid @RequestBody SubscriptionRequestDTO requestDTO) {
         String approvalUrl = paymentService.createPayment(requestDTO);
         return ResponseWrapper.<String>builder()
                 .status(HttpStatus.CREATED)

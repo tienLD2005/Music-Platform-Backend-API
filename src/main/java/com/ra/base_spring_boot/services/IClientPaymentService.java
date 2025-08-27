@@ -5,8 +5,10 @@ import com.ra.base_spring_boot.dto.resp.PaymentResponseDTO;
 import com.ra.base_spring_boot.dto.resp.SubscriptionResponseDTO;
 import com.ra.base_spring_boot.model.constants.PaymentMethod;
 
+import java.util.List;
+
 public interface IClientPaymentService {
-    PaymentResponseDTO getPaymentDetail(Long paymentId);
+    List<PaymentResponseDTO> getPaymentsHistory();
 
     String createPayment(SubscriptionRequestDTO requestDTO);
 

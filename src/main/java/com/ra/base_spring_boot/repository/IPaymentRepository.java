@@ -25,4 +25,7 @@ public interface IPaymentRepository extends JpaRepository<Payment, Long>{
 
     Optional<Payment> findByUserIdAndSubscriptionPlanIdAndPaymentStatus(
             Long userId, Long planId, PaymentStatus paymentStatus);
+
+    @Query("SELECT p FROM Payment p WHERE p.user.id = :userId")
+    List<Payment> findByUserId(Long userId);
 }
