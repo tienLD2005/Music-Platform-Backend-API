@@ -53,10 +53,10 @@ public class CommentReactionServiceImpl implements ICommentReactionService {
         Long userId = SecurityUtil.getCurrentUserId();
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new HttpNotFound("User not found"));
-
         Comment comment = getCommentById(commentId);
-        reactionRepository.findByUserAndComment(user, comment)
-                .ifPresent(reactionRepository::delete);
+        CommentReaction reaction = reactionRepository.findByUserAndComment(user, comment)
+                .orElseThrow(() -> new HttpNotFound("Reaction not found"));
+        reactionRepository.delete(reaction);
     }
 
     @Override
