@@ -1,5 +1,6 @@
 package com.ra.base_spring_boot.security.jwt;
 
+import com.ra.base_spring_boot.model.constants.AuthProvider;
 import com.ra.base_spring_boot.security.principle.MyUserDetails;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -66,10 +67,16 @@ public class JwtProvider {
         }
 
         if (userDetails instanceof MyUserDetails myUserDetails) {
+            if (myUserDetails.getProvider() != AuthProvider.LOCAL) {
+                return true;
+            }
+
             LocalDateTime lastChange = myUserDetails.getLastPasswordChangeAt();
             return lastChange == null ||
                    !issuedAt.toInstant().isBefore(lastChange.atZone(ZoneId.systemDefault()).toInstant());
         }
+
+
 
         return true;
     }
