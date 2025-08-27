@@ -5,6 +5,7 @@ import com.ra.base_spring_boot.dto.req.AlbumRequest;
 import com.ra.base_spring_boot.dto.req.FormSongRequest;
 import com.ra.base_spring_boot.dto.resp.*;
 import com.ra.base_spring_boot.exception.HttpBadRequest;
+import com.ra.base_spring_boot.exception.HttpConflict;
 import com.ra.base_spring_boot.exception.HttpForbidden;
 import com.ra.base_spring_boot.exception.HttpNotFound;
 import com.ra.base_spring_boot.model.Album;
@@ -45,7 +46,10 @@ public class AlbumServiceImpl implements IAlbumService {
         Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
         Pageable pageable = PageRequest.of(page - 1, size, sort);
 
-        Page<Song> songsPage = songRepository.findByAlbumIdAndStatus(albumId, pageable, SongStatus.APPROVED);
+        Album album = albumRepository.findById(albumId)
+                .orElseThrow(() -> new HttpNotFound("Album not found"));
+
+        Page<Song> songsPage = songRepository.findByAlbumIdAndStatus(album.getId(), pageable, SongStatus.APPROVED);
 
         Page<ResponseSong> songs = songsPage.map(song -> ResponseSong.builder()
                 .id(song.getId())
@@ -69,6 +73,10 @@ public class AlbumServiceImpl implements IAlbumService {
 
     @Override
     public ResponseSong addSongToAlbum(Long albumId, FormSongRequest request) {
+        if (request.getFileUrl() == null || request.getFileUrl().isEmpty()) {
+            throw new HttpBadRequest("File URL is required");
+        }
+
         Album album = albumRepository.findById(albumId)
                 .orElseThrow(() -> new HttpNotFound("Album not found"));
 
@@ -82,7 +90,7 @@ public class AlbumServiceImpl implements IAlbumService {
 
         // Check duplicate title song
         if (songRepository.existsByTitleAndAlbumId(request.getTitle(), albumId)) {
-            throw new HttpBadRequest("Song with this title already exists in the album");
+            throw new HttpConflict("Song with this title already exists in the album");
         }
 
         Set<Genre> genres = new HashSet<>();
