@@ -115,14 +115,16 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/profile/**").hasAnyAuthority(authorities(RoleName.ROLE_USER, RoleName.ROLE_ARTIST))
 
                         // --- Playlists ---
-                        .requestMatchers(HttpMethod.GET, "/api/v1/users/*/playlists/**").hasAnyAuthority(authorities(RoleName.ROLE_USER, RoleName.ROLE_ARTIST))
-                        .requestMatchers(HttpMethod.POST, "/api/v1/users/*/playlists").hasAnyAuthority(authorities(RoleName.ROLE_USER, RoleName.ROLE_ARTIST))
-                        .requestMatchers(HttpMethod.POST, "/api/v1/users/*/playlists/*/songs").hasAnyAuthority(authorities(RoleName.ROLE_USER, RoleName.ROLE_ARTIST))
-                        .requestMatchers(HttpMethod.GET, "/api/v1/users/*/playlists/*/songs").hasAnyAuthority(authorities(RoleName.ROLE_USER, RoleName.ROLE_ARTIST))
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/users/*/playlists/*").hasAnyAuthority(authorities(RoleName.ROLE_USER, RoleName.ROLE_ARTIST))
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/users/*/playlists/*/songs/*").hasAnyAuthority(authorities(RoleName.ROLE_USER, RoleName.ROLE_ARTIST))
+//                        .requestMatchers(HttpMethod.GET, "/api/v1/users/*/playlists/**").hasAnyAuthority(authorities(RoleName.ROLE_USER, RoleName.ROLE_ARTIST))
+//                        .requestMatchers(HttpMethod.POST, "/api/v1/users/*/playlists").hasAnyAuthority(authorities(RoleName.ROLE_USER, RoleName.ROLE_ARTIST))
+//                        .requestMatchers(HttpMethod.POST, "/api/v1/users/*/playlists/*/songs").hasAnyAuthority(authorities(RoleName.ROLE_USER, RoleName.ROLE_ARTIST))
+//                        .requestMatchers(HttpMethod.GET, "/api/v1/users/*/playlists/*/songs").hasAnyAuthority(authorities(RoleName.ROLE_USER, RoleName.ROLE_ARTIST))
+//                        .requestMatchers(HttpMethod.DELETE, "/api/v1/users/*/playlists/*").hasAnyAuthority(authorities(RoleName.ROLE_USER, RoleName.ROLE_ARTIST))
+//                        .requestMatchers(HttpMethod.DELETE, "/api/v1/users/*/playlists/*/songs/*").hasAnyAuthority(authorities(RoleName.ROLE_USER, RoleName.ROLE_ARTIST))
+//
+                        .requestMatchers("/api/v1/playlists/**").hasAnyAuthority(authorities(RoleName.ROLE_USER, RoleName.ROLE_ARTIST))
 
-                        // recommendation
+                                // recommendation
                         .requestMatchers("/api/v1/recommendations/*").hasAnyAuthority(authorities(RoleName.ROLE_USER, RoleName.ROLE_ARTIST))
 
                         // --- Default ---

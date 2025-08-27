@@ -56,12 +56,8 @@ public class ProfileServiceImpl implements IProfileService {
             user.setLastName(request.getLastName().trim().replaceAll("\\s+", " "));
         }
         if (request.getProfileImage() != null && !request.getProfileImage().isEmpty()) {
-            try {
-                String imageUrl = cloudinaryService.uploadImage(request.getProfileImage());
-                user.setProfileImage(imageUrl);
-            } catch (IOException e) {
-                throw new HttpBadRequest("Upload ảnh thất bại");
-            }
+            String imageUrl = cloudinaryService.uploadImage(request.getProfileImage());
+            user.setProfileImage(imageUrl);
         }
         if (StringUtils.hasText(request.getBio())) {
             user.setBio(request.getBio().trim().replaceAll("\\s+", " "));
@@ -76,7 +72,9 @@ public class ProfileServiceImpl implements IProfileService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new HttpNotFound("User not found"));
 
-        if (user.getProvider() == AuthProvider.LOCAL) {
+        AuthProvider provider = user.getProvider() == null ? AuthProvider.LOCAL : user.getProvider();
+
+        if (provider == AuthProvider.LOCAL) {
             validatePasswordRequest(request, user);
         } else {
             validateNewPasswordOnly(request);
@@ -86,6 +84,7 @@ public class ProfileServiceImpl implements IProfileService {
         user.setLastPasswordChangeAt(LocalDateTime.now());
         userRepository.save(user);
     }
+
 
     private void validatePasswordRequest(ChangePasswordRequest request, User user) {
         if (!StringUtils.hasText(request.getOldPassword())) {

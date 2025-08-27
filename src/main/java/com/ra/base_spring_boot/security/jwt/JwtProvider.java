@@ -97,8 +97,10 @@ public class JwtProvider {
         return false;
     }
 
-    public String generateToken(String email) {
+    public String generateToken(String email, Long userId, String role) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", userId);
+        claims.put("role", role);
         return createToken(claims, email);
     }
 
@@ -106,11 +108,12 @@ public class JwtProvider {
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(email)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setIssuedAt(new Date(System.currentTimeMillis())) // iat
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRED_ACCESS * 1000))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
+
 
     private Key getSignKey() {
         byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);

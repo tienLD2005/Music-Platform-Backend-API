@@ -49,10 +49,14 @@ public class AlbumStatisticsServiceImpl implements IAlbumStatisticsService {
         result.put("albumTrend", trend);
 
         List<AlbumStatusDTO> byStatus = albumRepository.countAlbumsByStatus().stream()
-                .map(r -> new AlbumStatusDTO(((AlbumStatus) r[0]).name(), ((Number) r[1]).longValue()))
+                .map(r -> {
+                    AlbumStatus status = (AlbumStatus) r[0];
+                    String statusName = (status != null) ? status.name() : "UNKNOWN";
+                    Long count = (r[1] != null) ? ((Number) r[1]).longValue() : 0L;
+                    return new AlbumStatusDTO(statusName, count);
+                })
                 .toList();
         result.put("albumsByStatus", byStatus);
-
 
         return result;
     }

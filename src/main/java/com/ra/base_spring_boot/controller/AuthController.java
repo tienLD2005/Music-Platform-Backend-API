@@ -3,7 +3,7 @@ package com.ra.base_spring_boot.controller;
 import com.ra.base_spring_boot.dto.ResponseWrapper;
 import com.ra.base_spring_boot.dto.req.*;
 import com.ra.base_spring_boot.services.IAuthService;
-import com.ra.base_spring_boot.services.email.EmailService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +17,7 @@ import java.net.URI;
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 @Tag(name = "Auth")
+@SecurityRequirement(name = "bearerAuth")
 public class AuthController {
 
     private final IAuthService authService;
@@ -81,6 +82,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
+    @io.swagger.v3.oas.annotations.security.SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> handleLogout(@RequestHeader("Authorization") String token) {
         authService.logout(token);
         return ResponseEntity.ok(
