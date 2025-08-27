@@ -29,7 +29,7 @@ public class MyUserDetails implements UserDetails {
 
     @Override
     public String getPassword() {
-        return user.getProvider() == AuthProvider.LOCAL ? user.getPassword() : null;
+        return user.getPassword();
     }
 
     @Override

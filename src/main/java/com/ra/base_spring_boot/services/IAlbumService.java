@@ -26,5 +26,5 @@ public interface IAlbumService {
     PageResponse<AlbumResponse> findFeaturedAlbums();
     PageResponse<AlbumResponse> getAlbumsByArtistWithRoleGuest(Long artistId, int page, int size, String keyword, String sortDir, boolean isPremium);
 
-    List<AlbumResponse> getTopTrendingAlbums(int limit);
+    List<AlbumResponse> getTopTrendingAlbums(int limit,int page);
 }

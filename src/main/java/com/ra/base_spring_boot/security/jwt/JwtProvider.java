@@ -76,8 +76,6 @@ public class JwtProvider {
                    !issuedAt.toInstant().isBefore(lastChange.atZone(ZoneId.systemDefault()).toInstant());
         }
 
-
-
         return true;
     }
 

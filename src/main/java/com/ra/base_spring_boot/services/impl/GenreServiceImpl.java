@@ -27,6 +27,10 @@ public class GenreServiceImpl implements GenreService {
 
     @Override
     public List<GenreTrendingDTO> getTrendingGenres(String period, int limit) {
+        if (limit <= 0) {
+            throw new HttpBadRequest("Limit must be greater than 0");
+        }
+
         LocalDateTime endDate = LocalDateTime.now();
         LocalDateTime startDate = switch (period.toLowerCase()) {
             case "week" -> endDate.minusWeeks(1);
@@ -40,7 +44,6 @@ public class GenreServiceImpl implements GenreService {
 
         return pageResult.getContent();
     }
-
 
     @Override
     public PageResponse<GenreResponseDTO> getGenres(String keyword, int page, int size, String sortBy, String direction) {
