@@ -2,11 +2,9 @@ package com.ra.base_spring_boot.advice;
 
 import com.ra.base_spring_boot.exception.*;
 import com.ra.base_spring_boot.dto.ResponseWrapper;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
@@ -99,17 +97,6 @@ public class GlobalHandleException
                         .data(ex.getMessage())
                         .code(HttpStatus.CONFLICT.value())
                         .status(HttpStatus.CONFLICT)
-                        .build()
-        );
-    }
-
-    @ExceptionHandler(MissingRequestHeaderException.class)
-    public ResponseEntity<?> handleMissingHeader(MissingRequestHeaderException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                ResponseWrapper.builder()
-                        .status(HttpStatus.BAD_REQUEST)
-                        .code(400)
-                        .data("Missing required header: " + ex.getHeaderName())
                         .build()
         );
     }

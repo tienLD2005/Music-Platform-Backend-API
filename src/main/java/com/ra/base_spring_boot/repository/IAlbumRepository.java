@@ -52,7 +52,6 @@ public interface IAlbumRepository extends JpaRepository<Album, Long> {
 """)
     Page<AlbumTrendingDTO> findTopTrendingAlbumsWithViews(Pageable pageable);
 
-    //List Album
     @Query("SELECT a FROM Album a WHERE a.status = :status AND " +
             "(LOWER(a.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(a.artist.firstName) LIKE LOWER(CONCAT('%', :keyword, '%')) " +

@@ -97,7 +97,7 @@ public class ArtistCommentServiceImpl implements IArtistCommentService {
         validateCommentContent(request.getContent());
 
         User artist = userRepository.findById(getCurrentUserId())
-                .orElseThrow(() -> new HttpBadRequest("User not found"));
+                .orElseThrow(() -> new HttpNotFound("User not found"));
 
         Song song = songRepository.findById(request.getSongId())
                 .orElseThrow(() -> new HttpNotFound("Song not found"));

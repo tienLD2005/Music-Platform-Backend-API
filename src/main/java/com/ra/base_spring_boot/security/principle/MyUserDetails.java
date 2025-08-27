@@ -1,6 +1,7 @@
 package com.ra.base_spring_boot.security.principle;
 
 import com.ra.base_spring_boot.model.User;
+import com.ra.base_spring_boot.model.constants.AuthProvider;
 import com.ra.base_spring_boot.model.constants.UStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,6 +10,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -27,7 +29,7 @@ public class MyUserDetails implements UserDetails {
 
     @Override
     public String getPassword() {
-        return user.getPassword();
+        return user.getProvider() == AuthProvider.LOCAL ? user.getPassword() : null;
     }
 
     @Override
@@ -58,6 +60,15 @@ public class MyUserDetails implements UserDetails {
     public Long getId() {
         return user.getId();
     }
+
+    public LocalDateTime getLastPasswordChangeAt() {
+        return user.getLastPasswordChangeAt();
+    }
+
+    public AuthProvider getProvider() {
+        return user.getProvider();
+    }
+
 
 }
 

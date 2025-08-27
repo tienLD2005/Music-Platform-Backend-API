@@ -14,7 +14,6 @@ import java.util.Optional;
 
 public interface IWishlistRepository extends JpaRepository<User, Long> {
 
-    // ORDER VIEWS
     @Query("SELECT s FROM User u JOIN u.wishlistSongs s WHERE u.email = :email ORDER BY s.views ASC")
     Page<Song> findWishlistOrderByViewsAsc(@Param("email") String email, Pageable pageable);
 

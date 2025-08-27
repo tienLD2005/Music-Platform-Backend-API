@@ -33,7 +33,7 @@ public class ProfileController {
         );
     }
 
-    @PatchMapping(value = "/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResponseWrapper<UserProfileResponseDTO>> updateProfile(
             @AuthenticationPrincipal MyUserDetails userDetails,
             @ModelAttribute UpdateProfileRequest request) {
@@ -62,5 +62,4 @@ public class ProfileController {
                         .build()
         );
     }
-
 }

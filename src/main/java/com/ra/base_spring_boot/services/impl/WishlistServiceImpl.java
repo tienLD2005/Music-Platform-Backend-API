@@ -53,8 +53,11 @@ public class WishlistServiceImpl implements IWishlistService {
 
     @Override
     public PageResponse<WishlistResponse> getWishlist(int page, int size, String sortBy, String sortDir, Authentication authentication) {
+        if (page < 0) throw new HttpBadRequest("Page must be >= 0");
+        if (size <= 0) throw new HttpBadRequest("Size must be > 0");
+
         String email = authentication.getName();
-        Pageable pageable = PageRequest.of(page - 1, size);
+        Pageable pageable = PageRequest.of(page, size);
 
         Page<Song> songs;
         if ("popular".equalsIgnoreCase(sortBy)) {
@@ -78,9 +81,15 @@ public class WishlistServiceImpl implements IWishlistService {
                 .build()
         );
 
+        int totalPages = wishlists.getTotalPages();
+
+        if ((totalPages == 0 && page > 0) || (totalPages > 0 && page >= totalPages)) {
+            throw new HttpBadRequest("Page index out of range. totalPages=" + totalPages);
+        }
+
         return PageResponse.<WishlistResponse>builder()
                 .content(wishlists.getContent())
-                .currentPage(wishlists.getNumber() + 1)
+                .currentPage(wishlists.getNumber())
                 .totalPages(wishlists.getTotalPages())
                 .totalElements(wishlists.getTotalElements())
                 .size(wishlists.getSize())

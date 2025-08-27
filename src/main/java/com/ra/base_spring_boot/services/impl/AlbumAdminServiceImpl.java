@@ -63,7 +63,7 @@ public class AlbumAdminServiceImpl implements IAlbumAdminService {
     public AlbumAdminResponse getAlbumById(Long id) {
         if (id == null || id <= 0) throw new HttpBadRequest("Invalid album ID");
         Album album = albumRepository.findById(id)
-                .orElseThrow(() -> new AlbumNotFoundException(id));
+                .orElseThrow(() -> new HttpNotFound("Không tìm thấy album với ID: " + id));
         Long songCount = albumRepository.countSongsByAlbumId(id);
         return AlbumAdminMapper.toAlbumAdminResponse(album, songCount);
     }
@@ -74,7 +74,7 @@ public class AlbumAdminServiceImpl implements IAlbumAdminService {
         validateAlbumAdmin.validateDeleteRequest(request);
 
         Album album = albumRepository.findById(request.getAlbumId())
-                .orElseThrow(() -> new AlbumNotFoundException(request.getAlbumId()));
+                .orElseThrow(() -> new HttpNotFound("Không tìm thấy album với ID: " + request.getAlbumId()));
 
         validateAlbumAdmin.validateAlbumForDeletion(album);
 
@@ -103,7 +103,7 @@ public class AlbumAdminServiceImpl implements IAlbumAdminService {
         validateAlbumAdmin.validateStatusUpdate(albumId, status);
 
         Album album = albumRepository.findById(albumId)
-                .orElseThrow(() -> new AlbumNotFoundException(albumId));
+                .orElseThrow(() -> new HttpNotFound("Không tìm thấy album với ID: " + albumId));
 
         AlbumStatus oldStatus = album.getStatus();
         album.setStatus(status);

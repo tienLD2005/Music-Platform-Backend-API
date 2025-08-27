@@ -25,8 +25,7 @@ public class SongHistoryId implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof SongHistoryId)) return false;
-        SongHistoryId that = (SongHistoryId) o;
+        if (!(o instanceof SongHistoryId that)) return false;
         return Objects.equals(userId, that.userId) &&
                 Objects.equals(songId, that.songId);
     }

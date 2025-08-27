@@ -1,6 +1,7 @@
 package com.ra.base_spring_boot.security.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ra.base_spring_boot.exception.HttpBadRequest;
 import com.ra.base_spring_boot.repository.IBlacklistedTokenRepository;
 import com.ra.base_spring_boot.security.principle.MyUserDetailsService;
 import jakarta.servlet.FilterChain;
@@ -9,14 +10,19 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,61 +35,78 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     private final JwtProvider jwtProvider;
     private final IBlacklistedTokenRepository blacklistedTokenRepository;
 
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         try {
-            String token = getTokenFromUser(request);
-            if (token != null) {
+            String token = getTokenFromRequest(request);
 
-                if (blacklistedTokenRepository.existsByToken(token)) {
-                    throw new RuntimeException("Token has been revoked");
-                }
-
-                if (jwtProvider.validateToken(token)) {
-                    String email = jwtProvider.extractEmail(token);
-
-                    UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-
-                    if (!jwtProvider.validateToken(token, userDetails)) {
-                        throw new RuntimeException("Token does not match the user");
-                    }
-
-                    Authentication authentication = new UsernamePasswordAuthenticationToken(
-                            userDetails, null, userDetails.getAuthorities());
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-
-                } else {
-                    throw new RuntimeException("Invalid or expired token");
-                }
+            if (token == null) {
+                filterChain.doFilter(request, response);
+                return;
             }
-        } catch (Exception e) {
-            log.error("Cannot authenticate JWT: {}", e.getMessage());
-            writeErrorResponse(response, e.getMessage());
-            return;
-        }
 
-        filterChain.doFilter(request, response);
+            if (blacklistedTokenRepository.existsByToken(token)) {
+                writeErrorResponse(response, "Token has been revoked", HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
+
+            if (!jwtProvider.validateToken(token)) {
+                writeErrorResponse(response, "Invalid or expired token", HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
+
+            String email = jwtProvider.extractEmail(token);
+            UserDetails userDetails;
+            try {
+                userDetails = userDetailsService.loadUserByUsername(email);
+            } catch (UsernameNotFoundException ex) {
+                writeErrorResponse(response, "User not found", HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
+
+            if (!jwtProvider.validateToken(token, userDetails)) {
+                writeErrorResponse(response, "Token does not match the user", HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
+
+            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                    userDetails, null, userDetails.getAuthorities()
+            );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            filterChain.doFilter(request, response);
+
+        } catch (Exception e) {
+            log.error("Cannot authenticate JWT: ", e);
+            writeErrorResponse(response, "Unauthorized", HttpServletResponse.SC_UNAUTHORIZED);
+        }
     }
 
-    private String getTokenFromUser(HttpServletRequest request) {
-        String authorization = request.getHeader("Authorization");
-        if (authorization != null && authorization.startsWith("Bearer ")) {
-            return authorization.substring(7);
+    private String getTokenFromRequest(HttpServletRequest request) {
+        String header = request.getHeader("Authorization");
+        if (header == null) return null;
+        header = header.trim();
+        if (header.startsWith("Bearer ")) {
+            return header.substring(7).trim();
         }
         return null;
     }
 
-    private void writeErrorResponse(HttpServletResponse response, String message) throws IOException {
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
+    private void writeErrorResponse(HttpServletResponse response, String message, int status) throws IOException {
+        response.setStatus(status);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
         Map<String, Object> error = new HashMap<>();
-        error.put("error", "Unauthorized");
+        error.put("timestamp", Instant.now().toString());
+        error.put("status", status);
+        error.put("error", HttpStatus.valueOf(status).getReasonPhrase());
         error.put("message", message);
 
-        new ObjectMapper().writeValue(response.getOutputStream(), error);
+        MAPPER.writeValue(response.getOutputStream(), error);
     }
 }
-

@@ -21,11 +21,10 @@ public interface IAlbumService {
     ResponseWrapper<AlbumResponseDTO> updateAlbum(Long albumId, AlbumRequest request);
     ResponseWrapper<String> deleteAlbum(Long albumId);
 
-    // List Ablum
     PageResponse<AlbumResponse> getAllAlbums(int page, int size, String sortBy, String sortDir, String keyword);
     PageResponse<AlbumResponse> getTopAlbums(String period);
     PageResponse<AlbumResponse> findFeaturedAlbums();
-    PageResponse<AlbumResponse> getAlbumsByArtist(Long artistId, int page, int size, String keyword, String sortDir, boolean isPremium);
+    PageResponse<AlbumResponse> getAlbumsByArtistWithRoleGuest(Long artistId, int page, int size, String keyword, String sortDir, boolean isPremium);
 
     List<AlbumResponse> getTopTrendingAlbums(int limit);
 }

@@ -1,5 +1,7 @@
 package com.ra.base_spring_boot.repository;
 
+import com.ra.base_spring_boot.dto.resp.GenreStatDTO;
+import com.ra.base_spring_boot.dto.resp.SongResponse;
 import com.ra.base_spring_boot.dto.resp.TopSongDTO;
 import com.ra.base_spring_boot.dto.resp.TopSongOfWeek;
 import com.ra.base_spring_boot.model.Song;
@@ -21,7 +23,6 @@ public interface ISongRepository extends JpaRepository<Song, Long> {
     @Query("SELECT s FROM Song s JOIN s.genres g WHERE g.id = :genreId")
     Page<Song> findByGenreId(@Param("genreId") Long genreId, Pageable pageable);
 
-    // CHECK DUPLICATE SONG TITLE
     boolean existsByTitleAndAlbumId(String title, Long albumId);
 
     @Query("""
@@ -102,13 +103,10 @@ public interface ISongRepository extends JpaRepository<Song, Long> {
     @Query("SELECT g.genreName FROM Song s JOIN s.genres g WHERE s.id = :songId")
     List<String> findGenresBySongId(@Param("songId") Long songId);
 
-    // Increase View in Song
     @Modifying
     @Query("UPDATE Song s SET s.views = s.views + 1 WHERE s.id = :songId")
     void incrementViews(@Param("songId") Long songId);
 
-
-    // Statistic Genre
     @Query("SELECT g.genreName, COUNT(s) " +
             "FROM Song s JOIN s.genres g " +
             "GROUP BY g.genreName" +
@@ -138,5 +136,46 @@ public interface ISongRepository extends JpaRepository<Song, Long> {
     List<TopSongDTO> findTrendingSongs(
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate
+    );
+
+    @Query("select sh.song.id from SongHistory sh where sh.user.id = :userId")
+    List<Long> findListenedSongIds(@Param("userId") Long userId);
+
+    @Query("""
+    select new com.ra.base_spring_boot.dto.resp.GenreStatDTO(
+        g.id, g.genreName, count(sh.id)
+    )
+    from SongHistory sh
+    join sh.song s
+    join s.genres g
+    where sh.user.id = :userId
+    group by g.id, g.genreName
+    order by count(sh.id) desc
+""")
+    List<GenreStatDTO> countGenresByUser(@Param("userId") Long userId);
+
+    @Query("""
+    SELECT new com.ra.base_spring_boot.dto.resp.SongResponse(
+        s.id,
+        s.title,
+        s.duration,
+        s.artist.fullName,
+        s.artist.id,
+        s.album.title,
+        s.album.id,
+        s.fileUrl,
+        s.views,
+        s.createdAt,
+        s.status
+    )
+    FROM Song s
+    JOIN s.genres g
+    WHERE g.id IN :topGenreIds
+      AND s.id NOT IN :listenedSongIds
+""")
+    Page<SongResponse> findRecommendedSongs(
+            @Param("topGenreIds") List<Long> topGenreIds,
+            @Param("listenedSongIds") List<Long> listenedSongIds,
+            Pageable pageable
     );
 }

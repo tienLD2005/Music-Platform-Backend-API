@@ -18,7 +18,7 @@ public class GuestAlbumController {
     private final IAlbumService albumService;
 
     @GetMapping
-    public ResponseEntity<?> getAlbums(@RequestParam(defaultValue = "1") int page,
+    public ResponseEntity<?> getAlbums(@RequestParam(defaultValue = "0") int page,
                                        @RequestParam(defaultValue = "10") int size,
                                        @RequestParam(defaultValue = "title") String sortBy,
                                        @RequestParam(defaultValue = "asc") String sortDir,
@@ -59,7 +59,7 @@ public class GuestAlbumController {
 
     @GetMapping("/{artistId}")
     public ResponseEntity<?> getAlbumsByArtist(@PathVariable Long artistId,
-                                               @RequestParam(defaultValue = "1") int page,
+                                               @RequestParam(defaultValue = "0") int page,
                                                @RequestParam(defaultValue = "10") int size,
                                                @RequestParam(required = false, defaultValue = "") String keyword,
                                                @RequestParam(defaultValue = "desc") String sortDir,
@@ -69,7 +69,7 @@ public class GuestAlbumController {
                 ResponseWrapper.builder()
                         .status(HttpStatus.OK)
                         .code(HttpStatus.OK.value())
-                        .data(albumService.getAlbumsByArtist(artistId, page, size, keyword, sortDir, isPremium))
+                        .data(albumService.getAlbumsByArtistWithRoleGuest(artistId, page, size, keyword, sortDir, isPremium))
                         .build()
         );
     }

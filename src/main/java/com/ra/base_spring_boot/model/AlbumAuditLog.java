@@ -30,7 +30,7 @@
         private String artistEmail;
 
         @Column(name = "action", nullable = false, length = 50)
-        private String action; // "DELETE", "APPROVE", "REJECT"
+        private String action;
 
         @Column(name = "reason", columnDefinition = "TEXT")
         private String reason;

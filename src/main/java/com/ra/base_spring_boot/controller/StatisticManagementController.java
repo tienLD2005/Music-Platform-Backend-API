@@ -6,12 +6,7 @@ import com.ra.base_spring_boot.dto.resp.PageResponse;
 import com.ra.base_spring_boot.dto.resp.CommentStatisticsResponseDTO;
 import com.ra.base_spring_boot.dto.resp.SongStatisticsResponseDTO;
 import com.ra.base_spring_boot.dto.resp.SubscriptionPlanStatisticDTO;
-import com.ra.base_spring_boot.services.IGenreStatisticService;
-import com.ra.base_spring_boot.services.ICommentStatisticsService;
-import com.ra.base_spring_boot.services.ISongStatisticsService;
-import com.ra.base_spring_boot.services.ISubscriptionPlanStatisticService;
-import com.ra.base_spring_boot.services.impl.AlbumStatisticsServiceImpl;
-import com.ra.base_spring_boot.services.impl.ArtistStatisticsServiceImpl;
+import com.ra.base_spring_boot.services.*;
 import com.ra.base_spring_boot.services.impl.UserStatisticsService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -30,48 +25,54 @@ import java.util.Map;
 @Tag(name = "Statistics Management")
 public class StatisticManagementController {
 
-    private final UserStatisticsService statisticsService;
+    private final UserStatisticsService userStatisticsService;
     private final ISongStatisticsService songStatisticsService;
-    private final ArtistStatisticsServiceImpl artistStatisticsService;
-    private final AlbumStatisticsServiceImpl albumStatisticsService;
+    private final IArtistStatisticsService artistStatisticsService;
+    private final IAlbumStatisticsService albumStatisticsService;
     private final ISubscriptionPlanStatisticService statisticService;
     private final IGenreStatisticService genreStatisticService;
-
     private final ICommentStatisticsService commentStatisticsService;
-    @GetMapping("/user/status")
-    public ResponseWrapper<Map<String, Long>> getUserCountByStatus() {
-        Map<String, Long> data = statisticsService.getUserCountByStatus();
-        return ResponseWrapper.<Map<String, Long>>builder()
-                .status(HttpStatus.OK)
-                .code(HttpStatus.OK.value())
-                .data(data)
-                .build();
-    }
 
-    @GetMapping("/user/account-type")
-    public ResponseWrapper<Map<String, Long>> getUserCountByAccountType() {
-        Map<String, Long> data = statisticsService.getUserCountByAccountType();
-        return ResponseWrapper.<Map<String, Long>>builder()
-                .status(HttpStatus.OK)
-                .code(HttpStatus.OK.value())
-                .data(data)
-                .build();
-    }
-
-    @GetMapping("/album")
-    public ResponseWrapper<Map<String, Object>> getAlbumStatistics() {
-        Map<String, Object> data = albumStatisticsService.getAlbumStatistics();
-        return ResponseWrapper.<Map<String, Object>>builder()
-                .status(HttpStatus.OK)
-                .code(200)
-                .data(data)
-                .build();
-    }
-
-    @GetMapping("/artist")
-    public ResponseEntity<ResponseWrapper<?>> getArtistStatistics() {
+    @GetMapping("/users/status")
+    public ResponseEntity<ResponseWrapper<Map<String, Long>>> getUserCountByStatus() {
+        Map<String, Long> data = userStatisticsService.getUserCountByStatus();
         return ResponseEntity.ok(
-                ResponseWrapper.builder()
+                ResponseWrapper.<Map<String, Long>>builder()
+                        .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
+                        .data(data)
+                        .build()
+        );
+    }
+
+    @GetMapping("/users/account-types")
+    public ResponseEntity<ResponseWrapper<Map<String, Long>>> getUserCountByAccountType() {
+        Map<String, Long> data = userStatisticsService.getUserCountByAccountType();
+        return ResponseEntity.ok(
+                ResponseWrapper.<Map<String, Long>>builder()
+                        .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
+                        .data(data)
+                        .build()
+        );
+    }
+
+    @GetMapping("/albums")
+    public ResponseEntity<ResponseWrapper<Map<String, Object>>> getAlbumStatistics() {
+        Map<String, Object> data = albumStatisticsService.getAlbumStatistics();
+        return ResponseEntity.ok(
+                ResponseWrapper.<Map<String, Object>>builder()
+                        .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
+                        .data(data)
+                        .build()
+        );
+    }
+
+    @GetMapping("/artists")
+    public ResponseEntity<ResponseWrapper<Map<String, Object>>> getArtistStatistics() {
+        return ResponseEntity.ok(
+                ResponseWrapper.<Map<String, Object>>builder()
                         .status(HttpStatus.OK)
                         .code(HttpStatus.OK.value())
                         .data(artistStatisticsService.getArtistStatistics())
@@ -79,8 +80,8 @@ public class StatisticManagementController {
         );
     }
 
-    @GetMapping("/song")
-    public ResponseWrapper<SongStatisticsResponseDTO> getSongStatistics(
+    @GetMapping("/songs")
+    public ResponseEntity<ResponseWrapper<SongStatisticsResponseDTO>> getSongStatistics(
             @RequestParam(required = false) Long artistId,
             @RequestParam(required = false) Long genreId,
             @RequestParam(required = false) Long albumId,
@@ -89,14 +90,15 @@ public class StatisticManagementController {
         SongStatisticsFilterRequestDTO filter = new SongStatisticsFilterRequestDTO(
                 artistId, genreId, albumId, sortBy
         );
-
         SongStatisticsResponseDTO data = songStatisticsService.getSongStatistics(filter);
 
-        return ResponseWrapper.<SongStatisticsResponseDTO>builder()
-                .status(HttpStatus.OK)
-                .code(HttpStatus.OK.value())
-                .data(data)
-                .build();
+        return ResponseEntity.ok(
+                ResponseWrapper.<SongStatisticsResponseDTO>builder()
+                        .status(HttpStatus.OK)
+                        .code(HttpStatus.OK.value())
+                        .data(data)
+                        .build()
+        );
     }
 
     @GetMapping("subscriptions")

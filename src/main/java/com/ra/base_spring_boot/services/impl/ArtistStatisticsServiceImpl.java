@@ -1,6 +1,6 @@
 package com.ra.base_spring_boot.services.impl;
 
-import com.ra.base_spring_boot.repository.ArtistRepository;
+import com.ra.base_spring_boot.repository.IArtistRepository;
 import com.ra.base_spring_boot.services.IArtistStatisticsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -13,7 +13,7 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class ArtistStatisticsServiceImpl implements IArtistStatisticsService {
-    private final ArtistRepository artistRepository;
+    private final IArtistRepository artistRepository;
 
     @Override
     public Map<String, Object> getArtistStatistics() {

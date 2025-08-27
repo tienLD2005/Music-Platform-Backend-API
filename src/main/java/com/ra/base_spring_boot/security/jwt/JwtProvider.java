@@ -1,5 +1,7 @@
 package com.ra.base_spring_boot.security.jwt;
 
+import com.ra.base_spring_boot.model.constants.AuthProvider;
+import com.ra.base_spring_boot.security.principle.MyUserDetails;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -9,6 +11,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,6 +36,10 @@ public class JwtProvider {
         return extractClaim(token, Claims::getExpiration);
     }
 
+    public Date extractIssuedAt(String token) {
+        return extractClaim(token, Claims::getIssuedAt);
+    }
+
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
@@ -52,7 +60,25 @@ public class JwtProvider {
 
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String email = extractEmail(token);
-        return (email.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        Date issuedAt = extractIssuedAt(token);
+
+        if (!email.equals(userDetails.getUsername()) || isTokenExpired(token)) {
+            return false;
+        }
+
+        if (userDetails instanceof MyUserDetails myUserDetails) {
+            if (myUserDetails.getProvider() != AuthProvider.LOCAL) {
+                return true;
+            }
+
+            LocalDateTime lastChange = myUserDetails.getLastPasswordChangeAt();
+            return lastChange == null ||
+                   !issuedAt.toInstant().isBefore(lastChange.atZone(ZoneId.systemDefault()).toInstant());
+        }
+
+
+
+        return true;
     }
 
     public Boolean validateToken(String token) {

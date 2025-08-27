@@ -43,11 +43,15 @@ public class AlbumServiceImpl implements IAlbumService {
 
     @Override
     public PageResponse<ResponseSong> getSongsByAlbum(Long albumId, int page, int size, String sortBy, String direction) {
+        if (page < 0) throw new HttpBadRequest("Page must be >= 0");
+        if (size <= 0) throw new HttpBadRequest("Size must be > 0");
+
         Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
-        Pageable pageable = PageRequest.of(page - 1, size, sort);
+        Pageable pageable = PageRequest.of(page, size, sort);
 
         Album album = albumRepository.findById(albumId)
                 .orElseThrow(() -> new HttpNotFound("Album not found"));
+
 
         Page<Song> songsPage = songRepository.findByAlbumIdAndStatus(album.getId(), pageable, SongStatus.APPROVED);
 
@@ -62,9 +66,15 @@ public class AlbumServiceImpl implements IAlbumService {
                 .fileUrl(song.getFileUrl())
                 .build());
 
+        int totalPages = songs.getTotalPages();
+
+        if ((totalPages == 0 && page > 0) || (totalPages > 0 && page >= totalPages)) {
+            throw new HttpBadRequest("Page index out of range. totalPages=" + totalPages);
+        }
+
         return PageResponse.<ResponseSong>builder()
                 .content(songs.getContent())
-                .currentPage(songs.getNumber() + 1)
+                .currentPage(songs.getNumber())
                 .totalPages(songs.getTotalPages())
                 .totalElements(songs.getTotalElements())
                 .size(songs.getSize())
@@ -159,7 +169,12 @@ public class AlbumServiceImpl implements IAlbumService {
 
     @Override
     public PageResponse<AlbumResponseDTO> getAlbumsByArtist(Long artistId, String title, int page, int size, String sortBy, String sortDir) {
-        Sort sort = sortDir.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        if (page < 0) throw new HttpBadRequest("Page must be >= 0");
+        if (size <= 0) throw new HttpBadRequest("Size must be > 0");
+
+        Sort sort = sortDir.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
 
         Page<AlbumResponseDTO> albumPage = albumRepository.findByArtistAndTitle(artistId, title, pageable)
@@ -172,10 +187,16 @@ public class AlbumServiceImpl implements IAlbumService {
                         .songCount(albumRepository.countSongsInAlbum(album.getId()))
                         .build());
 
+        int totalPages = albumPage.getTotalPages();
+
+        if ((totalPages == 0 && page > 0) || (totalPages > 0 && page >= totalPages)) {
+            throw new HttpBadRequest("Page index out of range. totalPages=" + totalPages);
+        }
+
         return PageResponse.<AlbumResponseDTO>builder()
                 .content(albumPage.getContent())
                 .currentPage(albumPage.getNumber())
-                .totalPages(albumPage.getTotalPages())
+                .totalPages(totalPages)
                 .totalElements(albumPage.getTotalElements())
                 .size(albumPage.getSize())
                 .build();
@@ -196,7 +217,7 @@ public class AlbumServiceImpl implements IAlbumService {
 
         // Check duplicate title
         if (albumRepository.existsByTitleIgnoreCaseAndArtistId(request.getTitle(), artistId)) {
-            throw new HttpBadRequest("Album with this title already exists");
+            throw new HttpConflict("Album with this title already exists");
         }
 
         String coverUrl = null;
@@ -205,11 +226,9 @@ public class AlbumServiceImpl implements IAlbumService {
             try {
                 coverUrl = cloudinaryService.uploadImage(file);
             } catch (IOException e) {
-                return ResponseWrapper.<AlbumResponseDTO>builder()
-                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                        .data(null)
-                        .build();
+                throw new HttpBadRequest("Invalid image file (IOE)");
+            }catch (RuntimeException e){
+                throw new HttpBadRequest("Invalid image file");
             }
         }
 
@@ -257,7 +276,8 @@ public class AlbumServiceImpl implements IAlbumService {
 
         // Check duplicate title
         if (!album.getTitle().equalsIgnoreCase(request.getTitle())
-                && albumRepository.existsByTitleIgnoreCaseAndArtistId(request.getTitle(), artistId)) {throw new HttpBadRequest("Album with this title already exists");
+                && albumRepository.existsByTitleIgnoreCaseAndArtistId(request.getTitle(), artistId)) {
+            throw new HttpConflict("Album with this title already exists");
         }
 
         album.setTitle(request.getTitle().trim().replaceAll("\\s+", " "));
@@ -270,7 +290,9 @@ public class AlbumServiceImpl implements IAlbumService {
                 String coverUrl = cloudinaryService.uploadImage(file);
                 album.setCoverImage(coverUrl);
             } catch (IOException e) {
-                throw new RuntimeException("Failed to upload cover image", e);
+                throw new HttpBadRequest("Failed to upload cover image");
+            } catch (RuntimeException e){
+                throw new HttpBadRequest("Invalid image file");
             }
         }
 
@@ -329,8 +351,12 @@ public class AlbumServiceImpl implements IAlbumService {
     // List Album
     @Override
     public PageResponse<AlbumResponse> getAllAlbums(int page, int size, String sortBy, String sortDir, String keyword) {
+
+        if (page < 0) throw new HttpBadRequest("Page must be >= 0");
+        if (size <= 0) throw new HttpBadRequest("Size must be > 0");
+
         Sort sort = sortDir.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
-        Pageable pageable = PageRequest.of(page - 1, size, sort);
+        Pageable pageable = PageRequest.of(page, size, sort);
 
 
         Page<Album> albumPage;
@@ -353,9 +379,15 @@ public class AlbumServiceImpl implements IAlbumService {
                 .songCount(albumRepository.countSongsInAlbum(album.getId()))
                 .build());
 
+        int totalPages = albums.getTotalPages();
+
+        if ((totalPages == 0 && page > 0) || (totalPages > 0 && page >= totalPages)) {
+            throw new HttpBadRequest("Page index out of range. totalPages=" + totalPages);
+        }
+
         return PageResponse.<AlbumResponse>builder()
                 .content(albums.getContent())
-                .currentPage(albums.getNumber() + 1)
+                .currentPage(albums.getNumber())
                 .totalPages(albums.getTotalPages())
                 .totalElements(albums.getTotalElements())
                 .size(albums.getSize())
@@ -398,6 +430,7 @@ public class AlbumServiceImpl implements IAlbumService {
 
     @Override
     public PageResponse<AlbumResponse> findFeaturedAlbums() {
+
         Pageable pageable = PageRequest.of(0, 5);
         Page<Album> albumPage = albumRepository.findFeaturedAlbums(AlbumStatus.ACTIVE, pageable);
 
@@ -423,11 +456,11 @@ public class AlbumServiceImpl implements IAlbumService {
     }
 
     @Override
-    public PageResponse<AlbumResponse> getAlbumsByArtist(Long artistId, int page, int size, String keyword, String sortDir, boolean isPremium) {
+    public PageResponse<AlbumResponse> getAlbumsByArtistWithRoleGuest(Long artistId, int page, int size, String keyword, String sortDir, boolean isPremium) {
         User user = userRepository.findById(artistId).orElseThrow(() -> new HttpNotFound("Artist not found"));
 
         Sort sort = sortDir.equalsIgnoreCase("asc") ? Sort.by("releaseDate").ascending() : Sort.by("releaseDate").descending();
-        Pageable pageable = PageRequest.of(page - 1, size, sort);
+        Pageable pageable = PageRequest.of(page, size, sort);
 
         Page<Album> albumPage = albumRepository.findAlbumsByArtist(
                 user.getId(),
@@ -438,24 +471,24 @@ public class AlbumServiceImpl implements IAlbumService {
 
 
         Page<AlbumResponse> albums = albumPage.map(album -> AlbumResponse.builder()
-                    .id(album.getId())
-                    .title(album.getTitle())
-                    .coverImage(album.getCoverImage())
-                    .releaseDate(album.getReleaseDate())
-                    .type(album.getType())
-                    .artistName(album.getArtist() != null
-                            ? album.getArtist().getFirstName() + " " + album.getArtist().getLastName()
-                            : null)
-                    .songCount(albumRepository.countSongsInAlbum(album.getId()))
-                    .streamUrls(album.getSongs().get(0).getFileUrl())
-                    .downloadUrl(isPremium ? (album.getSongs()
-                            .stream().map(Song::getFileUrl).toList()) : null)
-                        .build()
+                .id(album.getId())
+                .title(album.getTitle())
+                .coverImage(album.getCoverImage())
+                .releaseDate(album.getReleaseDate())
+                .type(album.getType())
+                .artistName(album.getArtist() != null
+                        ? album.getArtist().getFirstName() + " " + album.getArtist().getLastName()
+                        : null)
+                .songCount(albumRepository.countSongsInAlbum(album.getId()))
+                .streamUrls(album.getSongs().stream().map(Song::getFileUrl).toList())
+                .downloadUrl(isPremium ? (album.getSongs()
+                        .stream().map(Song::getFileUrl).toList()) : null)
+                .build()
         );
 
         return PageResponse.<AlbumResponse>builder()
                 .content(albums.getContent())
-                .currentPage(albums.getNumber() + 1)
+                .currentPage(albums.getNumber())
                 .totalPages(albums.getTotalPages())
                 .totalElements(albums.getTotalElements())
                 .size(albums.getSize())
