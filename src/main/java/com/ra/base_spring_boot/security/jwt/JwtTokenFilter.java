@@ -1,7 +1,6 @@
 package com.ra.base_spring_boot.security.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ra.base_spring_boot.exception.HttpBadRequest;
 import com.ra.base_spring_boot.repository.IBlacklistedTokenRepository;
 import com.ra.base_spring_boot.security.principle.MyUserDetailsService;
 import jakarta.servlet.FilterChain;
@@ -50,12 +49,12 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             }
 
             if (blacklistedTokenRepository.existsByToken(token)) {
-                writeErrorResponse(response, "Token has been revoked", HttpServletResponse.SC_UNAUTHORIZED);
+                writeErrorResponse(response, "Token has been revoked");
                 return;
             }
 
             if (!jwtProvider.validateToken(token)) {
-                writeErrorResponse(response, "Invalid or expired token", HttpServletResponse.SC_UNAUTHORIZED);
+                writeErrorResponse(response, "Invalid or expired token");
                 return;
             }
 
@@ -64,12 +63,12 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             try {
                 userDetails = userDetailsService.loadUserByUsername(email);
             } catch (UsernameNotFoundException ex) {
-                writeErrorResponse(response, "User not found", HttpServletResponse.SC_UNAUTHORIZED);
+                writeErrorResponse(response, "User not found");
                 return;
             }
 
             if (!jwtProvider.validateToken(token, userDetails)) {
-                writeErrorResponse(response, "Token does not match the user", HttpServletResponse.SC_UNAUTHORIZED);
+                writeErrorResponse(response, "Token does not match the user");
                 return;
             }
 
@@ -82,7 +81,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
         } catch (Exception e) {
             log.error("Cannot authenticate JWT: ", e);
-            writeErrorResponse(response, "Unauthorized", HttpServletResponse.SC_UNAUTHORIZED);
+            writeErrorResponse(response, "Unauthorized");
         }
     }
 
@@ -96,15 +95,15 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         return null;
     }
 
-    private void writeErrorResponse(HttpServletResponse response, String message, int status) throws IOException {
-        response.setStatus(status);
+    private void writeErrorResponse(HttpServletResponse response, String message) throws IOException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
         Map<String, Object> error = new HashMap<>();
         error.put("timestamp", Instant.now().toString());
-        error.put("status", status);
-        error.put("error", HttpStatus.valueOf(status).getReasonPhrase());
+        error.put("status", HttpServletResponse.SC_UNAUTHORIZED);
+        error.put("error", HttpStatus.valueOf(HttpServletResponse.SC_UNAUTHORIZED).getReasonPhrase());
         error.put("message", message);
 
         MAPPER.writeValue(response.getOutputStream(), error);

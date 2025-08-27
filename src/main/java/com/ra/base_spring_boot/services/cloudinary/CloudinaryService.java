@@ -2,6 +2,7 @@ package com.ra.base_spring_boot.services.cloudinary;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.ra.base_spring_boot.exception.HttpBadRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,17 +27,17 @@ public class CloudinaryService {
     public String uploadAudio(MultipartFile file) {
         try {
             if (file == null || file.isEmpty()) {
-                throw new IllegalArgumentException("File must not be empty");
+                throw new HttpBadRequest("File must not be empty");
             }
             if (file.getSize() > MAX_AUDIO_SIZE) {
-                throw new IllegalArgumentException("Maximum file size is 20MB");
+                throw new HttpBadRequest("Maximum file size is 20MB");
             }
 
             String contentType = file.getContentType();
             if (contentType == null ||
-                    (!contentType.equalsIgnoreCase("audio/mpeg") &&
-                            !contentType.equalsIgnoreCase("audio/wav"))) {
-                throw new IllegalArgumentException("Only MP3 or WAV files are supported");
+                (!contentType.equalsIgnoreCase("audio/mpeg") &&
+                 !contentType.equalsIgnoreCase("audio/wav"))) {
+                throw new HttpBadRequest("Only MP3 or WAV files are supported");
             }
 
             Map<?, ?> result = cloudinary.uploader().upload(
@@ -49,17 +50,26 @@ public class CloudinaryService {
             return result.get("secure_url").toString();
 
         } catch (IOException e) {
-            throw new RuntimeException("Error uploading file to Cloudinary", e);
+            throw new HttpBadRequest("Error uploading file to Cloudinary: " + e.getMessage());
         }
     }
-    public String uploadImage(MultipartFile file) throws IOException {
-        if (file == null || file.isEmpty()) throw new IllegalArgumentException("File must not be empty");
-        if (file.getSize() > MAX_IMAGE_SIZE) throw new IllegalArgumentException("Maximum image size is 10MB");
 
-        Map<?,?> result = cloudinary.uploader().upload(
-                file.getBytes(),
-                ObjectUtils.asMap("folder", "banners")
-        );
-        return result.get("secure_url").toString();
+    public String uploadImage(MultipartFile file) {
+        try {
+            if (file == null || file.isEmpty()) {
+                throw new HttpBadRequest("File must not be empty");
+            }
+            if (file.getSize() > MAX_IMAGE_SIZE) {
+                throw new HttpBadRequest("Maximum image size is 10MB");
+            }
+
+            Map<?, ?> result = cloudinary.uploader().upload(
+                    file.getBytes(),
+                    ObjectUtils.asMap("folder", "banners")
+            );
+            return result.get("secure_url").toString();
+        } catch (IOException e) {
+            throw new HttpBadRequest("Error uploading image to Cloudinary: " + e.getMessage());
+        }
     }
 }

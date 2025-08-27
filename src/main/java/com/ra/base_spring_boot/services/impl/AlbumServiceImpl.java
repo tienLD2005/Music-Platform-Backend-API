@@ -224,9 +224,7 @@ public class AlbumServiceImpl implements IAlbumService {
         if (file != null && !file.isEmpty()) {
             try {
                 coverUrl = cloudinaryService.uploadImage(file);
-            } catch (IOException e) {
-                throw new HttpBadRequest("Invalid image file (IOE)");
-            }catch (RuntimeException e){
+            } catch (RuntimeException e){
                 throw new HttpBadRequest("Invalid image file");
             }
         }
@@ -288,8 +286,6 @@ public class AlbumServiceImpl implements IAlbumService {
             try {
                 String coverUrl = cloudinaryService.uploadImage(file);
                 album.setCoverImage(coverUrl);
-            } catch (IOException e) {
-                throw new HttpBadRequest("Failed to upload cover image");
             } catch (RuntimeException e){
                 throw new HttpBadRequest("Invalid image file");
             }

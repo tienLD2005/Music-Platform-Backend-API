@@ -64,4 +64,16 @@ public class CustomOAuth2User implements OAuth2User, UserDetails {
 
     @Override
     public boolean isEnabled() { return user.getStatus() == UStatus.ACTIVE; }
+
+    public Long getUserId() {
+        return user.getId();
+    }
+
+    public String getPrimaryRole() {
+        if (user.getRoles() == null || user.getRoles().isEmpty()) {
+            return "ROLE_USER";
+        }
+        return user.getRoles().iterator().next().getRoleName().name();
+    }
+
 }

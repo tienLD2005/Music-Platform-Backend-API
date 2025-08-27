@@ -25,7 +25,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                                         Authentication authentication) throws IOException {
         CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
 
-        String token = jwtProvider.generateToken(oAuth2User.getUsername());
+        String token = jwtProvider.generateToken(oAuth2User.getUsername(),oAuth2User.getUserId(),oAuth2User.getPrimaryRole());
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");

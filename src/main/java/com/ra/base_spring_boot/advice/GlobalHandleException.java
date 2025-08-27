@@ -131,4 +131,15 @@ public class GlobalHandleException
                         .build()
         );
     }
+
+    @ExceptionHandler(HttpInternalServerError.class)
+    public ResponseEntity<?> httpInternalServerError(HttpInternalServerError ex){
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                ResponseWrapper.builder()
+                .data(ex.getMessage())
+                .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .build()
+        );
+    }
 }

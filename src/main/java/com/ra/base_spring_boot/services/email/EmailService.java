@@ -1,5 +1,7 @@
 package com.ra.base_spring_boot.services.email;
 
+import com.ra.base_spring_boot.exception.HttpInternalServerError;
+import com.ra.base_spring_boot.exception.HttpNotFound;
 import com.ra.base_spring_boot.model.User;
 import com.ra.base_spring_boot.repository.IUserRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +20,7 @@ public class EmailService {
     public void sendEmail(String to, String subject, String text) {
         Optional<User> optionalUser = userRepository.findByEmail(to);
         if (optionalUser.isEmpty()) {
-            throw new IllegalArgumentException("This email does not exist in the system");
+            throw new HttpNotFound("This email does not exist in the system");
         }
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
@@ -28,7 +30,7 @@ public class EmailService {
         try {
             mailSender.send(message);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to send email: " + e.getMessage());
+            throw new HttpInternalServerError("Failed to send email: " + e.getMessage());
         }
     }
 

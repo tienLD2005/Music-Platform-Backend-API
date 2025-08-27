@@ -101,13 +101,28 @@ public class AuthServiceImpl implements IAuthService {
         Authentication authentication;
         try {
             authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(formLogin.getEmail(), formLogin.getPassword())
+                    new UsernamePasswordAuthenticationToken(
+                            formLogin.getEmail(),
+                            formLogin.getPassword()
+                    )
             );
         } catch (AuthenticationException e) {
             throw new HttpBadRequest("Incorrect password");
         }
 
         MyUserDetails userDetails = (MyUserDetails) authentication.getPrincipal();
+
+        String role = userDetails.getAuthorities()
+                .stream()
+                .map(GrantedAuthority::getAuthority)
+                .findFirst()
+                .orElse("ROLE_USER");
+
+        String token = jwtProvider.generateToken(
+                userDetails.getUsername(),
+                user.getId(),
+                role
+        );
 
         UserResponseDTO userDto = UserResponseDTO.builder()
                 .id(user.getId())
@@ -123,7 +138,7 @@ public class AuthServiceImpl implements IAuthService {
                 .build();
 
         return JwtResponse.builder()
-                .accessToken(jwtProvider.generateToken(userDetails.getUsername()))
+                .accessToken(token)
                 .user(userDto)
                 .roles(userDetails.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)
