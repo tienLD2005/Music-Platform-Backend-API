@@ -12,11 +12,13 @@ import com.ra.base_spring_boot.model.constants.SongStatus;
 import com.ra.base_spring_boot.repository.ISongRepository;
 import com.ra.base_spring_boot.repository.IUserRepository;
 import com.ra.base_spring_boot.repository.IWishlistRepository;
+import com.ra.base_spring_boot.security.principle.MyUserDetails;
 import com.ra.base_spring_boot.services.IWishlistService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -29,10 +31,9 @@ public class WishlistServiceImpl implements IWishlistService {
     private final IWishlistRepository wishlistRepository;
 
     @Override
-    public String addSongToWishlist(Long songId, Authentication authentication) {
-        String email = authentication.getName();
+    public String addSongToWishlist(Long songId, MyUserDetails currentUser) {
 
-        User user = userRepository.findByEmail(email).orElseThrow(()-> new HttpNotFound("User not found"));
+        User user = userRepository.findById(currentUser.getId()).orElseThrow(()-> new HttpNotFound("User not found"));
 
         Song song = songRepository.findById(songId).orElseThrow(()-> new HttpNotFound("Song not found"));
 
@@ -52,23 +53,19 @@ public class WishlistServiceImpl implements IWishlistService {
     }
 
     @Override
-    public PageResponse<WishlistResponse> getWishlist(int page, int size, String sortBy, String sortDir, Authentication authentication) {
+    public PageResponse<WishlistResponse> getWishlist(int page, int size, String sortBy, String sortDir, MyUserDetails currentUser) {
         if (page < 0) throw new HttpBadRequest("Page must be >= 0");
         if (size <= 0) throw new HttpBadRequest("Size must be > 0");
 
-        String email = authentication.getName();
-        Pageable pageable = PageRequest.of(page, size);
+        User user = userRepository.findById(currentUser.getId())
+                .orElseThrow(() -> new HttpNotFound("User not found"));
 
-        Page<Song> songs;
-        if ("popular".equalsIgnoreCase(sortBy)) {
-            songs = "asc".equalsIgnoreCase(sortDir)
-                    ? wishlistRepository.findWishlistOrderByViewsAsc(email, pageable)
-                    : wishlistRepository.findWishlistOrderByViewsDesc(email, pageable);
-        } else {
-            songs = "asc".equalsIgnoreCase(sortDir)
-                    ? wishlistRepository.findWishlistOrderByCreatedAtAsc(email, pageable)
-                    : wishlistRepository.findWishlistOrderByCreatedAtDesc(email, pageable);
-        }
+        String sortField = "popular".equalsIgnoreCase(sortBy) ? "views" : "createdAt";
+        Sort.Direction direction = "asc".equalsIgnoreCase(sortDir) ? Sort.Direction.ASC : Sort.Direction.DESC;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
+
+        Page<Song> songs = wishlistRepository.findWishlistByUserIdSorted(user.getId(), sortDir, pageable);
 
         Page<WishlistResponse> wishlists = songs.map(song -> WishlistResponse.builder()
                 .id(song.getId())
@@ -98,19 +95,23 @@ public class WishlistServiceImpl implements IWishlistService {
 
 
     @Override
-    public String removeFromWishlist(Long songId, Authentication authentication) {
-        String email = authentication.getName();
-
-        User user = userRepository.findByEmail(email).orElseThrow(()-> new HttpNotFound("User not found"));
-
-        Song song = songRepository.findById(songId).orElseThrow(()-> new HttpNotFound("Song not found"));
-
-        if (user.getWishlistSongs().remove(song)) {
-            userRepository.save(user);
-        } else {
-            throw  new HttpBadRequest("This song is not in your wishlist");
+    public String removeFromWishlist(Long songId, MyUserDetails currentUser, boolean confirm) {
+        if (!confirm) {
+            throw new HttpBadRequest("Deletion not confirmed. Pass confirm=true to proceed");
         }
-        return "Successfully removed the song from the favorites list!!";
+        User user = userRepository.findById(currentUser.getId())
+                .orElseThrow(() -> new HttpNotFound("User not found"));
+
+        Song song = songRepository.findById(songId)
+                .orElseThrow(() -> new HttpNotFound("Song not found"));
+
+        boolean removed = user.getWishlistSongs().removeIf(s -> s.getId().equals(songId));
+        if (!removed) {
+            throw new HttpBadRequest("You can only remove songs from your own favorites list");
+        }
+
+        userRepository.save(user);
+        return "Song removed from your favorites!";
     }
 
 }

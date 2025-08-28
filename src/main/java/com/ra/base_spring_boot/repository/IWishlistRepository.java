@@ -13,20 +13,10 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface IWishlistRepository extends JpaRepository<User, Long> {
-
-    @Query("SELECT s FROM User u JOIN u.wishlistSongs s WHERE u.email = :email ORDER BY s.views ASC")
-    Page<Song> findWishlistOrderByViewsAsc(@Param("email") String email, Pageable pageable);
-
-    @Query("SELECT s FROM User u JOIN u.wishlistSongs s WHERE u.email = :email ORDER BY s.views DESC")
-    Page<Song> findWishlistOrderByViewsDesc(@Param("email") String email, Pageable pageable);
-
-    //ORDER CREATED
-    @Query("SELECT s FROM User u JOIN u.wishlistSongs s WHERE u.email = :email ORDER BY s.createdAt ASC")
-    Page<Song> findWishlistOrderByCreatedAtAsc(@Param("email") String email, Pageable pageable);
-
-    @Query("SELECT s FROM User u JOIN u.wishlistSongs s WHERE u.email = :email ORDER BY s.createdAt DESC")
-    Page<Song> findWishlistOrderByCreatedAtDesc(@Param("email") String email, Pageable pageable);
-
+    @Query("SELECT s FROM User u JOIN u.wishlistSongs s WHERE u.id = :userId ORDER BY " +
+            "CASE WHEN :sortDir = 'asc' THEN s.views END ASC, " +
+            "CASE WHEN :sortDir = 'desc' THEN s.views END DESC")
+    Page<Song> findWishlistByUserIdSorted(@Param("userId") Long userId, @Param("sortDir") String sortDir, Pageable pageable);
 
 }
 

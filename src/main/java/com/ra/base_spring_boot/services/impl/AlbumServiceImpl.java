@@ -28,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -42,18 +43,21 @@ public class AlbumServiceImpl implements IAlbumService {
     private final CloudinaryService cloudinaryService;
 
     @Override
-    public PageResponse<ResponseSong> getSongsByAlbum(Long albumId, int page, int size, String sortBy, String direction) {
+    public PageResponse<ResponseSong> getSongsByAlbum(Long albumId, int page, int size, String sortBy, String sortDir) {
         if (page < 0) throw new HttpBadRequest("Page must be >= 0");
         if (size <= 0) throw new HttpBadRequest("Size must be > 0");
 
-        Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
+        Sort sort = sortDir.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
         Pageable pageable = PageRequest.of(page, size, sort);
 
         Album album = albumRepository.findById(albumId)
                 .orElseThrow(() -> new HttpNotFound("Album not found"));
 
 
-        Page<Song> songsPage = songRepository.findByAlbumIdAndStatus(album.getId(), pageable, SongStatus.APPROVED);
+        Page<Song> songsPage = songRepository.findByAlbumId(album.getId(), pageable);
 
         Page<ResponseSong> songs = songsPage.map(song -> ResponseSong.builder()
                 .id(song.getId())
@@ -83,6 +87,14 @@ public class AlbumServiceImpl implements IAlbumService {
 
     @Override
     public ResponseSong addSongToAlbum(Long albumId, FormSongRequest request) {
+        if (request.getFileUrl() == null || request.getFileUrl().isEmpty()) {
+            throw new HttpBadRequest("File URL is required");
+        }
+
+        if (request.getDuration() == null || request.getDuration().equals(LocalTime.MIDNIGHT)) {
+            throw new HttpBadRequest("Song duration must be greater than 0");
+        }
+
         Album album = albumRepository.findById(albumId)
                 .orElseThrow(() -> new HttpNotFound("Album not found"));
 
@@ -95,12 +107,8 @@ public class AlbumServiceImpl implements IAlbumService {
         }
 
         // Check duplicate title song
-        if (songRepository.existsByTitleAndAlbumId(request.getTitle(), albumId)) {
-            throw new HttpBadRequest("Song with this title already exists in the album");
-        }
-
-        if(request.getFileUrl() ==  null) {
-            throw new HttpBadRequest("File url is required");
+        if (songRepository.existsByTitleAndAlbumId(request.getTitle().trim().replaceAll("\\s+", " "), albumId)) {
+            throw new HttpConflict("Song with this title already exists in the album");
         }
 
         Set<Genre> genres = new HashSet<>();
@@ -115,7 +123,7 @@ public class AlbumServiceImpl implements IAlbumService {
         String fileUrl = cloudinaryService.uploadAudio(request.getFileUrl());
 
         Song song = Song.builder()
-                .title(request.getTitle().trim().replaceAll("\\s+", " "))
+                .title(request.getTitle())
                 .duration(request.getDuration())
                 .fileUrl(fileUrl)
                 .album(album)
@@ -150,8 +158,38 @@ public class AlbumServiceImpl implements IAlbumService {
             throw new HttpBadRequest("This song does not belong to the album");
         }
 
-        song.setStatus(SongStatus.REJECTED);
-        songRepository.save(song);
+        // check constraints
+        Long countPlaylist = songRepository.countPlaylistSongs(songId);
+        if (countPlaylist > 0) {
+            throw new HttpBadRequest("Song contains playlists and cannot be deleted");
+        }
+
+        Long countReaction = songRepository.countReactions(songId);
+        if (countReaction > 0) {
+            throw new HttpBadRequest("Song contains reactions and cannot be deleted");
+        }
+
+        Long countWishlist = songRepository.countUsersWishlist(songId);
+        if (countWishlist > 0) {
+            throw new HttpBadRequest("Song contains wishlists and cannot be deleted");
+        }
+
+        Long countSongReaction = songRepository.countSongReactions(songId);
+        if (countSongReaction > 0) {
+            throw new HttpBadRequest("Song contains song reactions and cannot be deleted");
+        }
+
+        Long countDownload = songRepository.countDownloads(songId);
+        if (countDownload > 0) {
+            throw new HttpBadRequest("Song contains downloads and cannot be deleted");
+        }
+
+        Long countLyric = songRepository.countLyrics(songId);
+        if (countLyric > 0) {
+            throw new HttpBadRequest("Song contains lyrics and cannot be deleted");
+        }
+
+        songRepository.delete(song);
         return "Song delete from album successfully";
     }
 
@@ -214,8 +252,10 @@ public class AlbumServiceImpl implements IAlbumService {
             throw new HttpBadRequest("Release date must be in the present or future");
         }
 
+        String normalizedTitle = request.getTitle().trim().replaceAll("\\s+", " ");
+
         // Check duplicate title
-        if (albumRepository.existsByTitleIgnoreCaseAndArtistId(request.getTitle(), artistId)) {
+        if (albumRepository.existsByTitleIgnoreCaseAndArtistId(normalizedTitle, artistId)) {
             throw new HttpConflict("Album with this title already exists");
         }
 
@@ -230,7 +270,7 @@ public class AlbumServiceImpl implements IAlbumService {
         }
 
         Album album = Album.builder()
-                .title(request.getTitle().trim().replaceAll("\\s+", " "))
+                .title(normalizedTitle)
                 .releaseDate(request.getReleaseDate())
                 .type(request.getType())
                 .coverImage(coverUrl)
@@ -271,13 +311,15 @@ public class AlbumServiceImpl implements IAlbumService {
             throw new HttpBadRequest("Release date must be in the present or future");
         }
 
+        String normalizedTitle = request.getTitle().trim().replaceAll("\\s+", " ");
+
         // Check duplicate title
-        if (!album.getTitle().equalsIgnoreCase(request.getTitle())
-                && albumRepository.existsByTitleIgnoreCaseAndArtistId(request.getTitle(), artistId)) {
+        if (!album.getTitle().equalsIgnoreCase(normalizedTitle)
+                && albumRepository.existsByTitleIgnoreCaseAndArtistId(normalizedTitle, artistId)) {
             throw new HttpConflict("Album with this title already exists");
         }
 
-        album.setTitle(request.getTitle().trim().replaceAll("\\s+", " "));
+        album.setTitle(normalizedTitle);
         album.setReleaseDate(request.getReleaseDate());
         album.setType(request.getType());
 
@@ -308,6 +350,7 @@ public class AlbumServiceImpl implements IAlbumService {
                 .data(dto)
                 .build();
     }
+
 
     @Override
     public ResponseWrapper<String> deleteAlbum(Long albumId) {
@@ -416,7 +459,7 @@ public class AlbumServiceImpl implements IAlbumService {
 
         return PageResponse.<AlbumResponse>builder()
                 .content(albums.getContent())
-                .currentPage(albums.getNumber() + 1)
+                .currentPage(albums.getNumber())
                 .totalPages(albums.getTotalPages())
                 .totalElements(albums.getTotalElements())
                 .size(albums.getSize())
@@ -424,9 +467,13 @@ public class AlbumServiceImpl implements IAlbumService {
     }
 
     @Override
-    public PageResponse<AlbumResponse> findFeaturedAlbums() {
+    public PageResponse<AlbumResponse> findFeaturedAlbums(int page, int limit) {
 
-        Pageable pageable = PageRequest.of(0, 5);
+        if (page < 0) throw new HttpBadRequest("Page must be >= 0");
+        if (limit <= 0) throw new HttpBadRequest("Limit must be > 0");
+
+
+        Pageable pageable = PageRequest.of(page, limit);
         Page<Album> albumPage = albumRepository.findFeaturedAlbums(AlbumStatus.ACTIVE, pageable);
 
         Page<AlbumResponse> albums = albumPage.map(album -> AlbumResponse.builder()
@@ -441,9 +488,14 @@ public class AlbumServiceImpl implements IAlbumService {
                 .songCount(albumRepository.countSongsInAlbum(album.getId()))
                 .build());
 
+        int totalPages = albums.getTotalPages();
+        if ((totalPages == 0 && page > 0) || (totalPages > 0 && page >= totalPages)) {
+            throw new HttpBadRequest("Page index out of range. totalPages=" + totalPages);
+        }
+
         return PageResponse.<AlbumResponse>builder()
                 .content(albums.getContent())
-                .currentPage(albums.getNumber() + 1)
+                .currentPage(albums.getNumber())
                 .totalPages(albums.getTotalPages())
                 .totalElements(albums.getTotalElements())
                 .size(albums.getSize())
@@ -452,6 +504,9 @@ public class AlbumServiceImpl implements IAlbumService {
 
     @Override
     public PageResponse<AlbumResponse> getAlbumsByArtistWithRoleGuest(Long artistId, int page, int size, String keyword, String sortDir, boolean isPremium) {
+        if (page < 0) throw new HttpBadRequest("Page must be >= 0");
+        if (size <= 0) throw new HttpBadRequest("Size must be > 0");
+
         User user = userRepository.findById(artistId).orElseThrow(() -> new HttpNotFound("Artist not found"));
 
         Sort sort = sortDir.equalsIgnoreCase("asc") ? Sort.by("releaseDate").ascending() : Sort.by("releaseDate").descending();

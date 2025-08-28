@@ -46,13 +46,14 @@ public class GuestAlbumController {
     }
 
     @GetMapping("/featured")
-    public ResponseEntity<?> getFeaturedAlbums() {
+    public ResponseEntity<?> getFeaturedAlbums( @RequestParam(defaultValue = "0") int page,
+                                                @RequestParam(defaultValue = "5") int limit) {
 
         return ResponseEntity.ok().body(
                 ResponseWrapper.builder()
                         .status(HttpStatus.OK)
                         .code(HttpStatus.OK.value())
-                        .data(albumService.findFeaturedAlbums())
+                        .data(albumService.findFeaturedAlbums(page, limit))
                         .build()
         );
     }

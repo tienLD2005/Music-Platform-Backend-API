@@ -10,7 +10,7 @@ import java.util.List;
 
 
 public interface IAlbumService {
-    PageResponse<ResponseSong> getSongsByAlbum(Long albumId, int page, int size, String sortBy, String direction);
+    PageResponse<ResponseSong> getSongsByAlbum(Long albumId, int page, int size, String sortBy, String sortDir);
 
     ResponseSong addSongToAlbum(Long albumId, FormSongRequest request);
     String deleteSongFromAlbum(Long albumId, Long songId, MyUserDetails principal);
@@ -23,7 +23,7 @@ public interface IAlbumService {
 
     PageResponse<AlbumResponse> getAllAlbums(int page, int size, String sortBy, String sortDir, String keyword);
     PageResponse<AlbumResponse> getTopAlbums(String period);
-    PageResponse<AlbumResponse> findFeaturedAlbums();
+    PageResponse<AlbumResponse> findFeaturedAlbums(int page, int limit);
     PageResponse<AlbumResponse> getAlbumsByArtistWithRoleGuest(Long artistId, int page, int size, String keyword, String sortDir, boolean isPremium);
 
     List<AlbumResponse> getTopTrendingAlbums(int limit,int page);
