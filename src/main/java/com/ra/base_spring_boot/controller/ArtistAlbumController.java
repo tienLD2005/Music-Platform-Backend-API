@@ -91,12 +91,13 @@ public class ArtistAlbumController {
     @DeleteMapping("/{albumId}/songs/{songId}")
     public ResponseEntity<?> deleteSongFromAlbum(@PathVariable Long albumId,
                                                  @PathVariable Long songId,
-                                                 @AuthenticationPrincipal MyUserDetails principal) {
-        String message = albumService.deleteSongFromAlbum(albumId, songId, principal);
-        return ResponseEntity.status(HttpStatus.OK).body(
+                                                 @AuthenticationPrincipal MyUserDetails principal,
+                                                 @RequestParam(defaultValue = "false") boolean confirm) {
+        String message = albumService.deleteSongFromAlbum(albumId, songId, principal, confirm);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
                 ResponseWrapper.builder()
-                        .status(HttpStatus.OK)
-                        .code(HttpStatus.OK.value())
+                        .status(HttpStatus.NO_CONTENT)
+                        .code(HttpStatus.NO_CONTENT.value())
                         .data(message)
                         .build()
         );

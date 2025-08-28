@@ -106,8 +106,10 @@ public class AlbumServiceImpl implements IAlbumService {
 
         }
 
+        String normalizedTitle = request.getTitle().trim().replaceAll("\\s+", " ");
+
         // Check duplicate title song
-        if (songRepository.existsByTitleAndAlbumId(request.getTitle().trim().replaceAll("\\s+", " "), albumId)) {
+        if (songRepository.existsByTitleAndAlbumId(normalizedTitle, albumId)) {
             throw new HttpConflict("Song with this title already exists in the album");
         }
 
@@ -123,7 +125,7 @@ public class AlbumServiceImpl implements IAlbumService {
         String fileUrl = cloudinaryService.uploadAudio(request.getFileUrl());
 
         Song song = Song.builder()
-                .title(request.getTitle())
+                .title(normalizedTitle)
                 .duration(request.getDuration())
                 .fileUrl(fileUrl)
                 .album(album)
@@ -132,6 +134,7 @@ public class AlbumServiceImpl implements IAlbumService {
                 .status(SongStatus.PENDING)
                 .views(0)
                 .build();
+
         songRepository.save(song);
         return ResponseSong.builder()
                 .id(song.getId())
@@ -146,7 +149,10 @@ public class AlbumServiceImpl implements IAlbumService {
     }
 
     @Override
-    public String deleteSongFromAlbum(Long albumId, Long songId, MyUserDetails principal) {
+    public String deleteSongFromAlbum(Long albumId, Long songId, MyUserDetails principal, boolean confirm) {
+        if (!confirm) {
+            throw new HttpBadRequest("Deletion not confirmed. Pass confirm=true to proceed");
+        }
         Song song = songRepository.findById(songId)
                 .orElseThrow(()-> new HttpNotFound("Song not found"));
 
