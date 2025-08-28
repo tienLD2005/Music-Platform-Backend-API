@@ -48,8 +48,7 @@ public class CommentReactionController {
     @DeleteMapping("/{commentId}")
     public ResponseEntity<ResponseWrapper<String>> removeReaction(@PathVariable Long commentId) {
         commentReactionService.removeReaction(commentId);
-
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
+        return ResponseEntity.ok(
                 ResponseWrapper.<String>builder()
                         .status(HttpStatus.NO_CONTENT)
                         .code(HttpStatus.NO_CONTENT.value())

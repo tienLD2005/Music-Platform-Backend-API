@@ -128,7 +128,7 @@ public interface ISongRepository extends JpaRepository<Song, Long> {
         )
         FROM Song s
         LEFT JOIN s.downloads d
-        JOIN s.songHistories sh
+        LEFT JOIN s.songHistories sh
         WHERE sh.playedAt BETWEEN :startDate AND :endDate
         GROUP BY s.id, s.title, s.duration, s.fileUrl, s.views
         ORDER BY COUNT(sh) DESC

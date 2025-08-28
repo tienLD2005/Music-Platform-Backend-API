@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -43,10 +44,12 @@ public class ClientPaymentServiceImpl implements IClientPaymentService {
     private final PaypalService paypalService;
 
     @Override
-    public PaymentResponseDTO getPaymentDetail(Long paymentId) {
-        Payment payment = paymentRepository.findById(paymentId)
-                .orElseThrow(() -> new HttpNotFound("Payment not found"));
-        return mapToResponseDTO(payment);
+    public List<PaymentResponseDTO> getPaymentsHistory() {
+        Long userId = SecurityUtil.getCurrentUserId();
+        List<Payment> payments = paymentRepository.findByUserId(userId);
+        return payments.stream()
+                .map(this::mapToResponseDTO)
+                .toList();
     }
 
     @Override
