@@ -67,12 +67,15 @@ public class SubscriptionPlanServiceImpl implements ISubscriptionPlanService {
 
     @Override
     public SubscriptionPlanResponseDTO save(SubscriptionPlanRequestDTO request) {
-        if (subscriptionPlanRepository.existsByPlanName(request.getPlanName().trim().replaceAll("\\s+", " "))) {
+
+        String normalizedPlanName = request.getPlanName().trim().replaceAll("\\s+", " ");
+
+        if (subscriptionPlanRepository.existsByPlanName(normalizedPlanName)) {
             throw new HttpConflict("PlanName already exists");
         }
 
         SubscriptionPlan subscriptionPlan = SubscriptionPlan.builder()
-                .planName(request.getPlanName())
+                .planName(normalizedPlanName)
                 .price(request.getPrice())
                 .durationDay(request.getDurationDay())
                 .description(request.getDescription())
@@ -94,14 +97,14 @@ public class SubscriptionPlanServiceImpl implements ISubscriptionPlanService {
     public SubscriptionPlanResponseDTO update(Long planId, SubscriptionPlanRequestDTO request) {
         SubscriptionPlan plan = subscriptionPlanRepository.findById(planId).orElseThrow(() -> new HttpNotFound("Plan not found"));
 
-        String normalizedName = request.getPlanName().trim().replaceAll("\\s+", " ");
+        String normalizedPlanName = request.getPlanName().trim().replaceAll("\\s+", " ");
 
-        SubscriptionPlan existing = subscriptionPlanRepository.findByPlanName(normalizedName).orElse(null);
+        SubscriptionPlan existing = subscriptionPlanRepository.findByPlanName(normalizedPlanName).orElse(null);
         if (existing != null && !existing.getId().equals(planId)) {
             throw new HttpConflict("PlanName already exists");
         }
 
-        plan.setPlanName(request.getPlanName());
+        plan.setPlanName(normalizedPlanName);
         plan.setPrice(request.getPrice());
         plan.setDurationDay(request.getDurationDay());
         plan.setDescription(request.getDescription());
