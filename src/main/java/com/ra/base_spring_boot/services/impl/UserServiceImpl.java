@@ -9,6 +9,7 @@ import com.ra.base_spring_boot.model.constants.RoleName;
 import com.ra.base_spring_boot.model.constants.UStatus;
 import com.ra.base_spring_boot.repository.IUserRepository;
 import com.ra.base_spring_boot.services.IUserService;
+import com.ra.base_spring_boot.services.email.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,6 +24,7 @@ import java.util.List;
 public class UserServiceImpl implements IUserService {
 
     private final IUserRepository userRepository;
+    private final EmailService emailService;
 
     @Override
     public PageResponse<UserListItemResponse> getAllUsers(String search, int page, int size) {
@@ -79,6 +81,21 @@ public class UserServiceImpl implements IUserService {
 
         user.setStatus(newStatus);
         userRepository.save(user);
+
+        String subject = block
+                ? "Account Status Update: Your account has been blocked"
+                : "Account Status Update: Your account has been reactivated";
+
+        String displayName = (user.getFirstName() != null && user.getLastName() != null)
+                ? user.getFirstName() + " " + user.getLastName()
+                : user.getEmail();
+
+        String text = "Hello " + displayName + ",\n\n"
+                + "Your account has just been " + (block ? "blocked" : "reactivated") + ".\n"
+                + "If you have any questions, please contact our support team at support@yourdomain.com.\n\n"
+                + "Best regards,\nSupport Team";
+
+        emailService.sendEmail(user.getEmail(), subject, text);
     }
 
 }

@@ -17,7 +17,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Comment extends BaseObject
+public class    Comment extends BaseObject
 {
 
     @ManyToOne(fetch = FetchType.LAZY)
