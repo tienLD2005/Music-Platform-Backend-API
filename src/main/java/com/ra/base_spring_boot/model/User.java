@@ -124,7 +124,4 @@ public class User extends BaseObject {
     @OneToMany(mappedBy = "artist")
     private List<Song> songs;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SongReaction> songReactions;
-
 }
