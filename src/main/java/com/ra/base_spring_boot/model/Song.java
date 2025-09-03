@@ -76,4 +76,11 @@ public class Song extends BaseObject {
     @Column(name = "status", nullable = false)
     private SongStatus status;
 
+    @ManyToMany
+    @JoinTable(
+            name = "song_reaction",
+            joinColumns = @JoinColumn(name = "song_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<User> songReactions;
 }
